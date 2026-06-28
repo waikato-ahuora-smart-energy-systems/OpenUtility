@@ -1,0 +1,2 @@
+catalog,case_study,scenario,residual_rank,target_operating_cost_component,current_component_operating_cost,required_component_operating_cost,operating_cost_adjustment,operating_cost_adjustment_factor,benchmark_operating_cost,actual_operating_cost,target_operating_cost,operating_cost_residual
+physical-profile,contribution-2-case-study-2-physical-profile,utility-system-stand-alone,1,auxiliary_or_unallocated,3.1731143940000024,2.2299999999999898,-0.9431143940000126,0.7027795796510411,52.83,53.77311439400001,52.83,0.9431143940000126

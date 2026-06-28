@@ -1,0 +1,13 @@
+test_number,reference,steam_mains,power_demand,integrates_hot_oil_and_fsr,variable_count,binary_count,equation_count
+1,Varbanov et al. (2005),2,25.0,False,1327,113,1331
+2,Varbanov et al. (2005),2,25.0,True,1544,141,1485
+3,Varbanov et al. (2005),3,25.0,False,1805,132,1588
+4,Varbanov et al. (2005),3,25.0,True,2106,168,1789
+5,Sun et al. (2015),3,40.0,False,8165,512,5816
+6,Sun et al. (2015),3,40.0,True,9550,709,6879
+7,Sun et al. (2015),4,40.0,False,10404,542,6340
+8,Sun et al. (2015),4,40.0,True,11123,757,7522
+9,Oluleye (2015),3,15.0,False,16048,957,10713
+10,Oluleye (2015),3,15.0,True,18457,1354,12147
+11,Oluleye (2015),4,15.0,False,20080,1107,11282
+12,Oluleye (2015),4,15.0,True,21817,1442,13561

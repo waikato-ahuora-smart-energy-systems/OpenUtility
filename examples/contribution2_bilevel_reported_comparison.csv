@@ -1,0 +1,7 @@
+test_number,scenario,iteration_index,field,actual,benchmark,absolute_deviation,within_tolerance
+6,2,1,objective_value,53.891,53.891,0.0,True
+6,2,1,best_bound,52.659,52.659,0.0,True
+6,2,1,optimality_gap,1.2319999999999993,1.2319999999999993,0.0,True
+6,2,1,elapsed_seconds,2613.3,2613.3,0.0,True
+6,2,1,subproblem_status,reported,reported,,True
+6,2,1,stop_reason,reported,reported,,True

@@ -1,0 +1,5 @@
+catalog,case_study,scenario,iteration_index,objective_value,benchmark_total_cost,absolute_deviation,within_tolerance
+physical-profile,contribution-2-case-study-2-physical-profile,utility-system-stand-alone,1,67.68311439400001,66.74,0.9431143940000197,False
+physical-profile,contribution-2-case-study-2-physical-profile,utility-system-microgrid,1,64.86000000000001,64.86,1.4210854715202004e-14,True
+physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-stand-alone,1,55.160000000000004,55.17,0.00999999999999801,True
+physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-microgrid,1,53.89,53.89,0.0,True

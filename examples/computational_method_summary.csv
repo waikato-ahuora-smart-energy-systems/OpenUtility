@@ -1,0 +1,4 @@
+method,result_count,best_solution_count,time_limit_count,mean_computational_time_seconds
+baron,24,5,16,14493.408333333333
+s-milp,24,5,0,93.7
+bilevel,24,14,0,1589.4708333333335

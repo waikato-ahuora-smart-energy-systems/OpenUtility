@@ -1,0 +1,7 @@
+configuration,turbine,inlet_temperature,inlet_pressure,outlet_pressure,real_isentropic_enthalpy_change,model_isentropic_enthalpy_change,enthalpy_change_deviation,iapws_power_generation,model_power_generation,power_generation_deviation
+best-obtained-configuration,VHP-ST 1,570.0,100.0,20.0,0.1385,0.1367,-0.0018000000000000238,10.29,10.15,-0.1399999999999988
+best-obtained-configuration,BP-ST 1,295.5,20.0,2.7,0.1126,0.1152,0.002599999999999991,1.22,1.26,0.040000000000000036
+best-obtained-configuration,total,,,,,,,11.51,11.41,-0.09999999999999964
+fixed-steam-main-pressures,VHP-ST 1,570.0,100.0,20.0,0.1385,0.1367,-0.0018000000000000238,9.45,9.32,-0.129999999999999
+fixed-steam-main-pressures,BP-ST 1,267.0,14.0,2.7,0.0915,0.0936,0.0021000000000000046,1.16,1.19,0.030000000000000027
+fixed-steam-main-pressures,total,,,,,,,10.61,10.51,-0.09999999999999964

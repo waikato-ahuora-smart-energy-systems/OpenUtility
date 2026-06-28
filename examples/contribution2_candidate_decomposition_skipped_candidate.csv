@@ -1,0 +1,2 @@
+catalog,case_study,scenario,iteration_index,candidate_source,objective_value,best_bound,optimality_gap,elapsed_seconds,hit_time_limit,selected_binary_count,unselected_binary_count,subproblem_status,stop_reason,skipped_candidate_count
+physical-profile-candidates,contribution-2-case-study-2-physical-profile,hot-oil-fsr-microgrid,1,calibrated:contribution-2-case-study-2-physical-profile:hot-oil-fsr-microgrid,53.89,,,,False,45,141,optimal,candidate-exhausted,1

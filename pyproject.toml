@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "OpenUtility"
+version = "0.1.0"
+description = "Pyomo-based utility-system optimization models derived from Julia Jimenez-Romero's thesis."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [
+  { name = "Tim Walmsley", email = "tim.walmsley@waikato.ac.nz" },
+]
+dependencies = [
+  "CoolProp>=6.6",
+  "numpy>=1.26",
+  "pandas>=2.0",
+  "pyomo>=6.10.0",
+  "scipy>=1.11",
+]
+
+[project.scripts]
+openutility-style-table2-9 = "OpenUtility.cli:main"
+
+[project.optional-dependencies]
+openpinch = [
+  "OpenPinch>=0.4.5",
+]
+dev = [
+  "pytest>=8.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["OpenUtility"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 88

@@ -1,0 +1,5 @@
+catalog,case_study,scenario,candidate_index,source_catalog,candidate_source,target_variable_count,candidate_variable_count,selected_binary_count,unselected_binary_count,compatible_with_target,missing_target_variable_count,extra_candidate_variable_count
+physical-profile-candidates,contribution-2-case-study-2-physical-profile,hot-oil-fsr-microgrid,1,calibrated,contribution-2-case-study-2-physical-profile:utility-system-stand-alone,186,277,7,270,False,0,91
+physical-profile-candidates,contribution-2-case-study-2-physical-profile,hot-oil-fsr-microgrid,2,calibrated,contribution-2-case-study-2-physical-profile:hot-oil-fsr-stand-alone,186,187,46,141,False,0,1
+physical-profile-candidates,contribution-2-case-study-2-physical-profile,hot-oil-fsr-microgrid,3,calibrated,contribution-2-case-study-2-physical-profile:hot-oil-fsr-microgrid,186,186,45,141,True,0,0
+physical-profile-candidates,contribution-2-case-study-2-physical-profile,hot-oil-fsr-microgrid,4,uncalibrated,contribution-2-case-study-2-physical-profile:hot-oil-fsr-stand-alone,186,186,24,162,True,0,0
