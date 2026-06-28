@@ -5,9 +5,32 @@ optimization methods and benchmark results from Julia Jimenez-Romero's thesis,
 starting with the STYLE static synthesis framework and growing toward the
 multi-period and sustainability extensions.
 
+## Notebook Quick Start
+
+The primary workflow is a small Jupyter notebook. Open the checked example at
+`examples/notebooks/thesis_table_2_9_case_study.ipynb`, or start with:
+
+```python
+from OpenUtility import run_thesis_table_2_9_case_study
+
+case_study = run_thesis_table_2_9_case_study(
+    catalog="physical-profile",
+    apply_fuel_targets=True,
+    apply_operating_targets=True,
+)
+
+summary = case_study.summary_table()
+comparison = case_study.comparison_table()
+axes = case_study.plot_field_comparison("total_annualized_cost")
+```
+
 The first implementation slice contains:
 
 - OpenPinch-compatible stream interval extraction for total site profiles.
+- Optional conversion of thesis process stream fixtures into real OpenPinch
+  `Stream` and `StreamCollection` objects for case-study heat-profile
+  construction and notebook exploration when OpenPinch is installed, with a
+  fixture fallback when it is not.
 - Regression fixtures for STYLE case studies 1 and 2 plus Contribution 2
   benchmark tables reported in the thesis.
 - PDF-backed case-study 2 site constants and process stream fixtures from

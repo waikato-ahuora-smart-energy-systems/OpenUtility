@@ -23,6 +23,7 @@ from OpenUtility.thermal import (
     HeatIntervalProfile,
     build_temperature_intervals,
     heat_content_by_interval,
+    openpinch_streams_from_thesis_streams,
 )
 
 from .adapters import (
@@ -76,14 +77,21 @@ _DEFAULT_MODEL_EQUIPMENT_TYPES = {
 def style_case_study_2_heat_interval_profile(
     *,
     precision: int = 10,
+    use_openpinch_streams: bool = True,
 ) -> HeatIntervalProfile:
     """Build the shifted heat-interval profile for STYLE case study 2."""
 
+    streams = STYLE_CASE_STUDY_2_STREAMS
+    if use_openpinch_streams:
+        try:
+            streams = openpinch_streams_from_thesis_streams(STYLE_CASE_STUDY_2_STREAMS)
+        except ImportError:
+            streams = STYLE_CASE_STUDY_2_STREAMS
     intervals = build_temperature_intervals(
-        STYLE_CASE_STUDY_2_STREAMS,
+        streams,
         precision=precision,
     )
-    return heat_content_by_interval(STYLE_CASE_STUDY_2_STREAMS, intervals)
+    return heat_content_by_interval(streams, intervals)
 
 
 def style_case_study_2_base_model_data(

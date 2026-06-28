@@ -32,6 +32,11 @@ from .benchmarks import (
     ThesisStyleSteamTarget,
     ThesisStyleStream,
 )
+from .notebook import (
+    TABLE_2_9_CATALOGS,
+    ThesisTableCaseStudyNotebookRun,
+    run_thesis_table_2_9_case_study,
+)
 from .style import (
     BilevelCandidateAssignment,
     BilevelDecompositionIteration,
@@ -266,6 +271,8 @@ from .thermal import (
     TemperatureInterval,
     build_temperature_intervals,
     heat_content_by_interval,
+    openpinch_stream_collection_from_thesis_streams,
+    openpinch_streams_from_thesis_streams,
 )
 
 __all__ = [
@@ -313,6 +320,7 @@ __all__ = [
     "STYLE_CASE_STUDY_2_STREAMS",
     "STYLE_CASE_STUDY_1_HOT_OIL_RESULTS",
     "STYLE_CASE_STUDY_1_STEAM_TARGETS",
+    "TABLE_2_9_CATALOGS",
     "SteamLevelCandidate",
     "SteamLevelPropertyTarget",
     "SteamMainLetdownStationCandidate",
@@ -349,6 +357,7 @@ __all__ = [
     "ThesisStyleSiteConfig",
     "ThesisStyleSteamTarget",
     "ThesisStyleStream",
+    "ThesisTableCaseStudyNotebookRun",
     "VhpBackPressureTurbineCandidate",
     "VhpHeaderPropertyTarget",
     "VhpLetdownStationCandidate",
@@ -432,6 +441,8 @@ __all__ = [
     "format_steam_property_comparison_rows",
     "heat_content_by_interval",
     "model_derived_steam_property_comparison_rows",
+    "openpinch_stream_collection_from_thesis_streams",
+    "openpinch_streams_from_thesis_streams",
     "pyomo_static_style_solver",
     "run_bilevel_decomposition",
     "run_bilevel_decomposition_iteration",
@@ -440,6 +451,7 @@ __all__ = [
     "run_static_style_binary_selection_decomposition",
     "run_static_style_fixed_assignment_decomposition",
     "run_static_style_scenario",
+    "run_thesis_table_2_9_case_study",
     "scipy_milp_static_style_solver",
     "solve_static_style_model_with_pyomo",
     "solve_static_style_model_with_scipy_milp",

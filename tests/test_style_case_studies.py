@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+import OpenUtility.style.case_studies as case_studies
 from OpenUtility.benchmarks import (
     STYLE_CASE_STUDY_2_STREAMS,
     get_contribution2_case_study2_best_configuration,
@@ -84,6 +85,41 @@ def test_style_case_study_2_heat_interval_profile_uses_extracted_streams() -> No
     assert profile.intervals[-1].lower == pytest.approx(75.0)
     assert sum(profile.source_heat.values()) == pytest.approx(expected_source_heat)
     assert sum(profile.sink_heat.values()) == pytest.approx(expected_sink_heat)
+
+
+def test_style_case_study_2_heat_interval_profile_can_use_openpinch_streams() -> None:
+    openpinch_profile = style_case_study_2_heat_interval_profile(
+        use_openpinch_streams=True,
+    )
+    fixture_profile = style_case_study_2_heat_interval_profile(
+        use_openpinch_streams=False,
+    )
+
+    assert openpinch_profile.intervals == fixture_profile.intervals
+    assert openpinch_profile.source_heat == pytest.approx(fixture_profile.source_heat)
+    assert openpinch_profile.sink_heat == pytest.approx(fixture_profile.sink_heat)
+
+
+def test_style_case_study_2_heat_interval_profile_falls_back_without_openpinch(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def raise_missing_openpinch(_streams: object) -> tuple[object, ...]:
+        raise ImportError("OpenPinch missing")
+
+    monkeypatch.setattr(
+        case_studies,
+        "openpinch_streams_from_thesis_streams",
+        raise_missing_openpinch,
+    )
+
+    profile = style_case_study_2_heat_interval_profile(use_openpinch_streams=True)
+    fixture_profile = style_case_study_2_heat_interval_profile(
+        use_openpinch_streams=False,
+    )
+
+    assert profile.intervals == fixture_profile.intervals
+    assert profile.source_heat == pytest.approx(fixture_profile.source_heat)
+    assert profile.sink_heat == pytest.approx(fixture_profile.sink_heat)
 
 
 def test_style_case_study_2_base_model_data_uses_site_and_resource_fixtures() -> None:

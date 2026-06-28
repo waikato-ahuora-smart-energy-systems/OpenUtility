@@ -86,6 +86,56 @@ def heat_content_by_interval(
     )
 
 
+def openpinch_streams_from_thesis_streams(streams: Iterable[Any]) -> tuple[Any, ...]:
+    """Return real OpenPinch streams for thesis stream records.
+
+    The thesis fixtures carry heat-load values in the numeric basis used by the
+    OpenUtility model. The OpenPinch ``Stream`` class is reused here for stream
+    classification and shifted-temperature handling while preserving those
+    numeric heat-load values for the downstream STYLE heat-profile calculation.
+    """
+
+    try:
+        from OpenPinch.classes.stream import Stream
+    except ImportError as exc:  # pragma: no cover - depends on optional package.
+        raise ImportError(
+            "OpenPinch is required to create OpenPinch Stream objects. "
+            "Install OpenUtility with the 'openpinch' extra.",
+        ) from exc
+
+    openpinch_streams = []
+    for stream in streams:
+        temperature_change = abs(
+            float(getattr(stream, "supply_temperature"))
+            - float(getattr(stream, "target_temperature")),
+        )
+        heat_flow = float(getattr(stream, "heat_capacity_flow")) * temperature_change
+        openpinch_stream = Stream(
+            name=str(getattr(stream, "name")),
+            t_supply=float(getattr(stream, "supply_temperature")),
+            t_target=float(getattr(stream, "target_temperature")),
+            dt_cont=float(getattr(stream, "minimum_temperature_difference")) / 2.0,
+            heat_flow=heat_flow,
+            is_process_stream=True,
+        )
+        openpinch_stream.active = bool(getattr(stream, "active", True))
+        openpinch_streams.append(openpinch_stream)
+    return tuple(openpinch_streams)
+
+
+def openpinch_stream_collection_from_thesis_streams(streams: Iterable[Any]) -> Any:
+    """Return an OpenPinch StreamCollection for thesis stream records."""
+
+    try:
+        from OpenPinch.classes.stream_collection import StreamCollection
+    except ImportError as exc:  # pragma: no cover - depends on optional package.
+        raise ImportError(
+            "OpenPinch is required to create an OpenPinch StreamCollection. "
+            "Install OpenUtility with the 'openpinch' extra.",
+        ) from exc
+    return StreamCollection(list(openpinch_streams_from_thesis_streams(streams)))
+
+
 def _active_streams(streams: Iterable[Any]) -> tuple[Any, ...]:
     return tuple(stream for stream in streams if bool(getattr(stream, "active", True)))
 
@@ -136,4 +186,3 @@ def _temperature_overlap(
     lower = max(stream_min, interval.lower)
     upper = min(stream_max, interval.upper)
     return max(0.0, upper - lower)
-

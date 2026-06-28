@@ -14,6 +14,7 @@ authors = [
 ]
 dependencies = [
   "CoolProp>=6.6",
+  "matplotlib>=3.8",
   "numpy>=1.26",
   "pandas>=2.0",
   "pyomo>=6.10.0",
@@ -27,8 +28,16 @@ openutility-style-table2-9 = "OpenUtility.cli:main"
 openpinch = [
   "OpenPinch>=0.4.5",
 ]
+notebook = [
+  "jupyterlab>=4",
+  "nbformat>=5",
+]
+docs = [
+  "sphinx>=7",
+]
 dev = [
   "pytest>=8.0",
+  "ruff>=0.8",
 ]
 
 [tool.hatch.build.targets.wheel]

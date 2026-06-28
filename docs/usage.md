@@ -1,7 +1,32 @@
 # Usage
 
 OpenUtility currently exposes the Contribution 2 case-study 2 Table 2-9
-replication through both a command-line report and Python scenario catalogs.
+replication through a notebook-first Python workflow, command-line reports, and
+Python scenario catalogs.
+
+## Notebook
+
+Open the checked example notebook:
+
+```bash
+jupyter lab examples/notebooks/thesis_table_2_9_case_study.ipynb
+```
+
+Or use the public helper in a new notebook:
+
+```python
+from OpenUtility import run_thesis_table_2_9_case_study
+
+case_study = run_thesis_table_2_9_case_study(
+    catalog="physical-profile",
+    apply_fuel_targets=True,
+    apply_operating_targets=True,
+)
+
+summary = case_study.summary_table()
+comparison = case_study.comparison_table()
+axes = case_study.plot_field_comparison("total_annualized_cost")
+```
 
 ## Command Line
 

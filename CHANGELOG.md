@@ -10,6 +10,15 @@ Supported thesis scope:
 - Contribution 2 case-study 2 Table 2-9 reported-equipment rows.
 - Contribution 2 case-study 2 Table 2-9 physical-profile rows using extracted
   P1.D heat interval data.
+- Notebook-first public workflow via `run_thesis_table_2_9_case_study`, returning
+  pandas comparison tables and matplotlib plots for thesis Table 2-9 scenarios.
+- Checked example notebook at
+  `examples/notebooks/thesis_table_2_9_case_study.ipynb`.
+- Read the Docs Sphinx source with notebook workflow, input-data, API, and
+  developer-checklist pages.
+- Optional reuse of real OpenPinch `Stream` and `StreamCollection` objects for
+  thesis case-study stream fixtures during heat-profile construction and
+  notebook exploration, with tested fallback to compatible fixture objects.
 - Physical-profile fuel-family residual reporting for remaining Table 2-9
   fuel-consumption deviations.
 - Physical-profile fuel-residual ranking by scenario, including benchmark

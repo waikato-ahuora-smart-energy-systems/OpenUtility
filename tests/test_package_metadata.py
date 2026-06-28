@@ -30,6 +30,7 @@ def test_root_api_exports_reporting_and_physical_profile_catalog() -> None:
     assert "BilevelSubproblemResult" in OpenUtility.__all__
     assert "FuelConsumptionAccountingFactor" in OpenUtility.__all__
     assert "OperatingCostAccountingAdjustment" in OpenUtility.__all__
+    assert "ThesisTableCaseStudyNotebookRun" in OpenUtility.__all__
     assert "StaticStyleFuelCapacityContext" in OpenUtility.__all__
     assert "StaticStyleFuelConsumptionEquipment" in OpenUtility.__all__
     assert "StaticStyleFuelConsumptionFamily" in OpenUtility.__all__
@@ -119,6 +120,7 @@ def test_root_api_exports_reporting_and_physical_profile_catalog() -> None:
     )
     assert "run_static_style_binary_selection_decomposition" in OpenUtility.__all__
     assert "run_static_style_fixed_assignment_decomposition" in OpenUtility.__all__
+    assert "run_thesis_table_2_9_case_study" in OpenUtility.__all__
     assert "style_binary_selection_candidate_from_scenario" in OpenUtility.__all__
     assert "style_binary_selection_candidate_records_from_scenarios" in (
         OpenUtility.__all__
@@ -164,6 +166,8 @@ def test_root_api_exports_reporting_and_physical_profile_catalog() -> None:
     assert "best_configuration_summary_row" in OpenUtility.__all__
     assert "format_comparison_rows" in OpenUtility.__all__
     assert "format_summary_rows" in OpenUtility.__all__
+    assert "openpinch_stream_collection_from_thesis_streams" in OpenUtility.__all__
+    assert "openpinch_streams_from_thesis_streams" in OpenUtility.__all__
     assert "style_case_study_2_contribution2_physical_profile_catalog" in (
         OpenUtility.__all__
     )
