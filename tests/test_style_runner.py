@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from OpenUtility.benchmarks import get_style_result
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import get_style_result
 from OpenUtility.style import (
     EquipmentCost,
     FuelCost,

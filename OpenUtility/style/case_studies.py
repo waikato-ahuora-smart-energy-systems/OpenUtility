@@ -1,11 +1,11 @@
-"""STYLE case-study data builders from thesis fixtures."""
+"""STYLE case-study data builders from extracted benchmark fixtures."""
 
 from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import replace
 
-from OpenUtility.benchmarks import (
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
     CONTRIBUTION2_CASE_STUDY_2_BEST_CONFIGURATIONS,
     STYLE_GAS_TURBINE_AMBIENT_CORRECTION,
     STYLE_GAS_TURBINE_FULL_LOAD_COEFFICIENTS,
@@ -13,9 +13,9 @@ from OpenUtility.benchmarks import (
     STYLE_CASE_STUDY_2_RESOURCES,
     STYLE_CASE_STUDY_2_SITE_CONFIG,
     STYLE_CASE_STUDY_2_STREAMS,
-    ThesisGasTurbineFullLoadCoefficient,
-    ThesisStyleEquipmentCostCoefficient,
-    ThesisStyleResource,
+    StyleGasTurbineFullLoadCoefficient,
+    StyleEquipmentCostCoefficient,
+    StyleResource,
     get_contribution2_case_study2_best_configuration,
     get_style_result,
 )
@@ -23,7 +23,7 @@ from OpenUtility.thermal import (
     HeatIntervalProfile,
     build_temperature_intervals,
     heat_content_by_interval,
-    openpinch_streams_from_thesis_streams,
+    openpinch_streams_from_case_study_streams,
 )
 
 from .adapters import (
@@ -84,7 +84,9 @@ def style_case_study_2_heat_interval_profile(
     streams = STYLE_CASE_STUDY_2_STREAMS
     if use_openpinch_streams:
         try:
-            streams = openpinch_streams_from_thesis_streams(STYLE_CASE_STUDY_2_STREAMS)
+            streams = openpinch_streams_from_case_study_streams(
+                STYLE_CASE_STUDY_2_STREAMS,
+            )
         except ImportError:
             streams = STYLE_CASE_STUDY_2_STREAMS
     intervals = build_temperature_intervals(
@@ -310,7 +312,7 @@ def style_case_study_2_best_configuration_reported_flow_model_data(
     use_enthalpy_delta: float | None = 1.0,
     properties: SteamPropertyProvider | None = None,
 ) -> StyleModelData:
-    """Create a buildable multi-main model skeleton from reported thesis flows."""
+    """Create a buildable multi-main model skeleton from reported source flows."""
 
     configuration = get_contribution2_case_study2_best_configuration(scenario)
     provider = CoolPropSteamPropertyProvider() if properties is None else properties
@@ -2366,7 +2368,7 @@ def style_case_study_2_gas_turbine_candidate(
     )
 
 
-def _resource(name: str) -> ThesisStyleResource:
+def _resource(name: str) -> StyleResource:
     for resource in STYLE_CASE_STUDY_2_RESOURCES:
         if resource.name == name:
             return resource
@@ -2378,7 +2380,7 @@ def _equipment_cost_coefficient(
     equipment_type: str,
     subtype: str,
     design_size: float,
-) -> ThesisStyleEquipmentCostCoefficient:
+) -> StyleEquipmentCostCoefficient:
     matches = tuple(
         coefficient
         for coefficient in STYLE_CASE_STUDY_2_EQUIPMENT_COSTS
@@ -2396,7 +2398,7 @@ def _equipment_cost_coefficient(
 
 def _design_size_in_range(
     design_size: float,
-    coefficient: ThesisStyleEquipmentCostCoefficient,
+    coefficient: StyleEquipmentCostCoefficient,
 ) -> bool:
     lower = coefficient.range_lower
     upper = coefficient.range_upper
@@ -3164,7 +3166,7 @@ def _best_configuration_boiler_flowrate(scenario: str) -> float:
 
 def _gas_turbine_full_load_coefficient(
     turbine_type: str,
-) -> ThesisGasTurbineFullLoadCoefficient:
+) -> StyleGasTurbineFullLoadCoefficient:
     for coefficient in STYLE_GAS_TURBINE_FULL_LOAD_COEFFICIENTS:
         if coefficient.turbine_type == turbine_type:
             return coefficient
@@ -3188,7 +3190,7 @@ def _gas_turbine_max_fuel_flow(
     *,
     max_power_generation: float,
     lower_heating_value: float,
-    coefficient: ThesisGasTurbineFullLoadCoefficient,
+    coefficient: StyleGasTurbineFullLoadCoefficient,
     ambient_ratio: float,
 ) -> float:
     max_fuel_power = (

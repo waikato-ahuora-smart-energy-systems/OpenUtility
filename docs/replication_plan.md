@@ -1,10 +1,10 @@
-# Thesis Replication Plan
+# Source Replication Plan
 
 ## Source Scope
 
-The thesis is "Reduction of Industrial Energy Demand through Sustainable
+The source document is "Reduction of Industrial Energy Demand through Sustainable
 Integration of Distributed Energy Hubs" by Julia Nataly Jimenez-Romero. The
-package will replicate the thesis method in staged, test-driven increments:
+package will replicate the source method in staged, test-driven increments:
 
 1. STYLE static utility-system synthesis with steam level placement.
 2. Successive MILP steam-property update workflow.
@@ -26,7 +26,8 @@ resources, storage, and sustainability inventories.
 - `OpenUtility.style.pyomo_model`: Pyomo model construction. Functions build
   one model concern at a time: sets, parameters, variables, constraints, and
   objective.
-- `OpenUtility.benchmarks`: thesis result fixtures used as regression targets.
+- `case_study/jimenez_romero_utility_system_optimization/benchmarks.py`:
+  extracted source result fixtures used as regression targets.
 - Future service layer: orchestration of data preparation, model build, solve,
   post-processing, and OpenPinch-compatible result export.
 
@@ -38,14 +39,14 @@ resources, storage, and sustainability inventories.
   stream classification, inactive stream filtering.
 - Implementation: `TemperatureInterval`, `HeatIntervalProfile`,
   `build_temperature_intervals`, `heat_content_by_interval`.
-- Thesis target: Stage 1, Step 2 and Eq. 1.1.
+- Source target: Stage 1, Step 2 and Eq. 1.1.
 
 ### Milestone 2: Static STYLE Model Skeleton
 
 - Tests: Pyomo sets, variables, binary steam-level selection, source cascade,
   source steam generation using pseudo enthalpy deltas.
 - Implementation: core source cascade and steam-level selection.
-- Thesis target: Eqs. 1.5, 1.6, P1.A.8 to P1.A.14.
+- Source target: Eqs. 1.5, 1.6, P1.A.8 to P1.A.14.
 
 ### Milestone 3: Sink Cascade And Steam Main Balances
 
@@ -53,7 +54,7 @@ resources, storage, and sustainability inventories.
   level per main, no heat leakage across selected mains.
 - Implementation: sink heat variables, process steam use variables, BFW
   desuperheating terms, steam main mass and energy balances.
-- Thesis target: Eqs. 1.7 to 1.10 and P1.A.15 to P1.A.37.
+- Source target: Eqs. 1.7 to 1.10 and P1.A.15 to P1.A.37.
 
 ### Milestone 4: Utility Equipment Blocks
 
@@ -61,14 +62,14 @@ resources, storage, and sustainability inventories.
   steam turbine part-load behavior, grid import/export limits.
 - Implementation: reusable Pyomo block builders for boilers, turbines, HRSGs,
   deaerator, let-downs, cooling water, hot oil, and flash steam recovery.
-- Thesis target: P1.A.38 to P1.A.121 and Table P1.B coefficients.
+- Source target: P1.A.38 to P1.A.121 and Table P1.B coefficients.
 
 ### Milestone 5: Objective And Benchmark Replication
 
 - Tests: operating cost, annualized capital cost, maintenance cost, total
   annualized cost, case-study table regression checks.
 - Implementation: economic model, result extraction, benchmark runner.
-- Thesis targets: Tables 1-2 to 1-7 and Figure 1-14.
+- Source targets: Tables 1-2 to 1-7 and Figure 1-14.
 
 ### Milestone 6: Steam Properties And Successive MILP
 
@@ -76,7 +77,7 @@ resources, storage, and sustainability inventories.
   approximations, superheat update loop stop conditions.
 - Implementation: water property provider boundary, IAPWS-backed adapter when
   available, deterministic update loop.
-- Thesis target: Stage 2 and Stage 4 of STYLE.
+- Source target: Stage 2 and Stage 4 of STYLE.
 
 ### Milestone 7: Bilevel Decomposition
 
@@ -84,7 +85,7 @@ resources, storage, and sustainability inventories.
   handling, benchmark statistics for tests 1 to 12.
 - Implementation: relaxed MINLP master, NLP subproblem adapter, incumbent
   tracking, integer cuts.
-- Thesis target: Contribution 2, Tables 2-6 to 2-9.
+- Source target: Contribution 2, Tables 2-6 to 2-9.
 
 ### Milestone 8: Multi-Period Flexibility
 
@@ -92,7 +93,7 @@ resources, storage, and sustainability inventories.
   variables, storage state continuity, scenario sensitivity.
 - Implementation: period-indexed model data, typical-period weights, storage
   blocks, multi-period result extraction.
-- Thesis target: Contribution 3.
+- Source target: Contribution 3.
 
 ### Milestone 9: Sustainability And Pareto Analysis
 
@@ -100,7 +101,7 @@ resources, storage, and sustainability inventories.
   epsilon-constraint runs, Pareto monotonicity and reproducibility.
 - Implementation: lifecycle data classes, environmental objective terms,
   multi-objective runner.
-- Thesis target: Contribution 4.
+- Source target: Contribution 4.
 
 ## Current Slice
 
@@ -169,15 +170,15 @@ Implemented now:
   flow/power variables, mass and energy balance terms, selection constraints,
   onsite power aggregation, and Stage 4 turbine/let-down exhaust heat handling.
 - Static STYLE result extraction and benchmark-comparison helpers, including
-  field-level deviations against thesis `ThesisStyleResult` fixtures.
+  field-level deviations against source `StyleBenchmarkResult` fixtures.
 - Contribution 2 best-configuration comparison helper for case-study 2,
   including utility steam, fuel, total power, split steam/gas turbine power, and
-  economic fields from thesis configuration fixtures. Optional split fuel and
+  economic fields from source configuration fixtures. Optional split fuel and
   hot-oil operating costs are compared when both the extracted result and thesis
   row provide them.
 - Deterministic static STYLE scenario runner that builds a Pyomo model, delegates
   solving through an injected callback, extracts reporting values, and optionally
-  compares them to thesis benchmarks.
+  compares them to source benchmarks.
 - Pyomo `SolverFactory` adapter that produces runner-compatible solve callbacks,
   applies configured solver options, checks solver availability, and normalizes
   returned solver status metadata.
@@ -208,7 +209,7 @@ Implemented now:
 - Boiler candidate derivation from explicit thermal efficiency plus P1.D
   capital/fuel cost mapping, with buildable boiler plus gas-turbine/HRSG VHP
   generation `StyleModelData`.
-- Case-study 2 VHP enthalpy helper that uses CoolProp with the thesis VHP
+- Case-study 2 VHP enthalpy helper that uses CoolProp with the source VHP
   pressure and boiler-feedwater temperature to produce explicit VHP steam and
   feedwater enthalpy inputs.
 - Contribution 2 case-study 2 best-configuration property-spec helper that maps
@@ -494,7 +495,7 @@ Implemented now:
   rows for provenance-rich candidate-driven reports.
 - Candidate source labels can now be created through a caller-supplied factory,
   and the candidate-decomposition CLI qualifies combined source pools with
-  `calibrated:` and `uncalibrated:` prefixes so duplicate thesis scenario names
+  `calibrated:` and `uncalibrated:` prefixes so duplicate source scenario names
   remain unambiguous.
 - Candidate-pool inventory reporting lists compatible source-labeled candidate
   assignments before no-good cuts are applied, with CLI
@@ -579,7 +580,7 @@ Implemented now:
   checkout, including editable install, tests, lint, CLI report generation, and
   checked example-output verification.
 - Changelog/release-notes artifact summarizing the current working-product
-  thesis scope, public APIs, checked reports, and known physical-profile
+  source scope, public APIs, checked reports, and known physical-profile
   residuals.
 - The hot-oil/FSR stand-alone reported row is now feasible through the auxiliary
   VHP source for its 47.652 t/h unassigned utility-steam generation. With
@@ -597,7 +598,7 @@ Implemented now:
   options to selected steam-level candidates.
 - VHP-to-steam-main back-pressure turbine helper that connects assembled VHP
   generation to selected steam-level candidates and maps explicit design power
-  to the thesis steam-turbine capital-cost row.
+  to the source steam-turbine capital-cost row.
 - Public assembled case-study 2 static scenario catalog helper that combines
   heat-profile extraction, site economics, boiler, gas turbine, HRSG, VHP steam,
   VHP let-down, optional VHP turbine, and benchmark lookup into one buildable
@@ -623,7 +624,7 @@ Implemented now:
   smoke scenario closes every benchmark field on the reported comparison basis.
 - Solver-backed assembled case-study 2 regression through the SciPy MILP runner.
   This verifies the public path is executable and keeps reporting/accounting
-  bridges explicit while physical calibration to thesis assumptions continues.
+  bridges explicit while physical calibration to source assumptions continues.
 
 Current calibrated physical-profile residuals:
 

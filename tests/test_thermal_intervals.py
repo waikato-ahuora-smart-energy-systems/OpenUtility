@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import pytest
 
-from OpenUtility.benchmarks import STYLE_CASE_STUDY_2_STREAMS
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import STYLE_CASE_STUDY_2_STREAMS
 from OpenUtility.thermal import build_temperature_intervals, heat_content_by_interval
 from OpenUtility.thermal import (
-    openpinch_stream_collection_from_thesis_streams,
-    openpinch_streams_from_thesis_streams,
+    openpinch_stream_collection_from_case_study_streams,
+    openpinch_streams_from_case_study_streams,
 )
 
 
@@ -39,7 +39,7 @@ def test_build_temperature_intervals_uses_openpinch_shifted_kinks() -> None:
     ]
 
 
-def test_heat_content_by_interval_matches_thesis_interval_formula() -> None:
+def test_heat_content_by_interval_matches_style_interval_formula() -> None:
     hot_stream = Stream(
         name="hot",
         t_supply=200.0,
@@ -74,8 +74,10 @@ def test_heat_content_by_interval_matches_thesis_interval_formula() -> None:
     )
 
 
-def test_openpinch_streams_from_thesis_streams_reuses_stream_class() -> None:
-    streams = openpinch_streams_from_thesis_streams(STYLE_CASE_STUDY_2_STREAMS[:2])
+def test_openpinch_streams_from_case_study_streams_reuses_stream_class() -> None:
+    streams = openpinch_streams_from_case_study_streams(
+        STYLE_CASE_STUDY_2_STREAMS[:2],
+    )
     first_stream = streams[0]
 
     assert isinstance(first_stream, Stream)
@@ -92,8 +94,8 @@ def test_openpinch_streams_from_thesis_streams_reuses_stream_class() -> None:
     )
 
 
-def test_openpinch_stream_collection_from_thesis_streams_reuses_collection_class() -> None:
-    collection = openpinch_stream_collection_from_thesis_streams(
+def test_case_study_stream_collection_reuses_openpinch_class() -> None:
+    collection = openpinch_stream_collection_from_case_study_streams(
         STYLE_CASE_STUDY_2_STREAMS[:2],
     )
 

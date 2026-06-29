@@ -1,14 +1,27 @@
 Input Data
 ==========
 
-The thesis inputs used by the current case-study workflow are embedded as typed
-Python fixtures so tests and notebooks use the same source of truth.
+The extracted inputs used by the current case-study workflow are embedded as
+typed Python fixtures outside the core package so tests and notebooks use the
+same source of truth without making ``OpenUtility`` itself a data archive.
 
 Primary input fixtures
 ----------------------
 
-``OpenUtility/benchmarks.py``
-   Thesis constants and extracted table rows.
+``case_study/jimenez_romero_utility_system_optimization/benchmarks.py``
+   Source constants and extracted table rows for the Jimenez-Romero
+   utility-system optimization replication scope.
+
+``case_study/jimenez_romero_utility_system_optimization/style_stage1_hot_oil_and_steam_mains/``
+   Descriptive aliases for the STYLE stage 1 hot-oil and steam-main targets.
+
+``case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/``
+   Descriptive aliases for the Contribution 2 integrated hot-oil, steam-main,
+   gas-turbine, HRSG, and flash-steam-recovery case study.
+
+``case_study/jimenez_romero_utility_system_optimization/contribution2_computational_performance/``
+   Descriptive aliases for the Contribution 2 solver performance, model-size,
+   and steam-property comparison rows.
 
 ``STYLE_CASE_STUDY_2_SITE_CONFIG``
    Site demand, export limit, operating hours, finance constants, cooling-water
@@ -18,7 +31,7 @@ Primary input fixtures
    Fuel, electricity, cooling-water, and treated-water costs.
 
 ``STYLE_CASE_STUDY_2_EQUIPMENT_COSTS``
-   Linear equipment capital-cost coefficients from the thesis references.
+   Linear equipment capital-cost coefficients from the source references.
 
 ``STYLE_CASE_STUDY_2_STREAMS``
    Process stream rows used to reconstruct the heat-interval profile.
@@ -42,12 +55,12 @@ OpenPinch reuse
 ---------------
 
 When OpenPinch is installed, ``style_case_study_2_heat_interval_profile`` first
-converts the thesis stream fixtures into real OpenPinch ``Stream`` objects using
-``openpinch_streams_from_thesis_streams``. Notebook users can also request an
+converts the extracted stream fixtures into real OpenPinch ``Stream`` objects using
+``openpinch_streams_from_case_study_streams``. Notebook users can also request an
 OpenPinch ``StreamCollection`` with
-``openpinch_stream_collection_from_thesis_streams``. These conversions reuse
+``openpinch_stream_collection_from_case_study_streams``. These conversions reuse
 OpenPinch's hot/cold stream classification, collection container, and
-shifted-temperature properties while preserving the explicit thesis
+shifted-temperature properties while preserving the explicit extracted
 heat-capacity-flow values used by the STYLE heat profile. If OpenPinch is
 unavailable, the case-study builder falls back to the OpenPinch-compatible
 fixture objects.

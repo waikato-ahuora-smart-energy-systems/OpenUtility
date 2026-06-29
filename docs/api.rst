@@ -1,7 +1,7 @@
 Notebook API
 ============
 
-.. autofunction:: OpenUtility.run_thesis_table_2_9_case_study
+.. autofunction:: OpenUtility.run_style_table_2_9_case_study
 
-.. autoclass:: OpenUtility.ThesisTableCaseStudyNotebookRun
+.. autoclass:: OpenUtility.StyleTableCaseStudyNotebookRun
    :members:

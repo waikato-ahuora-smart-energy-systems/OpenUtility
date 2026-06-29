@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 import pyomo.environ as pyo
 
-from OpenUtility.benchmarks import Contribution2BestConfiguration, ThesisStyleResult
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import Contribution2BestConfiguration, StyleBenchmarkResult
 
 
 @dataclass(frozen=True)
@@ -84,10 +84,10 @@ class StaticStyleBenchmarkDeviation:
 
 @dataclass(frozen=True)
 class StaticStyleBenchmarkComparison:
-    """Comparison of an extracted static STYLE result against a thesis benchmark."""
+    """Comparison of an extracted static STYLE result against a source benchmark."""
 
     actual: StaticStyleResult
-    benchmark: ThesisStyleResult
+    benchmark: StyleBenchmarkResult
     deviations: tuple[StaticStyleBenchmarkDeviation, ...]
 
     @property
@@ -364,11 +364,11 @@ def static_style_operating_cost_components(
 
 def compare_static_style_result_to_benchmark(
     result: StaticStyleResult,
-    benchmark: ThesisStyleResult,
+    benchmark: StyleBenchmarkResult,
     *,
     absolute_tolerance: float = 1e-6,
 ) -> StaticStyleBenchmarkComparison:
-    """Compare extracted static STYLE values against a thesis benchmark row."""
+    """Compare extracted static STYLE values against a source benchmark row."""
 
     if result.case_study != benchmark.case_study or result.scenario != benchmark.scenario:
         raise ValueError("result and benchmark identify different STYLE scenarios")
@@ -462,7 +462,7 @@ def _benchmark_deviation(
     )
 
 
-def _benchmark_value(benchmark: ThesisStyleResult, field: str) -> float | None:
+def _benchmark_value(benchmark: StyleBenchmarkResult, field: str) -> float | None:
     value = getattr(benchmark, field)
     return None if value is None else float(value)
 

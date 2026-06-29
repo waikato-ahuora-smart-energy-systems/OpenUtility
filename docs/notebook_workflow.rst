@@ -3,27 +3,27 @@ Notebook Workflow
 
 OpenUtility is intended to be driven from small Jupyter notebooks. The public
 workflow helper hides the catalog construction, calibration target application,
-solver setup, and thesis comparison plumbing.
+solver setup, and benchmark comparison plumbing.
 
 Checked example
 ---------------
 
 The runnable example notebook is checked in at:
 
-``examples/notebooks/thesis_table_2_9_case_study.ipynb``
+``examples/notebooks/style_table_2_9_case_study.ipynb``
 
 Download it from the documentation build:
 
-:download:`thesis_table_2_9_case_study.ipynb <../examples/notebooks/thesis_table_2_9_case_study.ipynb>`
+:download:`style_table_2_9_case_study.ipynb <../examples/notebooks/style_table_2_9_case_study.ipynb>`
 
 Minimal notebook
 ----------------
 
 .. code-block:: python
 
-   from OpenUtility import run_thesis_table_2_9_case_study
+   from OpenUtility import run_style_table_2_9_case_study
 
-   case_study = run_thesis_table_2_9_case_study(
+   case_study = run_style_table_2_9_case_study(
        catalog="physical-profile",
        apply_fuel_targets=True,
        apply_operating_targets=True,
@@ -33,7 +33,7 @@ Minimal notebook
    summary = case_study.summary_table()
    comparison = case_study.comparison_table()
 
-The summary table contains one row per thesis scenario and reports whether all
+The summary table contains one row per STYLE scenario and reports whether all
 comparison fields are within tolerance. The comparison table contains one row
 per scenario and output field.
 

@@ -57,7 +57,7 @@ def heat_content_by_interval(
     streams: Iterable[Any],
     intervals: Iterable[TemperatureInterval],
 ) -> HeatIntervalProfile:
-    """Calculate interval heat content using the STYLE thesis formula."""
+    """Calculate interval heat content using the STYLE heat-profile formula."""
 
     interval_tuple = tuple(intervals)
     source_heat = {interval.key: 0.0 for interval in interval_tuple}
@@ -86,13 +86,14 @@ def heat_content_by_interval(
     )
 
 
-def openpinch_streams_from_thesis_streams(streams: Iterable[Any]) -> tuple[Any, ...]:
-    """Return real OpenPinch streams for thesis stream records.
+def openpinch_streams_from_case_study_streams(streams: Iterable[Any]) -> tuple[Any, ...]:
+    """Return real OpenPinch streams for extracted case-study stream records.
 
-    The thesis fixtures carry heat-load values in the numeric basis used by the
-    OpenUtility model. The OpenPinch ``Stream`` class is reused here for stream
-    classification and shifted-temperature handling while preserving those
-    numeric heat-load values for the downstream STYLE heat-profile calculation.
+    The extracted fixtures carry heat-load values in the numeric basis used by
+    the OpenUtility model. The OpenPinch ``Stream`` class is reused here for
+    stream classification and shifted-temperature handling while preserving
+    those numeric heat-load values for the downstream STYLE heat-profile
+    calculation.
     """
 
     try:
@@ -123,8 +124,8 @@ def openpinch_streams_from_thesis_streams(streams: Iterable[Any]) -> tuple[Any, 
     return tuple(openpinch_streams)
 
 
-def openpinch_stream_collection_from_thesis_streams(streams: Iterable[Any]) -> Any:
-    """Return an OpenPinch StreamCollection for thesis stream records."""
+def openpinch_stream_collection_from_case_study_streams(streams: Iterable[Any]) -> Any:
+    """Return an OpenPinch StreamCollection for extracted case-study streams."""
 
     try:
         from OpenPinch.classes.stream_collection import StreamCollection
@@ -133,8 +134,7 @@ def openpinch_stream_collection_from_thesis_streams(streams: Iterable[Any]) -> A
             "OpenPinch is required to create an OpenPinch StreamCollection. "
             "Install OpenUtility with the 'openpinch' extra.",
         ) from exc
-    return StreamCollection(list(openpinch_streams_from_thesis_streams(streams)))
-
+    return StreamCollection(list(openpinch_streams_from_case_study_streams(streams)))
 
 def _active_streams(streams: Iterable[Any]) -> tuple[Any, ...]:
     return tuple(stream for stream in streams if bool(getattr(stream, "active", True)))

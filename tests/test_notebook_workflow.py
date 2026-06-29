@@ -6,15 +6,15 @@ from pathlib import Path
 import matplotlib
 import pandas as pd
 
-from OpenUtility import run_thesis_table_2_9_case_study
+from OpenUtility import run_style_table_2_9_case_study
 
 
 matplotlib.use("Agg")
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_run_thesis_table_2_9_case_study_returns_notebook_tables() -> None:
-    case_study = run_thesis_table_2_9_case_study(
+def test_run_style_table_2_9_case_study_returns_notebook_tables() -> None:
+    case_study = run_style_table_2_9_case_study(
         apply_fuel_targets=True,
         apply_operating_targets=True,
         solver_time_limit=20.0,
@@ -32,7 +32,7 @@ def test_run_thesis_table_2_9_case_study_returns_notebook_tables() -> None:
 
 
 def test_notebook_case_study_plots_field_comparison() -> None:
-    case_study = run_thesis_table_2_9_case_study(
+    case_study = run_style_table_2_9_case_study(
         apply_fuel_targets=True,
         apply_operating_targets=True,
         solver_time_limit=20.0,
@@ -45,7 +45,7 @@ def test_notebook_case_study_plots_field_comparison() -> None:
 
 
 def test_notebook_case_study_plots_summary_deviations() -> None:
-    case_study = run_thesis_table_2_9_case_study(
+    case_study = run_style_table_2_9_case_study(
         apply_fuel_targets=True,
         apply_operating_targets=True,
         solver_time_limit=20.0,
@@ -57,10 +57,10 @@ def test_notebook_case_study_plots_summary_deviations() -> None:
     assert len(axes.patches) == 4
 
 
-def test_thesis_case_study_example_notebook_executes(monkeypatch, tmp_path) -> None:
+def test_style_case_study_example_notebook_executes(monkeypatch, tmp_path) -> None:
     monkeypatch.setenv("MPLCONFIGDIR", str(tmp_path / "matplotlib"))
     notebook_path = (
-        PROJECT_ROOT / "examples" / "notebooks" / "thesis_table_2_9_case_study.ipynb"
+        PROJECT_ROOT / "examples" / "notebooks" / "style_table_2_9_case_study.ipynb"
     )
     notebook = json.loads(notebook_path.read_text())
     namespace: dict[str, object] = {"__name__": "__main__"}

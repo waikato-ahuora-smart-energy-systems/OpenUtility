@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 import pyomo.environ as pyo
 
-from OpenUtility.benchmarks import (
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
     CONTRIBUTION2_COMPUTATIONAL_RESULTS,
     Contribution2ComputationalResult,
 )

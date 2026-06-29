@@ -41,7 +41,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["OpenUtility"]
+packages = ["OpenUtility", "case_study"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

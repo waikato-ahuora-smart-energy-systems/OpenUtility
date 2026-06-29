@@ -20,6 +20,41 @@ def test_pyproject_declares_cli_entry_point() -> None:
 
 
 def test_root_api_exports_reporting_and_physical_profile_catalog() -> None:
+    case_study_dataset_exports = (
+        "CONTRIBUTION2_CASE_STUDY_2_BEST_CONFIGURATIONS",
+        "CONTRIBUTION2_COMPUTATIONAL_RESULTS",
+        "CONTRIBUTION2_MODEL_STATISTICS",
+        "CONTRIBUTION2_STEAM_PROPERTY_COMPARISONS",
+        "Contribution2BestConfiguration",
+        "Contribution2ComputationalResult",
+        "Contribution2ModelStatistic",
+        "Contribution2SteamPropertyComparison",
+        "STYLE_CASE_STUDY_1_HOT_OIL_RESULTS",
+        "STYLE_CASE_STUDY_1_STEAM_TARGETS",
+        "STYLE_CASE_STUDY_2_EQUIPMENT_COSTS",
+        "STYLE_CASE_STUDY_2_RESOURCES",
+        "STYLE_CASE_STUDY_2_RESULTS",
+        "STYLE_CASE_STUDY_2_SITE_CONFIG",
+        "STYLE_CASE_STUDY_2_STREAMS",
+        "STYLE_GAS_TURBINE_AMBIENT_CORRECTION",
+        "STYLE_GAS_TURBINE_FULL_LOAD_COEFFICIENTS",
+        "STYLE_GAS_TURBINE_PART_LOAD_COEFFICIENTS",
+        "StyleBenchmarkResult",
+        "StyleEquipmentCostCoefficient",
+        "StyleGasTurbineAmbientCorrection",
+        "StyleGasTurbineFullLoadCoefficient",
+        "StyleGasTurbinePartLoadCoefficient",
+        "StyleHotOilDesignResult",
+        "StyleProcessStream",
+        "StyleResource",
+        "StyleSiteConfig",
+        "StyleSteamSystemTarget",
+    )
+
+    for name in case_study_dataset_exports:
+        assert name not in OpenUtility.__all__
+        assert not hasattr(OpenUtility, name)
+
     assert "BilevelCandidateAssignment" in OpenUtility.__all__
     assert "BilevelDecompositionIteration" in OpenUtility.__all__
     assert "BilevelDecompositionRun" in OpenUtility.__all__
@@ -30,7 +65,9 @@ def test_root_api_exports_reporting_and_physical_profile_catalog() -> None:
     assert "BilevelSubproblemResult" in OpenUtility.__all__
     assert "FuelConsumptionAccountingFactor" in OpenUtility.__all__
     assert "OperatingCostAccountingAdjustment" in OpenUtility.__all__
-    assert "ThesisTableCaseStudyNotebookRun" in OpenUtility.__all__
+    assert "StyleTableCaseStudyNotebookRun" in OpenUtility.__all__
+    assert "ThesisTableCaseStudyNotebookRun" not in OpenUtility.__all__
+    assert not hasattr(OpenUtility, "ThesisTableCaseStudyNotebookRun")
     assert "StaticStyleFuelCapacityContext" in OpenUtility.__all__
     assert "StaticStyleFuelConsumptionEquipment" in OpenUtility.__all__
     assert "StaticStyleFuelConsumptionFamily" in OpenUtility.__all__
@@ -120,7 +157,9 @@ def test_root_api_exports_reporting_and_physical_profile_catalog() -> None:
     )
     assert "run_static_style_binary_selection_decomposition" in OpenUtility.__all__
     assert "run_static_style_fixed_assignment_decomposition" in OpenUtility.__all__
-    assert "run_thesis_table_2_9_case_study" in OpenUtility.__all__
+    assert "run_style_table_2_9_case_study" in OpenUtility.__all__
+    assert "run_thesis_table_2_9_case_study" not in OpenUtility.__all__
+    assert not hasattr(OpenUtility, "run_thesis_table_2_9_case_study")
     assert "style_binary_selection_candidate_from_scenario" in OpenUtility.__all__
     assert "style_binary_selection_candidate_records_from_scenarios" in (
         OpenUtility.__all__
@@ -166,8 +205,14 @@ def test_root_api_exports_reporting_and_physical_profile_catalog() -> None:
     assert "best_configuration_summary_row" in OpenUtility.__all__
     assert "format_comparison_rows" in OpenUtility.__all__
     assert "format_summary_rows" in OpenUtility.__all__
-    assert "openpinch_stream_collection_from_thesis_streams" in OpenUtility.__all__
-    assert "openpinch_streams_from_thesis_streams" in OpenUtility.__all__
+    assert "openpinch_stream_collection_from_case_study_streams" in (
+        OpenUtility.__all__
+    )
+    assert "openpinch_stream_collection_from_thesis_streams" not in OpenUtility.__all__
+    assert not hasattr(OpenUtility, "openpinch_stream_collection_from_thesis_streams")
+    assert "openpinch_streams_from_case_study_streams" in OpenUtility.__all__
+    assert "openpinch_streams_from_thesis_streams" not in OpenUtility.__all__
+    assert not hasattr(OpenUtility, "openpinch_streams_from_thesis_streams")
     assert "style_case_study_2_contribution2_physical_profile_catalog" in (
         OpenUtility.__all__
     )

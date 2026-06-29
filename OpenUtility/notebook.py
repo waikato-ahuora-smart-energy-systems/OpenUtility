@@ -1,4 +1,4 @@
-"""Notebook-oriented workflows for thesis case-study replication."""
+"""Notebook-oriented workflows for STYLE case-study replication."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from typing import Any
 
 import pandas as pd
 
-from OpenUtility.benchmarks import get_contribution2_case_study2_best_configuration
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import get_contribution2_case_study2_best_configuration
 from OpenUtility.style import (
     StaticStyleScenarioCatalog,
     best_configuration_comparison_rows,
@@ -31,15 +31,15 @@ TABLE_2_9_CATALOGS = ("reported-equipment", "physical-profile")
 
 
 @dataclass(frozen=True)
-class ThesisTableCaseStudyNotebookRun:
-    """Solved thesis Table 2-9 case-study data prepared for notebooks."""
+class StyleTableCaseStudyNotebookRun:
+    """Solved STYLE Table 2-9 case-study data prepared for notebooks."""
 
     catalog: str
     comparison_rows: tuple[dict[str, Any], ...]
     summary_rows: tuple[dict[str, Any], ...]
 
     def comparison_table(self, *, digits: int | None = 2) -> pd.DataFrame:
-        """Return one row per reported model-versus-thesis field."""
+        """Return one row per reported model-versus-benchmark field."""
 
         return _rows_to_frame(self.comparison_rows, digits=digits)
 
@@ -55,7 +55,7 @@ class ThesisTableCaseStudyNotebookRun:
         return table.loc[table["field"] == field].reset_index(drop=True)
 
     def plot_field_comparison(self, field: str, *, ax: Any | None = None) -> Any:
-        """Plot model and thesis values for one reported output field."""
+        """Plot model and benchmark values for one reported output field."""
 
         axis = _resolve_axis(ax)
         table = self.field_table(field, digits=None)
@@ -71,7 +71,7 @@ class ThesisTableCaseStudyNotebookRun:
             [position + width / 2 for position in x_positions],
             table["benchmark"],
             width=width,
-            label="Thesis",
+            label="Benchmark",
         )
         axis.set_title(field)
         axis.set_ylabel(field)
@@ -91,15 +91,15 @@ class ThesisTableCaseStudyNotebookRun:
         return axis
 
 
-def run_thesis_table_2_9_case_study(
+def run_style_table_2_9_case_study(
     *,
     catalog: str = "physical-profile",
     calibrated: bool = True,
     apply_fuel_targets: bool = True,
     apply_operating_targets: bool = True,
     solver_time_limit: float = 20.0,
-) -> ThesisTableCaseStudyNotebookRun:
-    """Solve a thesis Table 2-9 case-study catalog for notebook exploration."""
+) -> StyleTableCaseStudyNotebookRun:
+    """Solve a STYLE Table 2-9 case-study catalog for notebook exploration."""
 
     scenario_catalog = _table_2_9_catalog(
         catalog,
@@ -113,7 +113,7 @@ def run_thesis_table_2_9_case_study(
         scenario_catalog=scenario_catalog,
         solver_time_limit=solver_time_limit,
     )
-    return ThesisTableCaseStudyNotebookRun(
+    return StyleTableCaseStudyNotebookRun(
         catalog=catalog,
         comparison_rows=comparison_rows,
         summary_rows=summary_rows,
@@ -157,7 +157,7 @@ def _table_2_9_catalog(
             fuel_consumption_factors_by_scenario=fuel_factors,
             operating_cost_adjustments_by_scenario=operating_adjustments,
         )
-    raise ValueError(f"unsupported thesis Table 2-9 catalog {catalog!r}")
+    raise ValueError(f"unsupported STYLE Table 2-9 catalog {catalog!r}")
 
 
 def _physical_profile_fuel_target_factors(

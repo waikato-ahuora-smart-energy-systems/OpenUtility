@@ -8,7 +8,7 @@ from collections.abc import Iterable, Sequence
 from io import StringIO
 from typing import Any
 
-from OpenUtility.benchmarks import (
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
     CONTRIBUTION2_COMPUTATIONAL_RESULTS,
     CONTRIBUTION2_MODEL_STATISTICS,
     CONTRIBUTION2_STEAM_PROPERTY_COMPARISONS,

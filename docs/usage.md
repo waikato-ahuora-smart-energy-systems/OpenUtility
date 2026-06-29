@@ -9,15 +9,15 @@ Python scenario catalogs.
 Open the checked example notebook:
 
 ```bash
-jupyter lab examples/notebooks/thesis_table_2_9_case_study.ipynb
+jupyter lab examples/notebooks/style_table_2_9_case_study.ipynb
 ```
 
 Or use the public helper in a new notebook:
 
 ```python
-from OpenUtility import run_thesis_table_2_9_case_study
+from OpenUtility import run_style_table_2_9_case_study
 
-case_study = run_thesis_table_2_9_case_study(
+case_study = run_style_table_2_9_case_study(
     catalog="physical-profile",
     apply_fuel_targets=True,
     apply_operating_targets=True,
@@ -324,7 +324,7 @@ python examples/contribution2_candidate_decomposition_skipped_candidate.py
 Run the calibrated reported-equipment catalog:
 
 ```python
-from OpenUtility.benchmarks import get_contribution2_case_study2_best_configuration
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import get_contribution2_case_study2_best_configuration
 from OpenUtility.style import (
     compare_static_style_result_to_best_configuration,
     run_static_style_scenario,
@@ -354,7 +354,7 @@ Create solver-independent bilevel incumbent records from captured Contribution
 2 computational rows:
 
 ```python
-from OpenUtility.benchmarks import Contribution2ComputationalResult
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import Contribution2ComputationalResult
 from OpenUtility.style import (
     BilevelIntegerAssignment,
     BilevelSolutionPool,

@@ -4,7 +4,7 @@ from dataclasses import replace
 
 import pytest
 
-from OpenUtility.benchmarks import (
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
     get_contribution2_case_study2_best_configuration,
     get_style_result,
 )

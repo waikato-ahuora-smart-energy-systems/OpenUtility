@@ -8,12 +8,12 @@ multi-period and sustainability extensions.
 ## Notebook Quick Start
 
 The primary workflow is a small Jupyter notebook. Open the checked example at
-`examples/notebooks/thesis_table_2_9_case_study.ipynb`, or start with:
+`examples/notebooks/style_table_2_9_case_study.ipynb`, or start with:
 
 ```python
-from OpenUtility import run_thesis_table_2_9_case_study
+from OpenUtility import run_style_table_2_9_case_study
 
-case_study = run_thesis_table_2_9_case_study(
+case_study = run_style_table_2_9_case_study(
     catalog="physical-profile",
     apply_fuel_targets=True,
     apply_operating_targets=True,
@@ -27,7 +27,7 @@ axes = case_study.plot_field_comparison("total_annualized_cost")
 The first implementation slice contains:
 
 - OpenPinch-compatible stream interval extraction for total site profiles.
-- Optional conversion of thesis process stream fixtures into real OpenPinch
+- Optional conversion of extracted case-study process stream fixtures into real OpenPinch
   `Stream` and `StreamCollection` objects for case-study heat-profile
   construction and notebook exploration when OpenPinch is installed, with a
   fixture fallback when it is not.
@@ -63,11 +63,11 @@ The first implementation slice contains:
   Pyomo models.
 - Contribution 2 case-study 2 best-configuration comparison helpers that check
   extracted utility steam, fuel, total power, split steam/gas turbine power, and
-  cost values against thesis fixtures, including optional split fuel and hot-oil
-  operating costs when the thesis row reports them.
+  cost values against source fixtures, including optional split fuel and hot-oil
+  operating costs when the source row reports them.
 - A deterministic static STYLE scenario runner that builds the Pyomo model,
   delegates solving through an injected callback, extracts results, and compares
-  them with thesis benchmark fixtures when provided.
+  them with source benchmark fixtures when provided.
 - A Pyomo `SolverFactory` adapter that turns configured MILP solvers into
   runner-compatible solve callbacks while normalizing solver status metadata.
 - A SciPy/HiGHS MILP adapter for linear Pyomo models, including solution
@@ -93,7 +93,7 @@ The first implementation slice contains:
   capital/fuel cost mapping, with buildable boiler plus gas-turbine/HRSG VHP
   generation data.
 - Case-study 2 VHP enthalpy helper that computes steam and boiler-feedwater
-  enthalpy inputs from the thesis VHP pressure/feedwater temperature and a
+  enthalpy inputs from the source VHP pressure/feedwater temperature and a
   selected VHP steam temperature.
 - Contribution 2 case-study 2 best-configuration property-spec helper that
   converts reported steam-main pressures/temperatures and VHP conditions into
@@ -114,7 +114,7 @@ The first implementation slice contains:
   thesis utility-steam total exceeds reported boiler and HRSG generation, with
   optional fuel accounting hooks.
 - A reported-fuel-consumption calibration helper that derives the HRSG
-  supplementary-firing factor needed to match fixed-load thesis rows.
+  supplementary-firing factor needed to match fixed-load source rows.
 - A combined Contribution 2 best-configuration model-data helper that composes
   reported flows, boiler, gas turbine, HRSG, and VHP turbine candidates into one
   buildable scaffold for calibration.
@@ -131,7 +131,7 @@ The first implementation slice contains:
 - Reported hot-oil and flash-steam recovery helpers for Contribution 2
   hot-oil/FSR best-configuration rows, including thermodynamic condensate
   recovery sizing from saturated enthalpies. Reported fuel consumption follows
-  the thesis process-utility convention and excludes hot-oil fuel, while hot-oil
+  the source process-utility convention and excludes hot-oil fuel, while hot-oil
   cost remains available as a separate operating-cost component.
 - A reported-hot-oil-cost calibration helper that derives the thermal efficiency
   needed to match the thesis hot-oil operating-cost row.
@@ -160,7 +160,7 @@ The first implementation slice contains:
 - Reported maintenance and capital calibration inputs for physical-profile
   bridge runs, keeping the remaining mismatch focused on physical fuel
   consumption and fuel-cost basis.
-- Physical-profile fuel-cost basis calibration that matches the thesis fuel-cost
+- Physical-profile fuel-cost basis calibration that matches the source fuel-cost
   row while leaving the physical fuel-consumption deviation visible in result
   comparison output.
 - Residual auxiliary operating-cost calibration for physical-profile bridge
@@ -259,11 +259,11 @@ The first implementation slice contains:
 - VHP-to-steam-main let-down helpers that connect assembled VHP generation data
   to selected steam-level candidates.
 - VHP-to-steam-main back-pressure turbine helpers that add explicit turbine
-  performance and map the design power to the thesis steam-turbine capital-cost
+  performance and map the design power to the source steam-turbine capital-cost
   row.
 - A public case-study 2 static scenario catalog helper that assembles the
   extracted heat profile, site economics, boiler, gas turbine, HRSG, VHP header,
-  VHP let-down, optional VHP turbine, and thesis benchmark into one buildable
+  VHP let-down, optional VHP turbine, and source benchmark into one buildable
   Pyomo scenario.
 - That assembled catalog can optionally match the benchmark total power
   generation by constraining grid export to the reported generation above site
@@ -281,7 +281,7 @@ The first implementation slice contains:
   and benchmark-specific physical choices are fully aligned to the thesis
   tables.
 - Annual operating-hour and currency-scaling controls on `StyleModelData`, with
-  case-study 2 configured from the thesis site constants.
+  case-study 2 configured from the source site constants.
 
 See [docs/usage.md](docs/usage.md) for command-line and Python API usage,
 [docs/developer_checklist.md](docs/developer_checklist.md) for reproduction

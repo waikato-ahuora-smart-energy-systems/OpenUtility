@@ -1,4 +1,4 @@
-"""Regression targets extracted from thesis result tables."""
+"""Regression targets extracted from Jimenez-Romero source result tables."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class ThesisStyleResult:
+class StyleBenchmarkResult:
     """One reported STYLE result used as a regression target."""
 
     case_study: str
@@ -21,7 +21,7 @@ class ThesisStyleResult:
 
 
 @dataclass(frozen=True)
-class ThesisStyleSteamTarget:
+class StyleSteamSystemTarget:
     """Steam-system target row reported for STYLE case study 1."""
 
     case_study: str
@@ -34,7 +34,7 @@ class ThesisStyleSteamTarget:
 
 
 @dataclass(frozen=True)
-class ThesisStyleHotOilResult:
+class StyleHotOilDesignResult:
     """Hot-oil design economics reported for STYLE case study 1."""
 
     case_study: str
@@ -58,7 +58,7 @@ class ThesisStyleHotOilResult:
 
 
 @dataclass(frozen=True)
-class ThesisStyleSiteConfig:
+class StyleSiteConfig:
     """Site-wide operating constants extracted from a STYLE case-study table."""
 
     case_study: str
@@ -95,7 +95,7 @@ class ThesisStyleSiteConfig:
 
 
 @dataclass(frozen=True)
-class ThesisStyleStream:
+class StyleProcessStream:
     """OpenPinch-style process stream row extracted from a STYLE case-study table."""
 
     case_study: str
@@ -180,7 +180,7 @@ class ThesisStyleStream:
 
 
 @dataclass(frozen=True)
-class ThesisStyleResource:
+class StyleResource:
     """Resource price row extracted from a STYLE case-study table."""
 
     case_study: str
@@ -199,7 +199,7 @@ class ThesisStyleResource:
 
 
 @dataclass(frozen=True)
-class ThesisStyleEquipmentCostCoefficient:
+class StyleEquipmentCostCoefficient:
     """Linear equipment capital-cost coefficient row from a STYLE case study."""
 
     case_study: str
@@ -235,7 +235,7 @@ class ThesisStyleEquipmentCostCoefficient:
 
 
 @dataclass(frozen=True)
-class ThesisGasTurbineFullLoadCoefficient:
+class StyleGasTurbineFullLoadCoefficient:
     """Gas-turbine full-load coefficients from Supplementary Information P1.B."""
 
     turbine_type: str
@@ -253,7 +253,7 @@ class ThesisGasTurbineFullLoadCoefficient:
 
 
 @dataclass(frozen=True)
-class ThesisGasTurbineAmbientCorrection:
+class StyleGasTurbineAmbientCorrection:
     """Gas-turbine ambient correction factors from Supplementary Information P1.B."""
 
     temperature_power_e: float
@@ -275,7 +275,7 @@ class ThesisGasTurbineAmbientCorrection:
 
 
 @dataclass(frozen=True)
-class ThesisGasTurbinePartLoadCoefficient:
+class StyleGasTurbinePartLoadCoefficient:
     """Gas-turbine part-load coefficients from Supplementary Information P1.B."""
 
     fuel: str
@@ -419,8 +419,8 @@ def _contribution2_scenario_results(
     )
 
 
-STYLE_CASE_STUDY_1_STEAM_TARGETS: tuple[ThesisStyleSteamTarget, ...] = (
-    ThesisStyleSteamTarget(
+STYLE_CASE_STUDY_1_STEAM_TARGETS: tuple[StyleSteamSystemTarget, ...] = (
+    StyleSteamSystemTarget(
         case_study="case-study-1",
         scenario="varbanov-2005",
         utility_steam_temperature=503.0,
@@ -429,7 +429,7 @@ STYLE_CASE_STUDY_1_STEAM_TARGETS: tuple[ThesisStyleSteamTarget, ...] = (
         power_generation=4.762,
         power_generation_per_boiler_flow=0.051,
     ),
-    ThesisStyleSteamTarget(
+    StyleSteamSystemTarget(
         case_study="case-study-1",
         scenario="authors",
         utility_steam_temperature=471.0,
@@ -441,8 +441,8 @@ STYLE_CASE_STUDY_1_STEAM_TARGETS: tuple[ThesisStyleSteamTarget, ...] = (
 )
 
 
-STYLE_CASE_STUDY_1_HOT_OIL_RESULTS: tuple[ThesisStyleHotOilResult, ...] = (
-    ThesisStyleHotOilResult(
+STYLE_CASE_STUDY_1_HOT_OIL_RESULTS: tuple[StyleHotOilDesignResult, ...] = (
+    StyleHotOilDesignResult(
         case_study="case-study-1",
         scenario="hot-oil-and-additional-steam-main",
         mp_pressure=15.2,
@@ -462,7 +462,7 @@ STYLE_CASE_STUDY_1_HOT_OIL_RESULTS: tuple[ThesisStyleHotOilResult, ...] = (
         total_capital_cost=4.83,
         total_annualized_cost=11.47,
     ),
-    ThesisStyleHotOilResult(
+    StyleHotOilDesignResult(
         case_study="case-study-1",
         scenario="hot-oil",
         mp_pressure=18.8,
@@ -1038,17 +1038,17 @@ CONTRIBUTION2_CASE_STUDY_2_BEST_CONFIGURATIONS: tuple[
 
 
 STYLE_GAS_TURBINE_FULL_LOAD_COEFFICIENTS: tuple[
-    ThesisGasTurbineFullLoadCoefficient,
+    StyleGasTurbineFullLoadCoefficient,
     ...,
 ] = (
-    ThesisGasTurbineFullLoadCoefficient(
+    StyleGasTurbineFullLoadCoefficient(
         turbine_type="industrial",
         full_load_a=2.5948,
         full_load_b=30093.0,
         air_flow_c=0.0028,
         air_flow_d=18.444,
     ),
-    ThesisGasTurbineFullLoadCoefficient(
+    StyleGasTurbineFullLoadCoefficient(
         turbine_type="aeroderivative",
         full_load_a=2.1816,
         full_load_b=10002.0,
@@ -1058,7 +1058,7 @@ STYLE_GAS_TURBINE_FULL_LOAD_COEFFICIENTS: tuple[
 )
 
 
-STYLE_GAS_TURBINE_AMBIENT_CORRECTION = ThesisGasTurbineAmbientCorrection(
+STYLE_GAS_TURBINE_AMBIENT_CORRECTION = StyleGasTurbineAmbientCorrection(
     temperature_power_e=1.02,
     temperature_power_f=1.33e-3,
     temperature_efficiency_g=1.1,
@@ -1067,15 +1067,15 @@ STYLE_GAS_TURBINE_AMBIENT_CORRECTION = ThesisGasTurbineAmbientCorrection(
 
 
 STYLE_GAS_TURBINE_PART_LOAD_COEFFICIENTS: tuple[
-    ThesisGasTurbinePartLoadCoefficient,
+    StyleGasTurbinePartLoadCoefficient,
     ...,
 ] = (
-    ThesisGasTurbinePartLoadCoefficient(
+    StyleGasTurbinePartLoadCoefficient(
         fuel="natural-gas",
         part_load_a=0.152,
         part_load_b=-0.00142,
     ),
-    ThesisGasTurbinePartLoadCoefficient(
+    StyleGasTurbinePartLoadCoefficient(
         fuel="distillate-oil",
         part_load_a=0.144,
         part_load_b=-0.00153,
@@ -1083,7 +1083,7 @@ STYLE_GAS_TURBINE_PART_LOAD_COEFFICIENTS: tuple[
 )
 
 
-STYLE_CASE_STUDY_2_SITE_CONFIG = ThesisStyleSiteConfig(
+STYLE_CASE_STUDY_2_SITE_CONFIG = StyleSiteConfig(
     case_study="case-study-2",
     power_demand=40.0,
     max_power_export=10.0,
@@ -1102,8 +1102,8 @@ def _case_study_2_resource(
     lower_heating_value: float | None,
     unit_cost: float,
     cost_unit: str = "eur_per_mwh",
-) -> ThesisStyleResource:
-    return ThesisStyleResource(
+) -> StyleResource:
+    return StyleResource(
         case_study="case-study-2",
         name=name,
         lower_heating_value=lower_heating_value,
@@ -1112,7 +1112,7 @@ def _case_study_2_resource(
     )
 
 
-STYLE_CASE_STUDY_2_RESOURCES: tuple[ThesisStyleResource, ...] = (
+STYLE_CASE_STUDY_2_RESOURCES: tuple[StyleResource, ...] = (
     _case_study_2_resource("natural-gas", 13.08, 24.30),
     _case_study_2_resource("distillate-oil", 11.28, 39.65),
     _case_study_2_resource("fuel-gas", 13.03, 23.87),
@@ -1135,8 +1135,8 @@ def _case_study_2_equipment_cost(
     range_lower: float | None,
     range_upper: float | None,
     reference: str,
-) -> ThesisStyleEquipmentCostCoefficient:
-    return ThesisStyleEquipmentCostCoefficient(
+) -> StyleEquipmentCostCoefficient:
+    return StyleEquipmentCostCoefficient(
         case_study="case-study-2",
         equipment_type=equipment_type,
         subtype=subtype,
@@ -1151,7 +1151,7 @@ def _case_study_2_equipment_cost(
 
 
 STYLE_CASE_STUDY_2_EQUIPMENT_COSTS: tuple[
-    ThesisStyleEquipmentCostCoefficient,
+    StyleEquipmentCostCoefficient,
     ...
 ] = (
     _case_study_2_equipment_cost(
@@ -1287,8 +1287,8 @@ def _case_study_2_stream(
     heat_load: float,
     heat_capacity_flow: float,
     minimum_temperature_difference: float,
-) -> ThesisStyleStream:
-    return ThesisStyleStream(
+) -> StyleProcessStream:
+    return StyleProcessStream(
         case_study="case-study-2",
         process=process,
         name=name,
@@ -1301,7 +1301,7 @@ def _case_study_2_stream(
     )
 
 
-STYLE_CASE_STUDY_2_STREAMS: tuple[ThesisStyleStream, ...] = (
+STYLE_CASE_STUDY_2_STREAMS: tuple[StyleProcessStream, ...] = (
     _case_study_2_stream("A", "A-1", "hot", 300.0, 280.0, 30.000, 1.500, 15.0),
     _case_study_2_stream("A", "A-2", "hot", 148.0, 135.0, 10.000, 0.769, 15.0),
     _case_study_2_stream("A", "A-3", "hot", 135.0, 110.0, 20.000, 0.800, 15.0),
@@ -1341,8 +1341,8 @@ STYLE_CASE_STUDY_2_STREAMS: tuple[ThesisStyleStream, ...] = (
 )
 
 
-STYLE_CASE_STUDY_2_RESULTS: tuple[ThesisStyleResult, ...] = (
-    ThesisStyleResult(
+STYLE_CASE_STUDY_2_RESULTS: tuple[StyleBenchmarkResult, ...] = (
+    StyleBenchmarkResult(
         case_study="case-study-2",
         scenario="conventional",
         utility_steam_flow=299.56,
@@ -1353,7 +1353,7 @@ STYLE_CASE_STUDY_2_RESULTS: tuple[ThesisStyleResult, ...] = (
         capital_cost=13.01,
         total_annualized_cost=75.86,
     ),
-    ThesisStyleResult(
+    StyleBenchmarkResult(
         case_study="case-study-2",
         scenario="proposed-without-hot-oil",
         utility_steam_flow=239.86,
@@ -1364,7 +1364,7 @@ STYLE_CASE_STUDY_2_RESULTS: tuple[ThesisStyleResult, ...] = (
         capital_cost=11.98,
         total_annualized_cost=64.77,
     ),
-    ThesisStyleResult(
+    StyleBenchmarkResult(
         case_study="case-study-2",
         scenario="fsr",
         utility_steam_flow=190.96,
@@ -1375,7 +1375,7 @@ STYLE_CASE_STUDY_2_RESULTS: tuple[ThesisStyleResult, ...] = (
         capital_cost=11.07,
         total_annualized_cost=56.10,
     ),
-    ThesisStyleResult(
+    StyleBenchmarkResult(
         case_study="case-study-2",
         scenario="hot-oil",
         utility_steam_flow=118.84,
@@ -1386,7 +1386,7 @@ STYLE_CASE_STUDY_2_RESULTS: tuple[ThesisStyleResult, ...] = (
         capital_cost=10.90,
         total_annualized_cost=58.85,
     ),
-    ThesisStyleResult(
+    StyleBenchmarkResult(
         case_study="case-study-2",
         scenario="hot-oil-and-fsr",
         utility_steam_flow=97.46,
@@ -1403,7 +1403,7 @@ STYLE_CASE_STUDY_2_RESULTS: tuple[ThesisStyleResult, ...] = (
 def get_style_steam_target(
     case_study: str,
     scenario: str,
-) -> ThesisStyleSteamTarget:
+) -> StyleSteamSystemTarget:
     """Return a named STYLE steam-system target benchmark."""
 
     for result in STYLE_CASE_STUDY_1_STEAM_TARGETS:
@@ -1415,7 +1415,7 @@ def get_style_steam_target(
 def get_style_hot_oil_result(
     case_study: str,
     scenario: str,
-) -> ThesisStyleHotOilResult:
+) -> StyleHotOilDesignResult:
     """Return a named STYLE hot-oil design benchmark."""
 
     for result in STYLE_CASE_STUDY_1_HOT_OIL_RESULTS:
@@ -1482,10 +1482,17 @@ def get_contribution2_case_study2_best_configuration(
     raise KeyError(f"No Contribution 2 case study 2 configuration {scenario!r}.")
 
 
-def get_style_result(case_study: str, scenario: str) -> ThesisStyleResult:
+def get_style_result(case_study: str, scenario: str) -> StyleBenchmarkResult:
     """Return a named STYLE benchmark result."""
 
     for result in STYLE_CASE_STUDY_2_RESULTS:
         if result.case_study == case_study and result.scenario == scenario:
             return result
     raise KeyError(f"No STYLE benchmark for {case_study!r}, {scenario!r}.")
+
+
+__all__ = tuple(
+    name
+    for name in globals()
+    if not name.startswith("_") and name not in {"annotations", "dataclass"}
+)

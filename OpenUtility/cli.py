@@ -7,7 +7,7 @@ import sys
 from collections.abc import Sequence
 from typing import TextIO
 
-from OpenUtility.benchmarks import get_contribution2_case_study2_best_configuration
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import get_contribution2_case_study2_best_configuration
 from OpenUtility.style import (
     StaticStyleScenarioCatalog,
     best_configuration_comparison_rows,
@@ -245,7 +245,7 @@ def main(argv: Sequence[str] | None = None, *, stdout: TextIO | None = None) -> 
 
 def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Run OpenUtility thesis replication reports.",
+        description="Run OpenUtility STYLE case-study replication reports.",
     )
     parser.add_argument(
         "--report",

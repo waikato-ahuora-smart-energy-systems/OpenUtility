@@ -5,7 +5,7 @@ import json
 import pytest
 import pyomo.environ as pyo
 
-from OpenUtility.benchmarks import get_contribution2_case_study2_best_configuration
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import get_contribution2_case_study2_best_configuration
 from OpenUtility.style import (
     BilevelDecompositionIteration,
     BilevelDecompositionRun,

@@ -9,7 +9,7 @@ from typing import Any
 
 import pyomo.environ as pyo
 
-from OpenUtility.benchmarks import (
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
     CONTRIBUTION2_COMPUTATIONAL_RESULTS,
     Contribution2ComputationalResult,
     get_contribution2_computational_result,

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from OpenUtility.benchmarks import (
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
     CONTRIBUTION2_CASE_STUDY_2_BEST_CONFIGURATIONS,
     CONTRIBUTION2_COMPUTATIONAL_RESULTS,
     CONTRIBUTION2_MODEL_STATISTICS,

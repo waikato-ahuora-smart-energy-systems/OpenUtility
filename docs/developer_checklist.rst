@@ -26,7 +26,7 @@ Build the Read the Docs source locally:
 
    python -m sphinx -b html docs /tmp/openutility-docs-html
 
-Recreate the calibrated thesis comparison report:
+Recreate the calibrated benchmark comparison report:
 
 .. code-block:: bash
 
@@ -36,4 +36,4 @@ Open the checked notebook example:
 
 .. code-block:: bash
 
-   jupyter lab examples/notebooks/thesis_table_2_9_case_study.ipynb
+   jupyter lab examples/notebooks/style_table_2_9_case_study.ipynb

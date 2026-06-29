@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 import OpenUtility.style.case_studies as case_studies
-from OpenUtility.benchmarks import (
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
     STYLE_CASE_STUDY_2_STREAMS,
     get_contribution2_case_study2_best_configuration,
 )
@@ -108,7 +108,7 @@ def test_style_case_study_2_heat_interval_profile_falls_back_without_openpinch(
 
     monkeypatch.setattr(
         case_studies,
-        "openpinch_streams_from_thesis_streams",
+        "openpinch_streams_from_case_study_streams",
         raise_missing_openpinch,
     )
 
