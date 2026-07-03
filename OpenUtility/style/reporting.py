@@ -6,17 +6,7 @@ import csv
 import json
 from collections.abc import Iterable, Sequence
 from io import StringIO
-from typing import Any
-
-from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
-    CONTRIBUTION2_COMPUTATIONAL_RESULTS,
-    CONTRIBUTION2_MODEL_STATISTICS,
-    CONTRIBUTION2_STEAM_PROPERTY_COMPARISONS,
-    Contribution2BestConfiguration,
-    Contribution2ComputationalResult,
-    Contribution2ModelStatistic,
-    Contribution2SteamPropertyComparison,
-)
+from typing import Any, Protocol
 
 from .bilevel import (
     BilevelCandidateAssignment,
@@ -33,6 +23,49 @@ from .results import (
     static_style_operating_cost_components,
 )
 from .runner import StaticStyleScenario
+
+
+class _Contribution2BestConfigurationRecord(Protocol):
+    total_cost: float
+    fuel_consumption: float
+    operating_cost: float
+    fuel_cost: float
+    hot_oil_operating_cost: float | None
+    power_revenue: float | None
+
+
+class _Contribution2ComputationalResultRecord(Protocol):
+    test_number: int
+    scenario: int
+    method: str
+    best_solution_found: float
+    best_possible: float | None
+    computational_time_seconds: float
+    hit_time_limit: bool
+
+
+class _Contribution2ModelStatisticRecord(Protocol):
+    test_number: int
+    reference: str
+    steam_mains: int
+    power_demand: float
+    integrates_hot_oil_and_fsr: bool
+    variable_count: int
+    binary_count: int
+    equation_count: int
+
+
+class _Contribution2SteamPropertyComparisonRecord(Protocol):
+    configuration: str
+    turbine: str
+    inlet_temperature: float | None
+    inlet_pressure: float | None
+    outlet_pressure: float | None
+    real_isentropic_enthalpy_change: float | None
+    iapws_power_generation: float
+    model_isentropic_enthalpy_change: float | None
+    model_power_generation: float
+
 
 COMPARISON_ROW_FIELDS = (
     "catalog",
@@ -1461,7 +1494,7 @@ def style_decomposition_objective_comparison_rows(
     catalog: str,
     scenario: StaticStyleScenario,
     run: BilevelDecompositionRun,
-    benchmark: Contribution2BestConfiguration,
+    benchmark: _Contribution2BestConfigurationRecord,
     absolute_tolerance: float | None = None,
 ) -> tuple[dict[str, Any], ...]:
     """Compare decomposition objective values with Table 2-9 total costs."""
@@ -1512,7 +1545,7 @@ def style_fuel_consumption_family_rows(
     catalog: str,
     scenario: StaticStyleScenario,
     model: Any,
-    benchmark: Contribution2BestConfiguration,
+    benchmark: _Contribution2BestConfigurationRecord,
 ) -> tuple[dict[str, Any], ...]:
     """Return fuel-family rows compared with a Table 2-9 fuel benchmark."""
 
@@ -1566,7 +1599,7 @@ def style_fuel_consumption_equipment_rows(
     catalog: str,
     scenario: StaticStyleScenario,
     model: Any,
-    benchmark: Contribution2BestConfiguration,
+    benchmark: _Contribution2BestConfigurationRecord,
 ) -> tuple[dict[str, Any], ...]:
     """Return equipment-level fuel-consumption residual trace rows."""
 
@@ -1627,7 +1660,7 @@ def style_fuel_consumption_capacity_rows(
     catalog: str,
     scenario: StaticStyleScenario,
     model: Any,
-    benchmark: Contribution2BestConfiguration,
+    benchmark: _Contribution2BestConfigurationRecord,
 ) -> tuple[dict[str, Any], ...]:
     """Return equipment fuel-consumption rows with capacity context."""
 
@@ -1797,7 +1830,7 @@ def style_operating_cost_component_rows(
     catalog: str,
     scenario: StaticStyleScenario,
     model: Any,
-    benchmark: Contribution2BestConfiguration,
+    benchmark: _Contribution2BestConfigurationRecord,
 ) -> tuple[dict[str, Any], ...]:
     """Return operating-cost component comparisons against a benchmark row."""
 
@@ -1995,9 +2028,7 @@ def format_style_fuel_consumption_residual_ranking_rows(
 
 
 def steam_property_comparison_rows(
-    comparisons: Iterable[Contribution2SteamPropertyComparison] = (
-        CONTRIBUTION2_STEAM_PROPERTY_COMPARISONS
-    ),
+    comparisons: Iterable[_Contribution2SteamPropertyComparisonRecord],
 ) -> tuple[dict[str, Any], ...]:
     """Return Contribution 2 steam-property comparison rows."""
 
@@ -2005,9 +2036,7 @@ def steam_property_comparison_rows(
 
 
 def model_derived_steam_property_comparison_rows(
-    comparisons: Iterable[Contribution2SteamPropertyComparison] = (
-        CONTRIBUTION2_STEAM_PROPERTY_COMPARISONS
-    ),
+    comparisons: Iterable[_Contribution2SteamPropertyComparisonRecord],
     *,
     properties: SteamPropertyProvider | None = None,
 ) -> tuple[dict[str, Any], ...]:
@@ -2061,9 +2090,7 @@ def model_derived_steam_property_comparison_rows(
 
 
 def contribution2_model_statistic_rows(
-    statistics: Iterable[Contribution2ModelStatistic] = (
-        CONTRIBUTION2_MODEL_STATISTICS
-    ),
+    statistics: Iterable[_Contribution2ModelStatisticRecord],
 ) -> tuple[dict[str, Any], ...]:
     """Return Contribution 2 model-statistics rows."""
 
@@ -2083,9 +2110,7 @@ def contribution2_model_statistic_rows(
 
 
 def contribution2_computational_result_rows(
-    results: Iterable[Contribution2ComputationalResult] = (
-        CONTRIBUTION2_COMPUTATIONAL_RESULTS
-    ),
+    results: Iterable[_Contribution2ComputationalResultRecord],
 ) -> tuple[dict[str, Any], ...]:
     """Return Contribution 2 computational-result rows."""
 
@@ -2108,9 +2133,7 @@ def contribution2_computational_result_rows(
 
 
 def contribution2_computational_best_method_rows(
-    results: Iterable[Contribution2ComputationalResult] = (
-        CONTRIBUTION2_COMPUTATIONAL_RESULTS
-    ),
+    results: Iterable[_Contribution2ComputationalResultRecord],
 ) -> tuple[dict[str, Any], ...]:
     """Return the best reported method for each Contribution 2 test scenario."""
 
@@ -2124,9 +2147,7 @@ def contribution2_computational_best_method_rows(
 
 
 def contribution2_computational_method_summary_rows(
-    results: Iterable[Contribution2ComputationalResult] = (
-        CONTRIBUTION2_COMPUTATIONAL_RESULTS
-    ),
+    results: Iterable[_Contribution2ComputationalResultRecord],
 ) -> tuple[dict[str, Any], ...]:
     """Return method-level Contribution 2 computational-result summaries."""
 
@@ -2151,9 +2172,7 @@ def contribution2_computational_method_summary_rows(
 
 
 def contribution2_bilevel_benchmark_trajectory_rows(
-    results: Iterable[Contribution2ComputationalResult] = (
-        CONTRIBUTION2_COMPUTATIONAL_RESULTS
-    ),
+    results: Iterable[_Contribution2ComputationalResultRecord],
     *,
     method: str = "bilevel",
 ) -> tuple[dict[str, Any], ...]:
@@ -2171,7 +2190,7 @@ def contribution2_bilevel_trajectory_comparison_rows(
     test_number: int,
     scenario: int,
     actual_rows: Iterable[dict[str, Any]],
-    benchmark_rows: Iterable[dict[str, Any]] | None = None,
+    benchmark_rows: Iterable[dict[str, Any]],
     fields: Sequence[str] = CONTRIBUTION2_BILEVEL_TRAJECTORY_COMPARISON_FIELDS,
     absolute_tolerance: float = 1e-6,
 ) -> tuple[dict[str, Any], ...]:
@@ -2182,11 +2201,7 @@ def contribution2_bilevel_trajectory_comparison_rows(
     selected_benchmark_rows = _contribution2_bilevel_benchmark_rows_by_iteration(
         test_number=test_number,
         scenario=scenario,
-        benchmark_rows=(
-            contribution2_bilevel_benchmark_trajectory_rows()
-            if benchmark_rows is None
-            else benchmark_rows
-        ),
+        benchmark_rows=benchmark_rows,
     )
     rows: list[dict[str, Any]] = []
     for actual_row in actual_rows:
@@ -2338,8 +2353,11 @@ def format_contribution2_bilevel_trajectory_comparison_rows(
 
 
 def _computational_results_by_test_scenario(
-    results: Iterable[Contribution2ComputationalResult],
-) -> tuple[tuple[tuple[int, int], tuple[Contribution2ComputationalResult, ...]], ...]:
+    results: Iterable[_Contribution2ComputationalResultRecord],
+) -> tuple[
+    tuple[tuple[int, int], tuple[_Contribution2ComputationalResultRecord, ...]],
+    ...
+]:
     result_tuple = tuple(results)
     keys = tuple(
         dict.fromkeys((result.test_number, result.scenario) for result in result_tuple)
@@ -2358,7 +2376,7 @@ def _computational_results_by_test_scenario(
 
 
 def _computational_best_method_row(
-    result: Contribution2ComputationalResult,
+    result: _Contribution2ComputationalResultRecord,
 ) -> dict[str, Any]:
     return {
         "test_number": result.test_number,
@@ -2377,7 +2395,7 @@ def _computational_best_method_row(
 
 def _computational_method_summary_row(
     method: str,
-    results: tuple[Contribution2ComputationalResult, ...],
+    results: tuple[_Contribution2ComputationalResultRecord, ...],
     best_method_keys: set[tuple[int, int, str]],
 ) -> dict[str, Any]:
     if not results:
@@ -2754,7 +2772,7 @@ def _binary_selection_component_name(variable_name: str) -> str:
 
 
 def _contribution2_bilevel_benchmark_trajectory_row(
-    result: Contribution2ComputationalResult,
+    result: _Contribution2ComputationalResultRecord,
 ) -> dict[str, Any]:
     return {
         "test_number": result.test_number,
@@ -3057,7 +3075,7 @@ def _fuel_calibration_action(
     if capacity_utilization is not None and capacity_utilization >= 0.999:
         if residual > 0.0:
             return "reduce_largest_capped_equipment_fuel"
-            return "increase_largest_capped_equipment_fuel"
+        return "increase_largest_capped_equipment_fuel"
     return "no_capped_capacity_target"
 
 
@@ -3088,7 +3106,7 @@ def _largest_operating_cost_component_residual(
 
 
 def _benchmark_operating_cost_components(
-    benchmark: Contribution2BestConfiguration,
+    benchmark: _Contribution2BestConfigurationRecord,
 ) -> dict[str, float]:
     fuel = benchmark.fuel_cost
     hot_oil = benchmark.hot_oil_operating_cost or 0.0
@@ -3104,7 +3122,7 @@ def _benchmark_operating_cost_components(
 
 
 def _steam_property_comparison_row(
-    comparison: Contribution2SteamPropertyComparison,
+    comparison: _Contribution2SteamPropertyComparisonRecord,
 ) -> dict[str, Any]:
     return _steam_property_comparison_row_from_values(
         comparison,
@@ -3114,7 +3132,7 @@ def _steam_property_comparison_row(
 
 
 def _steam_property_comparison_row_from_values(
-    comparison: Contribution2SteamPropertyComparison,
+    comparison: _Contribution2SteamPropertyComparisonRecord,
     *,
     real_isentropic_enthalpy_change: float | None,
     iapws_power_generation: float,
@@ -3141,7 +3159,9 @@ def _steam_property_comparison_row_from_values(
     }
 
 
-def _model_turbine_flow(comparison: Contribution2SteamPropertyComparison) -> float:
+def _model_turbine_flow(
+    comparison: _Contribution2SteamPropertyComparisonRecord,
+) -> float:
     model_enthalpy_change = _required_property_value(
         comparison.model_isentropic_enthalpy_change,
         "model_isentropic_enthalpy_change",

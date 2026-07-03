@@ -7,7 +7,12 @@ import sys
 from collections.abc import Sequence
 from typing import TextIO
 
-from case_study.jimenez_romero_utility_system_optimization.benchmarks import get_contribution2_case_study2_best_configuration
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
+    CONTRIBUTION2_COMPUTATIONAL_RESULTS,
+    CONTRIBUTION2_MODEL_STATISTICS,
+    CONTRIBUTION2_STEAM_PROPERTY_COMPARISONS,
+    get_contribution2_case_study2_best_configuration,
+)
 from OpenUtility.style import (
     StaticStyleScenarioCatalog,
     best_configuration_comparison_rows,
@@ -89,9 +94,11 @@ def main(argv: Sequence[str] | None = None, *, stdout: TextIO | None = None) -> 
     output = sys.stdout if stdout is None else stdout
     if args.report == "steam-properties":
         rows = (
-            model_derived_steam_property_comparison_rows()
+            model_derived_steam_property_comparison_rows(
+                CONTRIBUTION2_STEAM_PROPERTY_COMPARISONS,
+            )
             if args.computed
-            else steam_property_comparison_rows()
+            else steam_property_comparison_rows(CONTRIBUTION2_STEAM_PROPERTY_COMPARISONS)
         )
         output.write(
             format_steam_property_comparison_rows(
@@ -104,7 +111,7 @@ def main(argv: Sequence[str] | None = None, *, stdout: TextIO | None = None) -> 
     if args.report == "model-statistics":
         output.write(
             format_contribution2_model_statistic_rows(
-                contribution2_model_statistic_rows(),
+                contribution2_model_statistic_rows(CONTRIBUTION2_MODEL_STATISTICS),
                 output_format=args.format,
             ),
         )
@@ -746,21 +753,27 @@ def _candidate_source_label_factory(
 def _format_computational_result_report(view: str, output_format: str) -> str:
     if view == "best-method":
         return format_contribution2_computational_best_method_rows(
-            contribution2_computational_best_method_rows(),
+            contribution2_computational_best_method_rows(
+                CONTRIBUTION2_COMPUTATIONAL_RESULTS,
+            ),
             output_format=output_format,
         )
     if view == "method-summary":
         return format_contribution2_computational_method_summary_rows(
-            contribution2_computational_method_summary_rows(),
+            contribution2_computational_method_summary_rows(
+                CONTRIBUTION2_COMPUTATIONAL_RESULTS,
+            ),
             output_format=output_format,
         )
     if view == "bilevel-trajectory":
         return format_contribution2_bilevel_benchmark_trajectory_rows(
-            contribution2_bilevel_benchmark_trajectory_rows(),
+            contribution2_bilevel_benchmark_trajectory_rows(
+                CONTRIBUTION2_COMPUTATIONAL_RESULTS,
+            ),
             output_format=output_format,
         )
     return format_contribution2_computational_result_rows(
-        contribution2_computational_result_rows(),
+        contribution2_computational_result_rows(CONTRIBUTION2_COMPUTATIONAL_RESULTS),
         output_format=output_format,
     )
 

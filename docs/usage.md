@@ -354,7 +354,10 @@ Create solver-independent bilevel incumbent records from captured Contribution
 2 computational rows:
 
 ```python
-from case_study.jimenez_romero_utility_system_optimization.benchmarks import Contribution2ComputationalResult
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
+    CONTRIBUTION2_COMPUTATIONAL_RESULTS,
+    Contribution2ComputationalResult,
+)
 from OpenUtility.style import (
     BilevelIntegerAssignment,
     BilevelSolutionPool,
@@ -380,6 +383,7 @@ def assignment_from_result(
 
 pool = BilevelSolutionPool(
     bilevel_incumbents_from_computational_results(
+        CONTRIBUTION2_COMPUTATIONAL_RESULTS,
         assignment_factory=assignment_from_result,
     ),
 )
@@ -433,6 +437,9 @@ from OpenUtility.style import (
     contribution2_synthetic_bilevel_decomposition_run,
     format_bilevel_decomposition_run_rows,
 )
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
+    CONTRIBUTION2_COMPUTATIONAL_RESULTS,
+)
 
 rows = bilevel_decomposition_run_rows(run)
 print(format_bilevel_decomposition_run_rows(rows, output_format="csv"))
@@ -441,7 +448,9 @@ reported_run = contribution2_synthetic_bilevel_decomposition_run(
     scenario=2,
 )
 reported_rows = bilevel_decomposition_run_rows(reported_run)
-benchmark_rows = contribution2_bilevel_benchmark_trajectory_rows()
+benchmark_rows = contribution2_bilevel_benchmark_trajectory_rows(
+    CONTRIBUTION2_COMPUTATIONAL_RESULTS,
+)
 comparison_rows = contribution2_bilevel_trajectory_comparison_rows(
     test_number=6,
     scenario=2,

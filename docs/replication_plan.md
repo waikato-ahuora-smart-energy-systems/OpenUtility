@@ -174,7 +174,7 @@ Implemented now:
 - Contribution 2 best-configuration comparison helper for case-study 2,
   including utility steam, fuel, total power, split steam/gas turbine power, and
   economic fields from source configuration fixtures. Optional split fuel and
-  hot-oil operating costs are compared when both the extracted result and thesis
+  hot-oil operating costs are compared when both the extracted result and source
   row provide them.
 - Deterministic static STYLE scenario runner that builds a Pyomo model, delegates
   solving through an injected callback, extracts reporting values, and optionally
@@ -230,7 +230,7 @@ Implemented now:
   power and HRSG steam flow into explicit gas-turbine, HRSG, fuel, and
   capital-cost inputs.
 - Auxiliary VHP steam-source candidate and Pyomo block for reported calibration
-  rows where the thesis utility-steam total exceeds the boiler plus HRSG rows.
+  rows where the utility-steam total exceeds the boiler plus HRSG rows.
   The source participates in VHP mass/energy balances, optional fuel cost, and
   optional equipment cost without overloading boiler or HRSG semantics.
 - Reported-fuel-consumption calibration helper that derives the HRSG
@@ -256,16 +256,16 @@ Implemented now:
 - Reported hot-oil and flash-steam recovery helpers for Contribution 2
   hot-oil/FSR best-configuration rows. Flash recovery route sizing is derived
   from saturated liquid/vapor enthalpy balances and reported flash-steam flows.
-  Result extraction keeps thesis fuel consumption on the process-utility basis,
+  Result extraction keeps reported fuel consumption on the process-utility basis,
   excluding hot-oil fuel consumption while exposing hot-oil operating cost
   separately.
 - Reported-hot-oil-cost calibration helper that derives the thermal efficiency
-  needed to match the thesis hot-oil operating-cost row without changing fuel
+  needed to match the reported hot-oil operating-cost row without changing fuel
   consumption extraction.
 - Reported-economics calibration flag for fixed-load Contribution 2 rows. It
   applies reported fuel-cost scaling, hot-oil cost, power revenue, maintenance,
   capital, and the residual auxiliary operating cost required to match the
-  thesis operating-cost row.
+  reported operating-cost row.
 - Ready-to-run Contribution 2 case-study 2 best-configuration scenario catalog
   covering the four Table 2-9 rows with calibrated reported-equipment data.
 - Multi-main physical-profile bridge from the real case-study 2 P1.D heat

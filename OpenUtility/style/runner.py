@@ -8,13 +8,12 @@ from typing import TypeAlias
 
 import pyomo.environ as pyo
 
-from case_study.jimenez_romero_utility_system_optimization.benchmarks import StyleBenchmarkResult
-
 from .data import StyleModelData
 from .pyomo_model import build_static_style_model
 from .results import (
     StaticStyleBenchmarkComparison,
     StaticStyleResult,
+    StyleBenchmarkRecord,
     compare_static_style_result_to_benchmark,
     extract_static_style_result,
 )
@@ -27,7 +26,7 @@ class StaticStyleScenario:
     case_study: str
     scenario: str
     data: StyleModelData
-    benchmark: StyleBenchmarkResult | None = None
+    benchmark: StyleBenchmarkRecord | None = None
     absolute_tolerance: float = 1e-6
 
     def __post_init__(self) -> None:

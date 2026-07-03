@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import pytest
 import pyomo.environ as pyo
 
@@ -1020,8 +1022,53 @@ def test_bilevel_incumbents_from_contribution2_computational_results() -> None:
     assert len(pool.exclusion_cuts()) == 24
 
 
+def test_bilevel_incumbents_accept_generic_computational_result_records() -> None:
+    results = (
+        _SyntheticComputationalResult(
+            test_number=1,
+            scenario=1,
+            method="bilevel",
+            best_solution_found=12.0,
+            best_possible=10.0,
+            computational_time_seconds=3.5,
+            hit_time_limit=False,
+        ),
+        _SyntheticComputationalResult(
+            test_number=1,
+            scenario=2,
+            method="baron",
+            best_solution_found=11.0,
+            best_possible=9.0,
+            computational_time_seconds=4.0,
+            hit_time_limit=True,
+        ),
+    )
+
+    incumbents = bilevel_incumbents_from_computational_results(
+        results,
+        assignment_factory=_benchmark_assignment,
+    )
+
+    assert len(incumbents) == 1
+    assert incumbents[0].label == "test-1-scenario-1"
+    assert incumbents[0].objective_value == pytest.approx(12.0)
+    assert incumbents[0].best_bound == pytest.approx(10.0)
+    assert incumbents[0].elapsed_seconds == pytest.approx(3.5)
+
+
+@dataclass(frozen=True)
+class _SyntheticComputationalResult:
+    test_number: int
+    scenario: int
+    method: str
+    best_solution_found: float
+    best_possible: float | None
+    computational_time_seconds: float
+    hit_time_limit: bool
+
+
 def _benchmark_assignment(
-    result: Contribution2ComputationalResult,
+    result: Contribution2ComputationalResult | _SyntheticComputationalResult,
 ) -> BilevelIntegerAssignment:
     values = {
         f"test_{test_number}": int(test_number == result.test_number)

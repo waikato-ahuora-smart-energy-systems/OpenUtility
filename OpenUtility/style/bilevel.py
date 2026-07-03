@@ -5,16 +5,11 @@ from __future__ import annotations
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from math import isfinite
-from typing import Any
+from typing import Any, Protocol
 
 import pyomo.environ as pyo
 
-from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
-    CONTRIBUTION2_COMPUTATIONAL_RESULTS,
-    Contribution2ComputationalResult,
-    get_contribution2_computational_result,
-)
-
+from .data import StyleModelData
 from .pyomo_model import build_static_style_model
 from .results import extract_static_style_result
 from .runner import (
@@ -23,7 +18,6 @@ from .runner import (
     StaticStyleSolverStatus,
     run_static_style_scenario,
 )
-from .data import StyleModelData
 
 
 STYLE_MASTER_BINARY_COMPONENT_NAMES: tuple[str, ...] = (
@@ -39,6 +33,16 @@ STYLE_MASTER_BINARY_COMPONENT_NAMES: tuple[str, ...] = (
     "hrsg_selected",
     "hrsg_supplementary_firing_selected",
 )
+
+
+class _ComputationalResultRecord(Protocol):
+    test_number: int
+    scenario: int
+    method: str
+    best_solution_found: float
+    best_possible: float | None
+    computational_time_seconds: float
+    hit_time_limit: bool
 
 
 @dataclass(frozen=True)
@@ -341,12 +345,10 @@ class BilevelDecompositionRun:
 
 
 def bilevel_incumbents_from_computational_results(
-    results: Iterable[Contribution2ComputationalResult] = (
-        CONTRIBUTION2_COMPUTATIONAL_RESULTS
-    ),
+    results: Iterable[_ComputationalResultRecord],
     *,
     assignment_factory: Callable[
-        [Contribution2ComputationalResult],
+        [_ComputationalResultRecord],
         BilevelIntegerAssignment,
     ],
     method: str = "bilevel",
@@ -387,6 +389,10 @@ def contribution2_synthetic_bilevel_decomposition_run(
     scenario: int,
 ) -> BilevelDecompositionRun:
     """Generate a loop-backed synthetic run for one reported bilevel result."""
+
+    from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
+        get_contribution2_computational_result,
+    )
 
     result = get_contribution2_computational_result(
         test_number,

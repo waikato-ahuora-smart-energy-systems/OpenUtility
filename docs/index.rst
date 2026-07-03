@@ -2,7 +2,8 @@ OpenUtility
 ===========
 
 OpenUtility is a Pyomo-based utility-system optimization package for
-replicating selected methods and results from Julia Jimenez-Romero's thesis.
+replicating selected Jimenez-Romero utility-system case-study methods and
+results.
 The current user path is a notebook-first workflow: import one helper, solve a
 checked STYLE case study, then inspect comparison tables and graphs.
 

@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Protocol
 
 import pyomo.environ as pyo
-
-from case_study.jimenez_romero_utility_system_optimization.benchmarks import Contribution2BestConfiguration, StyleBenchmarkResult
 
 
 @dataclass(frozen=True)
@@ -82,12 +81,38 @@ class StaticStyleBenchmarkDeviation:
     within_tolerance: bool
 
 
+class StyleBenchmarkRecord(Protocol):
+    case_study: str
+    scenario: str
+    utility_steam_flow: float
+    fuel_consumption: float
+    power_generation: float
+    operating_cost: float
+    maintenance_cost: float | None
+    capital_cost: float
+    total_annualized_cost: float
+
+
+class BestConfigurationBenchmarkRecord(Protocol):
+    utility_steam_generation: float
+    fuel_consumption: float
+    power_generation: float
+    steam_turbine_power: float
+    gas_turbine_power: float
+    operating_cost: float
+    maintenance_cost: float
+    capital_cost: float
+    total_cost: float
+    fuel_cost: float
+    hot_oil_operating_cost: float | None
+
+
 @dataclass(frozen=True)
 class StaticStyleBenchmarkComparison:
     """Comparison of an extracted static STYLE result against a source benchmark."""
 
     actual: StaticStyleResult
-    benchmark: StyleBenchmarkResult
+    benchmark: StyleBenchmarkRecord
     deviations: tuple[StaticStyleBenchmarkDeviation, ...]
 
     @property
@@ -119,7 +144,7 @@ class StaticStyleBestConfigurationComparison:
     """Comparison against a Contribution 2 case-study 2 configuration row."""
 
     actual: StaticStyleResult
-    benchmark: Contribution2BestConfiguration
+    benchmark: BestConfigurationBenchmarkRecord
     deviations: tuple[StaticStyleBenchmarkDeviation, ...]
 
     @property
@@ -364,7 +389,7 @@ def static_style_operating_cost_components(
 
 def compare_static_style_result_to_benchmark(
     result: StaticStyleResult,
-    benchmark: StyleBenchmarkResult,
+    benchmark: StyleBenchmarkRecord,
     *,
     absolute_tolerance: float = 1e-6,
 ) -> StaticStyleBenchmarkComparison:
@@ -400,7 +425,7 @@ def compare_static_style_result_to_benchmark(
 
 def compare_static_style_result_to_best_configuration(
     result: StaticStyleResult,
-    benchmark: Contribution2BestConfiguration,
+    benchmark: BestConfigurationBenchmarkRecord,
     *,
     absolute_tolerance: float = 1e-6,
 ) -> StaticStyleBestConfigurationComparison:
@@ -462,7 +487,7 @@ def _benchmark_deviation(
     )
 
 
-def _benchmark_value(benchmark: StyleBenchmarkResult, field: str) -> float | None:
+def _benchmark_value(benchmark: StyleBenchmarkRecord, field: str) -> float | None:
     value = getattr(benchmark, field)
     return None if value is None else float(value)
 

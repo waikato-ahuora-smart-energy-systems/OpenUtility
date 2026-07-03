@@ -1,9 +1,9 @@
 # OpenUtility
 
-OpenUtility is a Pyomo-based package for replicating the utility-system
-optimization methods and benchmark results from Julia Jimenez-Romero's thesis,
-starting with the STYLE static synthesis framework and growing toward the
-multi-period and sustainability extensions.
+OpenUtility is a Pyomo-based package for replicating Jimenez-Romero
+utility-system optimization methods and benchmark results, starting with the
+STYLE static synthesis framework and growing toward the multi-period and
+sustainability extensions.
 
 ## Notebook Quick Start
 
@@ -31,8 +31,8 @@ The first implementation slice contains:
   `Stream` and `StreamCollection` objects for case-study heat-profile
   construction and notebook exploration when OpenPinch is installed, with a
   fixture fallback when it is not.
-- Regression fixtures for STYLE case studies 1 and 2 plus Contribution 2
-  benchmark tables reported in the thesis.
+- Regression fixtures for STYLE case studies 1 and 2 plus reported
+  Contribution 2 benchmark tables.
 - PDF-backed case-study 2 site constants and process stream fixtures from
   Supplementary Information P1.D, exposed as OpenPinch-style shifted-temperature
   stream records for reuse by thermal profile builders.
@@ -111,7 +111,7 @@ The first implementation slice contains:
   power and HRSG steam flow into explicit gas-turbine, HRSG, fuel, and
   capital-cost inputs.
 - Auxiliary VHP steam-source candidates for reported calibration rows where the
-  thesis utility-steam total exceeds reported boiler and HRSG generation, with
+  utility-steam total exceeds reported boiler and HRSG generation, with
   optional fuel accounting hooks.
 - A reported-fuel-consumption calibration helper that derives the HRSG
   supplementary-firing factor needed to match fixed-load source rows.
@@ -134,7 +134,7 @@ The first implementation slice contains:
   the source process-utility convention and excludes hot-oil fuel, while hot-oil
   cost remains available as a separate operating-cost component.
 - A reported-hot-oil-cost calibration helper that derives the thermal efficiency
-  needed to match the thesis hot-oil operating-cost row.
+  needed to match the reported hot-oil operating-cost row.
 - A reported-economics calibration flag for Contribution 2 fixed-load rows that
   applies reported fuel cost, hot-oil cost, power revenue, maintenance, capital,
   and residual auxiliary operating cost.
@@ -188,7 +188,7 @@ The first implementation slice contains:
   including a computed mode that recomputes IAPWS-side values through the steam
   property provider.
 - Contribution 2 model-statistics and computational-result report helpers and
-  CLI output, including optimality-gap rows where the thesis reports a bound
+  CLI output, including optimality-gap rows where the source reports a bound
   plus aggregate best-method and method-level summary views.
 - Solver-independent bilevel decomposition bookkeeping helpers for binary
   master assignments, no-good cuts, incumbent tracking, and conversion of
@@ -278,7 +278,7 @@ The first implementation slice contains:
 - Solver-backed regression coverage for that assembled case-study 2 scenario
   through the SciPy MILP runner. The current solve is intentionally transparent
   about opt-in accounting bridges until steam-main structure, fuel assumptions,
-  and benchmark-specific physical choices are fully aligned to the thesis
+  and benchmark-specific physical choices are fully aligned to the source
   tables.
 - Annual operating-hour and currency-scaling controls on `StyleModelData`, with
   case-study 2 configured from the source site constants.

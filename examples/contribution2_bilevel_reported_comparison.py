@@ -5,6 +5,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
+    CONTRIBUTION2_COMPUTATIONAL_RESULTS,
+)
 from OpenUtility.style import (
     bilevel_decomposition_run_rows,
     contribution2_bilevel_benchmark_trajectory_rows,
@@ -23,7 +26,9 @@ def comparison_rows() -> tuple[dict[str, object], ...]:
         test_number=6,
         scenario=2,
         actual_rows=bilevel_decomposition_run_rows(run),
-        benchmark_rows=contribution2_bilevel_benchmark_trajectory_rows(),
+        benchmark_rows=contribution2_bilevel_benchmark_trajectory_rows(
+            CONTRIBUTION2_COMPUTATIONAL_RESULTS,
+        ),
     )
 
 

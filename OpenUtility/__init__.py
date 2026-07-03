@@ -8,6 +8,7 @@ from .notebook import (
     run_style_table_2_9_case_study,
 )
 from .style import (
+    BestConfigurationBenchmarkRecord,
     BilevelCandidateAssignment,
     BilevelDecompositionIteration,
     BilevelDecompositionRun,
@@ -50,6 +51,7 @@ from .style import (
     StaticStyleFuelConsumptionFamily,
     StaticStyleOperatingCostComponent,
     StaticStyleResult,
+    StyleBenchmarkRecord,
     StaticStyleRunResult,
     StaticStyleScenario,
     StaticStyleScenarioCatalog,
@@ -246,6 +248,7 @@ from .thermal import (
 )
 
 __all__ = [
+    "BestConfigurationBenchmarkRecord",
     "BoilerCandidate",
     "BilevelCandidateAssignment",
     "BilevelDecompositionIteration",
@@ -290,6 +293,7 @@ __all__ = [
     "StaticStyleFuelConsumptionFamily",
     "StaticStyleOperatingCostComponent",
     "StaticStyleResult",
+    "StyleBenchmarkRecord",
     "StaticStyleRunResult",
     "StaticStyleScenario",
     "StaticStyleScenarioCatalog",

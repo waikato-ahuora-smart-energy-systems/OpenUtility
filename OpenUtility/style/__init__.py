@@ -132,6 +132,7 @@ from .properties import (
     steam_property_update_spec_from_model,
 )
 from .results import (
+    BestConfigurationBenchmarkRecord,
     StaticStyleBestConfigurationComparison,
     StaticStyleBenchmarkComparison,
     StaticStyleBenchmarkDeviation,
@@ -140,6 +141,7 @@ from .results import (
     StaticStyleFuelConsumptionFamily,
     StaticStyleOperatingCostComponent,
     StaticStyleResult,
+    StyleBenchmarkRecord,
     compare_static_style_result_to_best_configuration,
     compare_static_style_result_to_benchmark,
     extract_static_style_result,
@@ -249,6 +251,7 @@ from .solvers import (
 )
 
 __all__ = [
+    "BestConfigurationBenchmarkRecord",
     "BoilerCandidate",
     "BilevelCandidateAssignment",
     "BilevelDecompositionIteration",
@@ -291,6 +294,7 @@ __all__ = [
     "StaticStyleFuelConsumptionFamily",
     "StaticStyleOperatingCostComponent",
     "StaticStyleResult",
+    "StyleBenchmarkRecord",
     "StaticStyleRunResult",
     "StaticStyleScenario",
     "StaticStyleScenarioCatalog",

@@ -5,7 +5,12 @@ import json
 import pytest
 import pyomo.environ as pyo
 
-from case_study.jimenez_romero_utility_system_optimization.benchmarks import get_contribution2_case_study2_best_configuration
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
+    CONTRIBUTION2_COMPUTATIONAL_RESULTS,
+    CONTRIBUTION2_MODEL_STATISTICS,
+    CONTRIBUTION2_STEAM_PROPERTY_COMPARISONS,
+    get_contribution2_case_study2_best_configuration,
+)
 from OpenUtility.style import (
     BilevelDecompositionIteration,
     BilevelDecompositionRun,
@@ -657,6 +662,36 @@ def test_style_fuel_calibration_target_rows_compute_adjustment_to_benchmark() ->
     )
 
 
+def test_style_fuel_calibration_target_rows_increase_capped_equipment_fuel() -> None:
+    rows = style_fuel_calibration_target_rows(
+        (
+            {
+                "catalog": "physical-profile",
+                "case_study": "case",
+                "scenario": "under-fired",
+                "equipment_family": "gas_turbine",
+                "equipment_name": "gt",
+                "fuel_variable": "gas_turbine_fuel_flow[gt]",
+                "fuel_consumption": 36.0,
+                "selection_variable": "gas_turbine_selected[gt]",
+                "selected": True,
+                "capacity_basis": "fuel_consumption",
+                "actual_capacity_basis_value": 36.0,
+                "capacity_value": 36.0,
+                "capacity_utilization": 1.0,
+                "benchmark_fuel_consumption": 38.0,
+                "table_fuel_consumption": 36.0,
+                "fuel_consumption_residual": -2.0,
+            },
+        ),
+    )
+
+    assert rows[0]["calibration_action"] == "increase_largest_capped_equipment_fuel"
+    assert rows[0]["required_equipment_fuel_consumption"] == pytest.approx(38.0)
+    assert rows[0]["fuel_consumption_adjustment"] == pytest.approx(2.0)
+    assert rows[0]["fuel_consumption_adjustment_factor"] == pytest.approx(38.0 / 36.0)
+
+
 def test_style_fuel_consumption_factor_map_from_calibration_target_rows() -> None:
     target_rows = (
         {
@@ -697,13 +732,36 @@ def test_style_fuel_consumption_factor_map_from_calibration_target_rows() -> Non
             "target_table_fuel_consumption": 20.0,
             "fuel_consumption_residual": 0.0,
         },
+        {
+            "catalog": "physical-profile",
+            "case_study": "case",
+            "scenario": "scenario-c",
+            "residual_rank": 3,
+            "calibration_action": "increase_largest_capped_equipment_fuel",
+            "target_equipment_family": "gas_turbine",
+            "target_equipment_name": "gt-1",
+            "capacity_basis": "fuel_consumption",
+            "capacity_utilization": 1.0,
+            "current_equipment_fuel_consumption": 36.0,
+            "required_equipment_fuel_consumption": 38.0,
+            "fuel_consumption_adjustment": 2.0,
+            "fuel_consumption_adjustment_factor": 38.0 / 36.0,
+            "benchmark_fuel_consumption": 38.0,
+            "table_fuel_consumption": 36.0,
+            "target_table_fuel_consumption": 38.0,
+            "fuel_consumption_residual": -2.0,
+        },
     )
 
     factors = style_fuel_consumption_factor_map_from_calibration_target_rows(
         target_rows,
     )
 
-    assert factors == {"scenario-a": {("boiler", "boiler-1"): 0.95}}
+    assert set(factors) == {"scenario-a", "scenario-c"}
+    assert factors["scenario-a"] == {("boiler", "boiler-1"): 0.95}
+    assert factors["scenario-c"][("gas_turbine", "gt-1")] == pytest.approx(
+        38.0 / 36.0,
+    )
 
 
 def test_style_operating_cost_component_rows_compare_auxiliary_bucket() -> None:
@@ -1005,7 +1063,7 @@ def test_style_fuel_consumption_residual_ranking_rows_allows_zero_denominators()
 
 
 def test_steam_property_comparison_rows_report_model_deviations() -> None:
-    rows = steam_property_comparison_rows()
+    rows = steam_property_comparison_rows(CONTRIBUTION2_STEAM_PROPERTY_COMPARISONS)
     vhp_row = rows[0]
     csv_output = format_steam_property_comparison_rows(rows[:1], output_format="csv")
 
@@ -1023,7 +1081,9 @@ def test_steam_property_comparison_rows_report_model_deviations() -> None:
 
 
 def test_model_derived_steam_property_comparison_rows_recompute_iapws_values() -> None:
-    rows = model_derived_steam_property_comparison_rows()
+    rows = model_derived_steam_property_comparison_rows(
+        CONTRIBUTION2_STEAM_PROPERTY_COMPARISONS,
+    )
     vhp_row = rows[0]
     total_row = rows[2]
 
@@ -1038,7 +1098,7 @@ def test_model_derived_steam_property_comparison_rows_recompute_iapws_values() -
 
 
 def test_contribution2_model_statistic_rows_are_reportable() -> None:
-    rows = contribution2_model_statistic_rows()
+    rows = contribution2_model_statistic_rows(CONTRIBUTION2_MODEL_STATISTICS)
     csv_output = format_contribution2_model_statistic_rows(
         rows[:1],
         output_format="csv",
@@ -1056,7 +1116,7 @@ def test_contribution2_model_statistic_rows_are_reportable() -> None:
 
 
 def test_contribution2_computational_result_rows_are_reportable() -> None:
-    rows = contribution2_computational_result_rows()
+    rows = contribution2_computational_result_rows(CONTRIBUTION2_COMPUTATIONAL_RESULTS)
     csv_output = format_contribution2_computational_result_rows(
         rows[:1],
         output_format="csv",
@@ -1074,7 +1134,9 @@ def test_contribution2_computational_result_rows_are_reportable() -> None:
 
 
 def test_contribution2_computational_best_method_rows_are_reportable() -> None:
-    rows = contribution2_computational_best_method_rows()
+    rows = contribution2_computational_best_method_rows(
+        CONTRIBUTION2_COMPUTATIONAL_RESULTS,
+    )
     test_6_scenario_2 = next(
         row
         for row in rows
@@ -1098,7 +1160,9 @@ def test_contribution2_computational_best_method_rows_are_reportable() -> None:
 
 
 def test_contribution2_computational_method_summary_rows_are_reportable() -> None:
-    rows = contribution2_computational_method_summary_rows()
+    rows = contribution2_computational_method_summary_rows(
+        CONTRIBUTION2_COMPUTATIONAL_RESULTS,
+    )
     baron = rows[0]
     csv_output = format_contribution2_computational_method_summary_rows(
         rows[:1],
@@ -2712,7 +2776,9 @@ def test_style_decomposition_objective_comparison_rows_are_reportable() -> None:
 
 
 def test_contribution2_bilevel_benchmark_trajectory_rows_are_reportable() -> None:
-    rows = contribution2_bilevel_benchmark_trajectory_rows()
+    rows = contribution2_bilevel_benchmark_trajectory_rows(
+        CONTRIBUTION2_COMPUTATIONAL_RESULTS,
+    )
     test_6_scenario_2 = next(
         row
         for row in rows
@@ -2762,6 +2828,9 @@ def test_contribution2_bilevel_trajectory_comparison_rows_are_reportable() -> No
         test_number=6,
         scenario=2,
         actual_rows=actual_rows,
+        benchmark_rows=contribution2_bilevel_benchmark_trajectory_rows(
+            CONTRIBUTION2_COMPUTATIONAL_RESULTS,
+        ),
         absolute_tolerance=5e-4,
     )
     objective_row = rows[0]
@@ -2799,6 +2868,9 @@ def test_synthetic_bilevel_run_compares_with_contribution2_benchmark_rows() -> N
         test_number=6,
         scenario=2,
         actual_rows=actual_rows,
+        benchmark_rows=contribution2_bilevel_benchmark_trajectory_rows(
+            CONTRIBUTION2_COMPUTATIONAL_RESULTS,
+        ),
     )
 
     assert {row["field"] for row in rows} == {

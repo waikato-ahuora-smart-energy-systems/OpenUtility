@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "OpenUtility"
 version = "0.1.0"
-description = "Pyomo-based utility-system optimization models derived from Julia Jimenez-Romero's thesis."
+description = "Pyomo-based utility-system optimization models for Jimenez-Romero case studies."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
