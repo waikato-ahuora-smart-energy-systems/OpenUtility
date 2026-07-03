@@ -46,7 +46,8 @@ Primary input fixtures
 Model construction
 ------------------
 
-``OpenUtility/style/case_studies.py`` turns the benchmark fixtures into
+``case_study/jimenez_romero_utility_system_optimization/style_model_builders.py``
+turns the benchmark fixtures into
 ``StyleModelData`` instances. The notebook workflow uses
 ``style_case_study_2_contribution2_physical_profile_catalog`` for the
 physical-profile Table 2-9 scenarios.
@@ -54,20 +55,29 @@ physical-profile Table 2-9 scenarios.
 OpenPinch reuse
 ---------------
 
-When OpenPinch is installed, ``style_case_study_2_heat_interval_profile`` first
-converts the extracted stream fixtures into real OpenPinch ``Stream`` objects using
-``openpinch_streams_from_case_study_streams``. Notebook users can also request an
-OpenPinch ``StreamCollection`` with
-``openpinch_stream_collection_from_case_study_streams``. These conversions reuse
-OpenPinch's hot/cold stream classification, collection container, and
-shifted-temperature properties while preserving the explicit extracted
-heat-capacity-flow values used by the STYLE heat profile. If OpenPinch is
-unavailable, the case-study builder falls back to the OpenPinch-compatible
-fixture objects.
+The Contribution 2 process stream fixtures are real OpenPinch ``Stream``
+objects, collected in an OpenPinch ``StreamCollection`` and grouped in an
+OpenPinch ``Zone`` with process subzones ``A`` through ``E``. The extracted
+``heat_load`` is mapped to OpenPinch ``heat_flow``. ``dt_cont`` is half the extracted minimum temperature difference.
+
+OpenUtility uses OpenPinch-derived ``CP``, ``type``, ``t_min_star``, and
+``t_max_star`` values when building shifted thermal intervals. The thermal
+helpers accept an OpenPinch ``Stream``, ``StreamCollection``, ``Zone``, or other
+iterable of OpenPinch streams.
+
+Potential OpenPinch upstream helpers
+------------------------------------
+
+The case-study source literature uses heat-duty terminology, so a
+``heat_duty`` alias for ``heat_flow`` or support for ``heat_duty=`` in
+``Stream(...)`` would reduce mapping code. A ``metadata`` or ``tags`` mapping on
+``Stream`` would also help preserve source-table provenance. Finally, a
+``Zone.add_stream(stream)`` helper could route hot and cold process streams into
+the appropriate collection based on ``stream.type``.
 
 Generated outputs
 -----------------
 
-The CSV files under ``examples/`` are generated outputs used as regression
-fixtures. They are useful for review, but they are not the authoritative input
-data for the package.
+The CSV files under the case-study package ``outputs/`` folders are generated
+outputs used as regression fixtures. They are useful for review, but they are
+not the authoritative input data for the package.

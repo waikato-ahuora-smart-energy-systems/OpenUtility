@@ -9,6 +9,13 @@ from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
     CONTRIBUTION2_COMPUTATIONAL_RESULTS,
     Contribution2ComputationalResult,
 )
+from case_study.jimenez_romero_utility_system_optimization.contribution2_computational_performance import (
+    contribution2_reported_bilevel_decomposition_run,
+    contribution2_synthetic_bilevel_decomposition_run,
+)
+from case_study.jimenez_romero_utility_system_optimization.style_model_builders import (
+    style_case_study_2_contribution2_physical_profile_catalog,
+)
 from OpenUtility.style import (
     BilevelDecompositionRun,
     BilevelIncumbent,
@@ -35,8 +42,6 @@ from OpenUtility.style import (
     build_static_style_model,
     compatible_bilevel_candidate_assignments,
     compatible_bilevel_integer_assignments,
-    contribution2_reported_bilevel_decomposition_run,
-    contribution2_synthetic_bilevel_decomposition_run,
     fix_style_master_integer_assignment,
     run_bilevel_decomposition,
     run_bilevel_decomposition_iteration,
@@ -48,7 +53,6 @@ from OpenUtility.style import (
     style_binary_selection_candidate_solver,
     style_binary_selection_candidates_from_scenarios,
     style_binary_selection_master_assignment_from_model,
-    style_case_study_2_contribution2_physical_profile_catalog,
     style_fixed_assignment_subproblem_result,
     style_master_binary_variables,
     style_master_integer_assignment_from_model,
@@ -979,12 +983,12 @@ def test_static_style_fixed_assignment_decomposition_runs_physical_profile_catal
 
     assert scenario.scenario == "utility-system-stand-alone"
     assert rows == (
-        {
-            "iteration_index": 1,
-            "candidate_source": "",
-            "objective_value": pytest.approx(67.68311439400001),
-            "best_bound": None,
-            "optimality_gap": None,
+            {
+                "iteration_index": 1,
+                "candidate_source": "",
+                "objective_value": pytest.approx(67.6834),
+                "best_bound": None,
+                "optimality_gap": None,
             "elapsed_seconds": None,
             "hit_time_limit": False,
             "selected_binary_count": 7,

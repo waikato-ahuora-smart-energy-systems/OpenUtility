@@ -1,0 +1,6 @@
+catalog,case_study,scenario,within_tolerance,max_absolute_deviation,failing_fields
+physical-profile,contribution-2-case-study-2-physical-profile,utility-system-stand-alone,False,0.9434000000000111,operating_cost;total_annualized_cost
+physical-profile,contribution-2-case-study-2-physical-profile,utility-system-microgrid,True,0.0002856060000198113,
+physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-stand-alone,True,0.00999999999999801,
+physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-microgrid,True,2.842170943040401e-14,
+

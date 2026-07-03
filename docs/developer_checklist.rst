@@ -36,4 +36,4 @@ Open the checked notebook example:
 
 .. code-block:: bash
 
-   jupyter lab examples/notebooks/style_table_2_9_case_study.ipynb
+   jupyter lab case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/notebooks/replication.ipynb

@@ -15,11 +15,12 @@ physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-stand-
 physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-stand-alone,gas_turbine,True,109.61813936706328,121.96,125.08799602801042,3.127996028010429
 physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-stand-alone,hrsg_supplementary,True,15.469856660947144,121.96,125.08799602801042,3.127996028010429
 physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-stand-alone,vhp_source,True,0.0,121.96,125.08799602801042,3.127996028010429
-physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-stand-alone,hot_oil,False,66.08287874437745,121.96,125.08799602801042,3.127996028010429
+physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-stand-alone,hot_oil,False,66.08287874437747,121.96,125.08799602801042,3.127996028010429
 physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-stand-alone,table_total,True,125.08799602801042,121.96,125.08799602801042,3.127996028010429
 physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-microgrid,boiler,True,0,175.03,179.57048231342594,4.54048231342594
 physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-microgrid,gas_turbine,True,121.5795693254675,175.03,179.57048231342594,4.54048231342594
 physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-microgrid,hrsg_supplementary,True,57.990912987958424,175.03,179.57048231342594,4.54048231342594
 physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-microgrid,vhp_source,True,0,175.03,179.57048231342594,4.54048231342594
-physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-microgrid,hot_oil,False,66.08287874437747,175.03,179.57048231342594,4.54048231342594
+physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-microgrid,hot_oil,False,66.08287874437745,175.03,179.57048231342594,4.54048231342594
 physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-microgrid,table_total,True,179.57048231342594,175.03,179.57048231342594,4.54048231342594
+

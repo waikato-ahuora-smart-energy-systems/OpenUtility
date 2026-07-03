@@ -3,18 +3,18 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
     CONTRIBUTION2_COMPUTATIONAL_RESULTS,
 )
-from OpenUtility.style import (
-    bilevel_decomposition_run_rows,
+from case_study.jimenez_romero_utility_system_optimization.contribution2_computational_performance import (
     contribution2_bilevel_benchmark_trajectory_rows,
     contribution2_bilevel_trajectory_comparison_rows,
     contribution2_synthetic_bilevel_decomposition_run,
     format_contribution2_bilevel_trajectory_comparison_rows,
 )
+from OpenUtility.style import bilevel_decomposition_run_rows
 
 
 def comparison_rows() -> tuple[dict[str, object], ...]:

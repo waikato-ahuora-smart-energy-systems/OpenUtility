@@ -1,7 +1,7 @@
 Notebook API
 ============
 
-.. autofunction:: OpenUtility.run_style_table_2_9_case_study
+.. autofunction:: case_study.jimenez_romero_utility_system_optimization.contribution2_integrated_hot_oil_fsr.run_contribution2_table_2_9_case_study
 
-.. autoclass:: OpenUtility.StyleTableCaseStudyNotebookRun
+.. autoclass:: case_study.jimenez_romero_utility_system_optimization.contribution2_integrated_hot_oil_fsr.Contribution2Table29NotebookRun
    :members:

@@ -10,20 +10,20 @@ Checked example
 
 The runnable example notebook is checked in at:
 
-``examples/notebooks/style_table_2_9_case_study.ipynb``
+``case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/notebooks/replication.ipynb``
 
 Download it from the documentation build:
 
-:download:`style_table_2_9_case_study.ipynb <../examples/notebooks/style_table_2_9_case_study.ipynb>`
+:download:`style_table_2_9_case_study.ipynb <../case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/notebooks/replication.ipynb>`
 
 Minimal notebook
 ----------------
 
 .. code-block:: python
 
-   from OpenUtility import run_style_table_2_9_case_study
+   from case_study.jimenez_romero_utility_system_optimization.contribution2_integrated_hot_oil_fsr import run_contribution2_table_2_9_case_study
 
-   case_study = run_style_table_2_9_case_study(
+   case_study = run_contribution2_table_2_9_case_study(
        catalog="physical-profile",
        apply_fuel_targets=True,
        apply_operating_targets=True,

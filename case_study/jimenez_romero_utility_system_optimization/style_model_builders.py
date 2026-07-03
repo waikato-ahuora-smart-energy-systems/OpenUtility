@@ -23,14 +23,13 @@ from OpenUtility.thermal import (
     HeatIntervalProfile,
     build_temperature_intervals,
     heat_content_by_interval,
-    openpinch_streams_from_case_study_streams,
 )
 
-from .adapters import (
+from OpenUtility.style.adapters import (
     style_model_data_from_heat_profile,
     style_model_data_from_heat_profile_for_steam_mains,
 )
-from .data import (
+from OpenUtility.style.data import (
     BoilerCandidate,
     CoolingWaterConfig,
     ElectricityCost,
@@ -54,7 +53,7 @@ from .data import (
     VhpSteamSourceCandidate,
     WaterCost,
 )
-from .properties import (
+from OpenUtility.style.properties import (
     CoolPropSteamPropertyProvider,
     SteamLevelPropertyTarget,
     SteamPropertyProvider,
@@ -62,8 +61,8 @@ from .properties import (
     VhpHeaderPropertyTarget,
     apply_steam_property_update,
 )
-from .runner import StaticStyleScenario
-from .scenarios import StaticStyleScenarioCatalog
+from OpenUtility.style.runner import StaticStyleScenario
+from OpenUtility.style.scenarios import StaticStyleScenarioCatalog
 
 
 _DEFAULT_MODEL_EQUIPMENT_TYPES = {
@@ -77,18 +76,10 @@ _DEFAULT_MODEL_EQUIPMENT_TYPES = {
 def style_case_study_2_heat_interval_profile(
     *,
     precision: int = 10,
-    use_openpinch_streams: bool = True,
 ) -> HeatIntervalProfile:
     """Build the shifted heat-interval profile for STYLE case study 2."""
 
     streams = STYLE_CASE_STUDY_2_STREAMS
-    if use_openpinch_streams:
-        try:
-            streams = openpinch_streams_from_case_study_streams(
-                STYLE_CASE_STUDY_2_STREAMS,
-            )
-        except ImportError:
-            streams = STYLE_CASE_STUDY_2_STREAMS
     intervals = build_temperature_intervals(
         streams,
         precision=precision,

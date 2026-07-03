@@ -3,14 +3,16 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
+from case_study.jimenez_romero_utility_system_optimization.style_model_builders import (
+    style_case_study_2_contribution2_physical_profile_catalog,
+)
 from OpenUtility.style import (
     bilevel_decomposition_run_rows,
     format_bilevel_decomposition_run_rows,
     run_static_style_fixed_assignment_decomposition,
     scipy_milp_static_style_solver,
-    style_case_study_2_contribution2_physical_profile_catalog,
 )
 
 

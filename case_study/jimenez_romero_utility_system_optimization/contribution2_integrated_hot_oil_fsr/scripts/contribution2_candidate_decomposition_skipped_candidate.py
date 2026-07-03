@@ -3,18 +3,20 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
+from case_study.jimenez_romero_utility_system_optimization.style_model_builders import (
+    style_case_study_2_contribution2_physical_profile_catalog,
+)
 from OpenUtility.style import (
+    build_static_style_model,
     compatible_bilevel_candidate_assignments,
     format_style_decomposition_trajectory_rows,
     run_static_style_binary_selection_candidate_decomposition,
     scipy_milp_static_style_solver,
     style_binary_selection_candidate_records_from_scenarios,
-    style_case_study_2_contribution2_physical_profile_catalog,
     style_decomposition_trajectory_rows,
     style_master_binary_variables,
-    build_static_style_model,
 )
 
 

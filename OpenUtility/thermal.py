@@ -1,4 +1,4 @@
-"""Thermal interval helpers that interoperate with OpenPinch streams."""
+"""Thermal interval helpers for OpenPinch streams and zones."""
 
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ class HeatIntervalProfile:
 
 
 def build_temperature_intervals(
-    streams: Iterable[Any],
+    streams: Any | Iterable[Any],
     *,
     precision: int = 10,
 ) -> tuple[TemperatureInterval, ...]:
@@ -54,7 +54,7 @@ def build_temperature_intervals(
 
 
 def heat_content_by_interval(
-    streams: Iterable[Any],
+    streams: Any | Iterable[Any],
     intervals: Iterable[TemperatureInterval],
 ) -> HeatIntervalProfile:
     """Calculate interval heat content using the STYLE heat-profile formula."""
@@ -70,14 +70,14 @@ def heat_content_by_interval(
         target = source_heat if stream_type == "hot" else sink_heat
         stream_min = _stream_shifted_min_temperature(stream)
         stream_max = _stream_shifted_max_temperature(stream)
-        heat_capacity_flow = abs(_stream_heat_capacity_flow(stream))
+        cp = abs(_stream_cp(stream))
         for interval in interval_tuple:
             overlap = _temperature_overlap(
                 stream_min=stream_min,
                 stream_max=stream_max,
                 interval=interval,
             )
-            target[interval.key] += heat_capacity_flow * overlap
+            target[interval.key] += cp * overlap
 
     return HeatIntervalProfile(
         intervals=interval_tuple,
@@ -86,84 +86,45 @@ def heat_content_by_interval(
     )
 
 
-def openpinch_streams_from_case_study_streams(streams: Iterable[Any]) -> tuple[Any, ...]:
-    """Return real OpenPinch streams for extracted case-study stream records.
-
-    The extracted fixtures carry heat-load values in the numeric basis used by
-    the OpenUtility model. The OpenPinch ``Stream`` class is reused here for
-    stream classification and shifted-temperature handling while preserving
-    those numeric heat-load values for the downstream STYLE heat-profile
-    calculation.
-    """
-
-    try:
-        from OpenPinch.classes.stream import Stream
-    except ImportError as exc:  # pragma: no cover - depends on optional package.
-        raise ImportError(
-            "OpenPinch is required to create OpenPinch Stream objects. "
-            "Install OpenUtility with the 'openpinch' extra.",
-        ) from exc
-
-    openpinch_streams = []
-    for stream in streams:
-        temperature_change = abs(
-            float(getattr(stream, "supply_temperature"))
-            - float(getattr(stream, "target_temperature")),
-        )
-        heat_flow = float(getattr(stream, "heat_capacity_flow")) * temperature_change
-        openpinch_stream = Stream(
-            name=str(getattr(stream, "name")),
-            t_supply=float(getattr(stream, "supply_temperature")),
-            t_target=float(getattr(stream, "target_temperature")),
-            dt_cont=float(getattr(stream, "minimum_temperature_difference")) / 2.0,
-            heat_flow=heat_flow,
-            is_process_stream=True,
-        )
-        openpinch_stream.active = bool(getattr(stream, "active", True))
-        openpinch_streams.append(openpinch_stream)
-    return tuple(openpinch_streams)
+def _active_streams(streams: Any | Iterable[Any]) -> tuple[Any, ...]:
+    return tuple(
+        stream
+        for stream in _stream_iterable(streams)
+        if bool(getattr(stream, "active", True))
+    )
 
 
-def openpinch_stream_collection_from_case_study_streams(streams: Iterable[Any]) -> Any:
-    """Return an OpenPinch StreamCollection for extracted case-study streams."""
+def _stream_iterable(streams: Any | Iterable[Any]) -> Iterable[Any]:
+    if _is_openpinch_stream(streams):
+        return (streams,)
+    if hasattr(streams, "process_streams"):
+        return getattr(streams, "process_streams")
+    return streams
 
-    try:
-        from OpenPinch.classes.stream_collection import StreamCollection
-    except ImportError as exc:  # pragma: no cover - depends on optional package.
-        raise ImportError(
-            "OpenPinch is required to create an OpenPinch StreamCollection. "
-            "Install OpenUtility with the 'openpinch' extra.",
-        ) from exc
-    return StreamCollection(list(openpinch_streams_from_case_study_streams(streams)))
 
-def _active_streams(streams: Iterable[Any]) -> tuple[Any, ...]:
-    return tuple(stream for stream in streams if bool(getattr(stream, "active", True)))
+def _is_openpinch_stream(value: Any) -> bool:
+    return all(
+        hasattr(value, attribute)
+        for attribute in ("type", "t_min_star", "t_max_star", "CP")
+    )
 
 
 def _stream_type(stream: Any) -> str:
-    stream_type = getattr(stream, "type", None) or getattr(stream, "stream_type", None)
+    stream_type = getattr(stream, "type", None)
     if stream_type is None:
-        raise TypeError("stream must expose an OpenPinch-style type or stream_type")
+        raise TypeError("stream must expose an OpenPinch type")
     return str(stream_type).strip().lower()
 
 
 def _stream_shifted_min_temperature(stream: Any) -> float:
-    return _value_as_float(
-        getattr(stream, "t_min_star", None)
-        or getattr(stream, "shifted_minimum_temperature", None),
-        unit="degC",
-    )
+    return _value_as_float(getattr(stream, "t_min_star", None), unit="degC")
 
 
 def _stream_shifted_max_temperature(stream: Any) -> float:
-    return _value_as_float(
-        getattr(stream, "t_max_star", None)
-        or getattr(stream, "shifted_maximum_temperature", None),
-        unit="degC",
-    )
+    return _value_as_float(getattr(stream, "t_max_star", None), unit="degC")
 
 
-def _stream_heat_capacity_flow(stream: Any) -> float:
+def _stream_cp(stream: Any) -> float:
     return _value_as_float(getattr(stream, "CP", None), unit="kW/delta_degC")
 
 

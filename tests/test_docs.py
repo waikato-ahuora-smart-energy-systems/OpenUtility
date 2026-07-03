@@ -24,12 +24,20 @@ def test_docs_index_prioritizes_notebook_workflow() -> None:
 def test_notebook_workflow_docs_link_checked_example_notebook() -> None:
     docs = (PROJECT_ROOT / "docs" / "notebook_workflow.rst").read_text()
     notebook = (
-        PROJECT_ROOT / "examples" / "notebooks" / "style_table_2_9_case_study.ipynb"
+        PROJECT_ROOT
+        / "case_study"
+        / "jimenez_romero_utility_system_optimization"
+        / "contribution2_integrated_hot_oil_fsr"
+        / "notebooks"
+        / "replication.ipynb"
     )
 
     assert notebook.exists()
-    assert "examples/notebooks/style_table_2_9_case_study.ipynb" in docs
-    assert "run_style_table_2_9_case_study" in docs
+    assert (
+        "case_study/jimenez_romero_utility_system_optimization/"
+        "contribution2_integrated_hot_oil_fsr/notebooks/replication.ipynb"
+    ) in docs
+    assert "run_contribution2_table_2_9_case_study" in docs
 
 
 def test_input_docs_explain_openpinch_stream_reuse() -> None:
@@ -37,5 +45,6 @@ def test_input_docs_explain_openpinch_stream_reuse() -> None:
 
     assert "OpenPinch ``Stream``" in docs
     assert "OpenPinch ``StreamCollection``" in docs
-    assert "openpinch_stream_collection_from_case_study_streams" in docs
-    assert "openpinch_streams_from_case_study_streams" in docs
+    assert "OpenPinch ``Zone``" in docs
+    assert "``heat_load`` is mapped to OpenPinch ``heat_flow``" in docs
+    assert "``dt_cont`` is half the extracted minimum temperature difference" in docs

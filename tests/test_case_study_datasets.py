@@ -11,6 +11,7 @@ from case_study.jimenez_romero_utility_system_optimization.contribution2_computa
 from case_study.jimenez_romero_utility_system_optimization.contribution2_integrated_hot_oil_fsr import (
     CONTRIBUTION2_INTEGRATED_HOT_OIL_FSR_BEST_CONFIGURATIONS,
     STYLE_CASE_STUDY_2_TOTAL_SITE_PROCESS_STREAMS,
+    STYLE_CASE_STUDY_2_TOTAL_SITE_ZONE,
 )
 from case_study.jimenez_romero_utility_system_optimization.style_stage1_hot_oil_and_steam_mains import (
     STYLE_STAGE1_HOT_OIL_AND_STEAM_MAIN_DESIGN_RESULTS,
@@ -34,7 +35,8 @@ def test_extracted_dataset_lives_outside_core_package() -> None:
 
     assert not core_file.exists()
     assert "STYLE_CASE_STUDY_2_STREAMS" in case_study_text
-    assert "StyleProcessStream(" in case_study_text
+    assert "Stream(" in case_study_text
+    assert "StyleProcessStream(" not in case_study_text
 
 
 def test_openutility_benchmarks_compatibility_import_path_is_removed() -> None:
@@ -53,6 +55,9 @@ def test_descriptive_case_study_folders_alias_extracted_datasets() -> None:
     )
     assert STYLE_CASE_STUDY_2_TOTAL_SITE_PROCESS_STREAMS is (
         benchmarks.STYLE_CASE_STUDY_2_STREAMS
+    )
+    assert STYLE_CASE_STUDY_2_TOTAL_SITE_ZONE is (
+        benchmarks.STYLE_CASE_STUDY_2_TOTAL_SITE_ZONE
     )
     assert CONTRIBUTION2_SOLVER_PERFORMANCE_RESULTS is (
         benchmarks.CONTRIBUTION2_COMPUTATIONAL_RESULTS
@@ -82,7 +87,6 @@ def test_case_study_dataset_exports_descriptive_type_names_only() -> None:
         "StyleGasTurbineFullLoadCoefficient",
         "StyleGasTurbinePartLoadCoefficient",
         "StyleHotOilDesignResult",
-        "StyleProcessStream",
         "StyleResource",
         "StyleSiteConfig",
         "StyleSteamSystemTarget",

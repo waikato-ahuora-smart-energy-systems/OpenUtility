@@ -9,15 +9,15 @@ Python scenario catalogs.
 Open the checked example notebook:
 
 ```bash
-jupyter lab examples/notebooks/style_table_2_9_case_study.ipynb
+jupyter lab case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/notebooks/replication.ipynb
 ```
 
 Or use the public helper in a new notebook:
 
 ```python
-from OpenUtility import run_style_table_2_9_case_study
+from case_study.jimenez_romero_utility_system_optimization.contribution2_integrated_hot_oil_fsr import run_contribution2_table_2_9_case_study
 
-case_study = run_style_table_2_9_case_study(
+case_study = run_contribution2_table_2_9_case_study(
     catalog="physical-profile",
     apply_fuel_targets=True,
     apply_operating_targets=True,
@@ -266,57 +266,57 @@ The CLI uses the SciPy/HiGHS MILP adapter bundled through SciPy. Use
 
 Checked CSV examples are stored in:
 
-- `examples/table_2_9_reported_equipment.csv`
-- `examples/table_2_9_physical_profile.csv`
-- `examples/table_2_9_physical_profile_fuel_capacity.csv`
-- `examples/table_2_9_physical_profile_fuel_diagnosis.csv`
-- `examples/table_2_9_physical_profile_fuel_equipment.csv`
-- `examples/table_2_9_physical_profile_fuel_families.csv`
-- `examples/table_2_9_physical_profile_fuel_ranking.csv`
-- `examples/table_2_9_physical_profile_fuel_and_operating_targeted_summary.csv`
-- `examples/table_2_9_physical_profile_fuel_targeted_summary.csv`
-- `examples/table_2_9_physical_profile_fuel_targeted_operating_components.csv`
-- `examples/table_2_9_physical_profile_fuel_targeted_operating_targets.csv`
-- `examples/table_2_9_physical_profile_fuel_targets.csv`
-- `examples/steam_property_comparisons.csv`
-- `examples/model_statistics.csv`
-- `examples/computational_results.csv`
-- `examples/computational_best_methods.csv`
-- `examples/computational_method_summary.csv`
-- `examples/computational_bilevel_trajectory.csv`
-- `examples/contribution2_bilevel_reported_comparison.csv`
-- `examples/contribution2_candidate_decomposition_skipped_candidate.csv`
-- `examples/contribution2_candidate_decomposition_pool.csv`
-- `examples/contribution2_candidate_decomposition_source_summary.csv`
-- `examples/contribution2_candidate_decomposition_source_detail.csv`
-- `examples/contribution2_candidate_decomposition_source_variables.csv`
-- `examples/contribution2_candidate_decomposition_pool_comparison.csv`
-- `examples/contribution2_candidate_decomposition_selection_delta.csv`
-- `examples/contribution2_candidate_decomposition_selection_delta_summary.csv`
-- `examples/contribution2_candidate_decomposition_skip_delta_summary.csv`
-- `examples/contribution2_candidate_decomposition_audit_bundle.csv`
-- `examples/contribution2_candidate_decomposition_cost_comparison.csv`
-- `examples/contribution2_candidate_decomposition_skipped_candidates.csv`
-- `examples/contribution2_physical_profile_decomposition_smoke.csv`
-- `examples/contribution2_physical_profile_decomposition_trajectories.csv`
-- `examples/contribution2_physical_profile_decomposition_cost_comparison.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_reported_equipment.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_capacity.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_diagnosis.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_equipment.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_families.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_ranking.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_and_operating_targeted_summary.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_targeted_summary.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_targeted_operating_components.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_targeted_operating_targets.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_targets.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_computational_performance/outputs/steam_property_comparisons.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_computational_performance/outputs/model_statistics.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_computational_performance/outputs/computational_results.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_computational_performance/outputs/computational_best_methods.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_computational_performance/outputs/computational_method_summary.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_computational_performance/outputs/computational_bilevel_trajectory.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_computational_performance/outputs/contribution2_bilevel_reported_comparison.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_skipped_candidate.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_pool.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_source_summary.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_source_detail.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_source_variables.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_pool_comparison.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_selection_delta.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_selection_delta_summary.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_skip_delta_summary.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_audit_bundle.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_cost_comparison.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_skipped_candidates.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_physical_profile_decomposition_smoke.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_physical_profile_decomposition_trajectories.csv`
+- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_physical_profile_decomposition_cost_comparison.csv`
 
 Run the synthetic reported bilevel comparison example workflow:
 
 ```bash
-python examples/contribution2_bilevel_reported_comparison.py
+python case_study/jimenez_romero_utility_system_optimization/contribution2_computational_performance/scripts/contribution2_bilevel_reported_comparison.py
 ```
 
 Run the physical-profile decomposition smoke workflow:
 
 ```bash
-python examples/contribution2_physical_profile_decomposition_smoke.py
+python case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/scripts/contribution2_physical_profile_decomposition_smoke.py
 ```
 
 Run the candidate-driven decomposition example that cuts one failed candidate:
 
 ```bash
-python examples/contribution2_candidate_decomposition_skipped_candidate.py
+python case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/scripts/contribution2_candidate_decomposition_skipped_candidate.py
 ```
 
 ## Python API
@@ -325,11 +325,13 @@ Run the calibrated reported-equipment catalog:
 
 ```python
 from case_study.jimenez_romero_utility_system_optimization.benchmarks import get_contribution2_case_study2_best_configuration
+from case_study.jimenez_romero_utility_system_optimization.style_model_builders import (
+    style_case_study_2_contribution2_best_configuration_catalog,
+)
 from OpenUtility.style import (
     compare_static_style_result_to_best_configuration,
     run_static_style_scenario,
     scipy_milp_static_style_solver,
-    style_case_study_2_contribution2_best_configuration_catalog,
 )
 
 catalog = style_case_study_2_contribution2_best_configuration_catalog()
@@ -430,15 +432,17 @@ print(run.stop_reason, run.best_incumbent().objective_value)
 Format a bilevel run trajectory:
 
 ```python
-from OpenUtility.style import (
-    bilevel_decomposition_run_rows,
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
+    CONTRIBUTION2_COMPUTATIONAL_RESULTS,
+)
+from case_study.jimenez_romero_utility_system_optimization.contribution2_computational_performance import (
     contribution2_bilevel_benchmark_trajectory_rows,
     contribution2_bilevel_trajectory_comparison_rows,
     contribution2_synthetic_bilevel_decomposition_run,
-    format_bilevel_decomposition_run_rows,
 )
-from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
-    CONTRIBUTION2_COMPUTATIONAL_RESULTS,
+from OpenUtility.style import (
+    bilevel_decomposition_run_rows,
+    format_bilevel_decomposition_run_rows,
 )
 
 rows = bilevel_decomposition_run_rows(run)
@@ -462,13 +466,15 @@ comparison_rows = contribution2_bilevel_trajectory_comparison_rows(
 Extract a STYLE model's current master binary assignment:
 
 ```python
+from case_study.jimenez_romero_utility_system_optimization.style_model_builders import (
+    style_case_study_2_contribution2_physical_profile_catalog,
+)
 from OpenUtility.style import (
     build_static_style_model,
     build_static_style_binary_selection_master,
     compatible_bilevel_integer_assignments,
     fix_style_master_integer_assignment,
     scipy_milp_static_style_solver,
-    style_case_study_2_contribution2_physical_profile_catalog,
     style_fixed_assignment_subproblem_result,
     style_master_binary_variables,
     style_master_integer_assignment_from_model,

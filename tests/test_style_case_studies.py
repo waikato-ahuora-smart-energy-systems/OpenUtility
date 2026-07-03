@@ -2,24 +2,11 @@ from __future__ import annotations
 
 import pytest
 
-import OpenUtility.style.case_studies as case_studies
 from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
     STYLE_CASE_STUDY_2_STREAMS,
     get_contribution2_case_study2_best_configuration,
 )
-from OpenUtility.style import (
-    StaticStyleScenario,
-    StaticStyleScenarioCatalog,
-    SteamLevelCandidate,
-    StyleModelData,
-    VhpSteamCandidate,
-    CoolPropSteamPropertyProvider,
-    apply_steam_property_update,
-    build_static_style_model,
-    compare_static_style_result_to_best_configuration,
-    run_static_style_scenario,
-    scipy_milp_static_style_solver,
-    static_style_fuel_consumption_by_equipment,
+from case_study.jimenez_romero_utility_system_optimization.style_model_builders import (
     style_case_study_2_best_configuration_physical_profile_model_data,
     style_case_study_2_best_configuration_property_spec,
     style_case_study_2_best_configuration_reported_flow_model_data,
@@ -64,21 +51,33 @@ from OpenUtility.style import (
     style_case_study_2_with_vhp_letdown,
     style_case_study_2_water_cost,
 )
+from OpenUtility.style import (
+    StaticStyleScenario,
+    StaticStyleScenarioCatalog,
+    SteamLevelCandidate,
+    StyleModelData,
+    VhpSteamCandidate,
+    CoolPropSteamPropertyProvider,
+    apply_steam_property_update,
+    build_static_style_model,
+    compare_static_style_result_to_best_configuration,
+    run_static_style_scenario,
+    scipy_milp_static_style_solver,
+    static_style_fuel_consumption_by_equipment,
+)
 
 
 def test_style_case_study_2_heat_interval_profile_uses_extracted_streams() -> None:
     profile = style_case_study_2_heat_interval_profile()
     expected_source_heat = sum(
-        stream.heat_capacity_flow
-        * abs(stream.supply_temperature - stream.target_temperature)
+        stream.heat_flow.value
         for stream in STYLE_CASE_STUDY_2_STREAMS
-        if stream.stream_type == "hot"
+        if stream.type == "Hot"
     )
     expected_sink_heat = sum(
-        stream.heat_capacity_flow
-        * abs(stream.supply_temperature - stream.target_temperature)
+        stream.heat_flow.value
         for stream in STYLE_CASE_STUDY_2_STREAMS
-        if stream.stream_type == "cold"
+        if stream.type == "Cold"
     )
 
     assert profile.intervals[0].upper == pytest.approx(292.5)
@@ -87,39 +86,11 @@ def test_style_case_study_2_heat_interval_profile_uses_extracted_streams() -> No
     assert sum(profile.sink_heat.values()) == pytest.approx(expected_sink_heat)
 
 
-def test_style_case_study_2_heat_interval_profile_can_use_openpinch_streams() -> None:
-    openpinch_profile = style_case_study_2_heat_interval_profile(
-        use_openpinch_streams=True,
-    )
-    fixture_profile = style_case_study_2_heat_interval_profile(
-        use_openpinch_streams=False,
-    )
+def test_style_case_study_2_heat_interval_profile_uses_openpinch_streams() -> None:
+    profile = style_case_study_2_heat_interval_profile()
 
-    assert openpinch_profile.intervals == fixture_profile.intervals
-    assert openpinch_profile.source_heat == pytest.approx(fixture_profile.source_heat)
-    assert openpinch_profile.sink_heat == pytest.approx(fixture_profile.sink_heat)
-
-
-def test_style_case_study_2_heat_interval_profile_falls_back_without_openpinch(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    def raise_missing_openpinch(_streams: object) -> tuple[object, ...]:
-        raise ImportError("OpenPinch missing")
-
-    monkeypatch.setattr(
-        case_studies,
-        "openpinch_streams_from_case_study_streams",
-        raise_missing_openpinch,
-    )
-
-    profile = style_case_study_2_heat_interval_profile(use_openpinch_streams=True)
-    fixture_profile = style_case_study_2_heat_interval_profile(
-        use_openpinch_streams=False,
-    )
-
-    assert profile.intervals == fixture_profile.intervals
-    assert profile.source_heat == pytest.approx(fixture_profile.source_heat)
-    assert profile.sink_heat == pytest.approx(fixture_profile.sink_heat)
+    assert profile.source_heat[(292.5, 272.5)] == pytest.approx(30.0)
+    assert profile.sink_heat[(181.5, 176.5)] == pytest.approx(17.5)
 
 
 def test_style_case_study_2_base_model_data_uses_site_and_resource_fixtures() -> None:
@@ -688,9 +659,9 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_solve
 
     assert run.solver.status == "ok"
     assert run.solver.termination_condition == "optimal"
-    assert run.result.utility_steam_flow == pytest.approx(206.39857548)
-    assert run.result.power_generation == pytest.approx(45.57878802)
-    assert run.result.total_annualized_cost == pytest.approx(57.29517192)
+    assert run.result.utility_steam_flow == pytest.approx(206.3844544382651)
+    assert run.result.power_generation == pytest.approx(45.57743414763052)
+    assert run.result.total_annualized_cost == pytest.approx(57.29270032002185)
 
 
 def test_style_case_study_2_best_configuration_physical_profile_model_data_reports_table_2_9_deltas() -> None:
@@ -720,14 +691,14 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_repor
 
     assert comparison.within_tolerance is False
     assert comparison.deviation_for("utility_steam_flow").absolute_deviation == (
-        pytest.approx(11.38142452)
+        pytest.approx(11.395545561734906)
     )
     assert comparison.deviation_for("fuel_consumption").absolute_deviation == (
-        pytest.approx(8.48362827)
+        pytest.approx(8.498538742715027)
     )
     assert comparison.deviation_for("gas_turbine_power").within_tolerance is True
     assert comparison.deviation_for("total_annualized_cost").absolute_deviation == (
-        pytest.approx(7.56482808)
+        pytest.approx(7.567299679978149)
     )
 
 
@@ -773,7 +744,7 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_f
         pytest.approx(3.53407029)
     )
     assert comparison.deviation_for("total_annualized_cost").absolute_deviation == (
-        pytest.approx(3.33384458)
+        pytest.approx(3.3335589745130534)
     )
 
 
@@ -811,7 +782,7 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_a
         pytest.approx(3.53407029)
     )
     assert comparison.deviation_for("total_annualized_cost").absolute_deviation == (
-        pytest.approx(0.05320962)
+        pytest.approx(0.053495228802688644)
     )
 
 
@@ -849,10 +820,10 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_m
         pytest.approx(3.53407029)
     )
     assert comparison.deviation_for("operating_cost").absolute_deviation == (
-        pytest.approx(0.1138, abs=1e-4)
+        pytest.approx(0.11351397999998625)
     )
     assert comparison.deviation_for("total_annualized_cost").absolute_deviation == (
-        pytest.approx(0.1138, abs=1e-4)
+        pytest.approx(0.11351397999997914)
     )
 
 
@@ -934,7 +905,7 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_a
         pytest.approx(2.76735909)
     )
     assert comparison.deviation_for("operating_cost").absolute_deviation == (
-        pytest.approx(0.94311439)
+        pytest.approx(0.9434000000000111)
     )
 
 
@@ -2863,11 +2834,11 @@ def test_style_case_study_2_contribution2_physical_profile_catalog_solves_calibr
         assert comparison.deviation_for("fuel_consumption").within_tolerance is False
         if scenario.scenario == "utility-system-stand-alone":
             assert comparison.deviation_for("operating_cost").absolute_deviation == (
-                pytest.approx(0.94311439)
+                pytest.approx(0.9434000000000111)
             )
             assert comparison.deviation_for(
                 "total_annualized_cost",
-            ).absolute_deviation == pytest.approx(0.94311439)
+            ).absolute_deviation == pytest.approx(0.9434000000000111)
         else:
             assert comparison.deviation_for("operating_cost").within_tolerance is True
             assert (

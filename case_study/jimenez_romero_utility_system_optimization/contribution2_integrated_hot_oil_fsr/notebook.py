@@ -16,8 +16,6 @@ from OpenUtility.style import (
     compare_static_style_result_to_best_configuration,
     run_static_style_scenario,
     scipy_milp_static_style_solver,
-    style_case_study_2_contribution2_best_configuration_catalog,
-    style_case_study_2_contribution2_physical_profile_catalog,
     style_fuel_calibration_target_rows,
     style_fuel_consumption_capacity_rows,
     style_fuel_consumption_factor_map_from_calibration_target_rows,
@@ -25,13 +23,17 @@ from OpenUtility.style import (
     style_operating_cost_component_rows,
     style_operating_cost_target_rows,
 )
+from case_study.jimenez_romero_utility_system_optimization.style_model_builders import (
+    style_case_study_2_contribution2_best_configuration_catalog,
+    style_case_study_2_contribution2_physical_profile_catalog,
+)
 
 
 TABLE_2_9_CATALOGS = ("reported-equipment", "physical-profile")
 
 
 @dataclass(frozen=True)
-class StyleTableCaseStudyNotebookRun:
+class Contribution2Table29NotebookRun:
     """Solved STYLE Table 2-9 case-study data prepared for notebooks."""
 
     catalog: str
@@ -91,14 +93,14 @@ class StyleTableCaseStudyNotebookRun:
         return axis
 
 
-def run_style_table_2_9_case_study(
+def run_contribution2_table_2_9_case_study(
     *,
     catalog: str = "physical-profile",
     calibrated: bool = True,
     apply_fuel_targets: bool = True,
     apply_operating_targets: bool = True,
     solver_time_limit: float = 20.0,
-) -> StyleTableCaseStudyNotebookRun:
+) -> Contribution2Table29NotebookRun:
     """Solve a STYLE Table 2-9 case-study catalog for notebook exploration."""
 
     scenario_catalog = _table_2_9_catalog(
@@ -113,7 +115,7 @@ def run_style_table_2_9_case_study(
         scenario_catalog=scenario_catalog,
         solver_time_limit=solver_time_limit,
     )
-    return StyleTableCaseStudyNotebookRun(
+    return Contribution2Table29NotebookRun(
         catalog=catalog,
         comparison_rows=comparison_rows,
         summary_rows=summary_rows,

@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import pytest
 
+from OpenPinch.classes.stream import Stream
+from OpenPinch.classes.stream_collection import StreamCollection
+from OpenPinch.classes.zone import Zone
 from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
     CONTRIBUTION2_CASE_STUDY_2_BEST_CONFIGURATIONS,
     CONTRIBUTION2_COMPUTATIONAL_RESULTS,
@@ -16,6 +19,7 @@ from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
     STYLE_CASE_STUDY_2_SITE_CONFIG,
     STYLE_CASE_STUDY_2_RESULTS,
     STYLE_CASE_STUDY_2_STREAMS,
+    STYLE_CASE_STUDY_2_TOTAL_SITE_ZONE,
     get_contribution2_case_study2_best_configuration,
     get_contribution2_computational_result,
     get_contribution2_model_statistic,
@@ -101,42 +105,71 @@ def test_case_study_2_site_configuration_is_captured() -> None:
 def test_case_study_2_stream_table_is_captured() -> None:
     streams = STYLE_CASE_STUDY_2_STREAMS
 
+    assert isinstance(streams, StreamCollection)
     assert len(streams) == 36
-    assert streams[0].name == "A-1"
-    assert streams[0].stream_type == "hot"
-    assert streams[-1].name == "E-9"
-    assert streams[-1].stream_type == "hot"
-    assert sum(stream.heat_load for stream in streams if stream.stream_type == "hot") == (
+    assert all(isinstance(stream, Stream) for stream in streams)
+    assert streams.get_stream_names()[0] == "A-1"
+    assert streams["A-1"].type == "Hot"
+    assert streams.get_stream_names()[-1] == "E-9"
+    assert streams["E-9"].type == "Hot"
+    assert sum(stream.heat_flow.value for stream in streams if stream.type == "Hot") == (
         pytest.approx(330.0)
     )
-    assert sum(stream.heat_load for stream in streams if stream.stream_type == "cold") == (
+    assert sum(stream.heat_flow.value for stream in streams if stream.type == "Cold") == (
         pytest.approx(220.0)
     )
 
-    stream_a1 = streams[0]
-    assert stream_a1.t_max_star == pytest.approx(292.5)
-    assert stream_a1.t_min_star == pytest.approx(272.5)
-    assert stream_a1.CP == pytest.approx(1.5)
+    stream_a1 = streams["A-1"]
+    assert stream_a1.t_max_star.value == pytest.approx(292.5)
+    assert stream_a1.t_min_star.value == pytest.approx(272.5)
+    assert stream_a1.CP.value == pytest.approx(1.5)
+    assert stream_a1.heat_flow.value == pytest.approx(30.0)
 
-    stream_c1 = next(stream for stream in streams if stream.name == "C-1")
-    assert stream_c1.shifted_minimum_temperature == pytest.approx(176.5)
-    assert stream_c1.shifted_maximum_temperature == pytest.approx(181.5)
+    stream_c1 = streams["C-1"]
+    assert stream_c1.t_min_star.value == pytest.approx(176.5)
+    assert stream_c1.t_max_star.value == pytest.approx(181.5)
+    assert stream_c1.CP.value == pytest.approx(2.0)
+    assert stream_c1.heat_flow.value == pytest.approx(10.0)
+
+
+def test_case_study_2_streams_are_organized_in_openpinch_zone() -> None:
+    zone = STYLE_CASE_STUDY_2_TOTAL_SITE_ZONE
+
+    assert isinstance(zone, Zone)
+    assert zone.name == "case-study-2"
+    assert set(zone.subzones) == {"A", "B", "C", "D", "E"}
+    assert len(zone.process_streams) == 36
+    assert zone.subzones["A"].process_streams.get_stream_names() == [
+        "A-1",
+        "A-2",
+        "A-3",
+        "A-4",
+    ]
+    assert zone.subzones["E"].process_streams.get_stream_names() == [
+        "E-8",
+        "E-9",
+        "E-1",
+        "E-2",
+        "E-3",
+        "E-4",
+        "E-5",
+        "E-6",
+        "E-7",
+    ]
 
 
 def test_case_study_2_streams_feed_existing_thermal_profile_builder() -> None:
     intervals = build_temperature_intervals(STYLE_CASE_STUDY_2_STREAMS)
     profile = heat_content_by_interval(STYLE_CASE_STUDY_2_STREAMS, intervals)
     expected_source_heat = sum(
-        stream.heat_capacity_flow
-        * abs(stream.supply_temperature - stream.target_temperature)
+        stream.heat_flow.value
         for stream in STYLE_CASE_STUDY_2_STREAMS
-        if stream.stream_type == "hot"
+        if stream.type == "Hot"
     )
     expected_sink_heat = sum(
-        stream.heat_capacity_flow
-        * abs(stream.supply_temperature - stream.target_temperature)
+        stream.heat_flow.value
         for stream in STYLE_CASE_STUDY_2_STREAMS
-        if stream.stream_type == "cold"
+        if stream.type == "Cold"
     )
 
     assert intervals[0].upper == pytest.approx(292.5)

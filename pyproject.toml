@@ -5,9 +5,9 @@ build-backend = "hatchling.build"
 [project]
 name = "OpenUtility"
 version = "0.1.0"
-description = "Pyomo-based utility-system optimization models for Jimenez-Romero case studies."
+description = "Pyomo-based utility-system optimization model and reporting helpers."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.14.2"
 license = "MIT"
 authors = [
   { name = "Tim Walmsley", email = "tim.walmsley@waikato.ac.nz" },
@@ -16,18 +16,16 @@ dependencies = [
   "CoolProp>=6.6",
   "matplotlib>=3.8",
   "numpy>=1.26",
+  "OpenPinch>=0.4.5",
   "pandas>=2.0",
   "pyomo>=6.10.0",
   "scipy>=1.11",
 ]
 
 [project.scripts]
-openutility-style-table2-9 = "OpenUtility.cli:main"
+openutility-style-table2-9 = "case_study.jimenez_romero_utility_system_optimization.cli:main"
 
 [project.optional-dependencies]
-openpinch = [
-  "OpenPinch>=0.4.5",
-]
 notebook = [
   "jupyterlab>=4",
   "nbformat>=5",

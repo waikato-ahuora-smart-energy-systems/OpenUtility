@@ -1,0 +1,4 @@
+catalog,case_study,scenario,residual_rank,target_operating_cost_component,current_component_operating_cost,required_component_operating_cost,operating_cost_adjustment,operating_cost_adjustment_factor,benchmark_operating_cost,actual_operating_cost,target_operating_cost,operating_cost_residual
+physical-profile,contribution-2-case-study-2-physical-profile,utility-system-stand-alone,1,auxiliary_or_unallocated,3.173400000000001,2.2299999999999898,-0.9434000000000111,0.7027163294888729,52.83,53.77340000000001,52.83,0.9434000000000111
+physical-profile,contribution-2-case-study-2-physical-profile,utility-system-microgrid,2,auxiliary_or_unallocated,3.287199585999998,3.2869139799999854,-0.00028560600001270586,0.9999131157106405,50.49,50.490285606000015,50.49,0.00028560600001270586
+

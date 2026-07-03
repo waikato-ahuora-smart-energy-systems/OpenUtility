@@ -1,5 +1,6 @@
 catalog,case_study,scenario,iteration_index,candidate_source,objective_value,best_bound,optimality_gap,elapsed_seconds,hit_time_limit,selected_binary_count,unselected_binary_count,subproblem_status,stop_reason,skipped_candidate_count
-physical-profile,contribution-2-case-study-2-physical-profile,utility-system-stand-alone,1,,67.68311439400001,,,,False,7,270,optimal,max-iterations,0
-physical-profile,contribution-2-case-study-2-physical-profile,utility-system-microgrid,1,,64.86000000000001,,,,False,7,270,optimal,max-iterations,0
+physical-profile,contribution-2-case-study-2-physical-profile,utility-system-stand-alone,1,,67.6834,,,,False,7,270,optimal,max-iterations,0
+physical-profile,contribution-2-case-study-2-physical-profile,utility-system-microgrid,1,,64.86028560600002,,,,False,7,270,optimal,max-iterations,0
 physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-stand-alone,1,,55.160000000000004,,,,False,46,141,optimal,max-iterations,0
 physical-profile,contribution-2-case-study-2-physical-profile,hot-oil-fsr-microgrid,1,,53.89,,,,False,45,141,optimal,max-iterations,0
+

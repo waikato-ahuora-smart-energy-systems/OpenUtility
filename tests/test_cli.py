@@ -8,10 +8,53 @@ from pathlib import Path
 
 import pytest
 
-from OpenUtility.cli import main
+from case_study.jimenez_romero_utility_system_optimization.cli import main
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+CASE_STUDY_ROOT = (
+    PROJECT_ROOT / "case_study" / "jimenez_romero_utility_system_optimization"
+)
+INTEGRATED_OUTPUTS = CASE_STUDY_ROOT / "contribution2_integrated_hot_oil_fsr" / "outputs"
+INTEGRATED_SCRIPTS = CASE_STUDY_ROOT / "contribution2_integrated_hot_oil_fsr" / "scripts"
+COMPUTATIONAL_OUTPUTS = (
+    CASE_STUDY_ROOT / "contribution2_computational_performance" / "outputs"
+)
+COMPUTATIONAL_SCRIPTS = (
+    CASE_STUDY_ROOT / "contribution2_computational_performance" / "scripts"
+)
+COMPUTATIONAL_OUTPUT_FILENAMES = {
+    "computational_best_methods.csv",
+    "computational_bilevel_trajectory.csv",
+    "computational_method_summary.csv",
+    "computational_results.csv",
+    "contribution2_bilevel_reported_comparison.csv",
+    "model_statistics.csv",
+    "steam_property_comparisons.csv",
+}
+COMPUTATIONAL_SCRIPT_FILENAMES = {"contribution2_bilevel_reported_comparison.py"}
+
+
+def _checked_output(filename: str) -> Path:
+    output_root = (
+        COMPUTATIONAL_OUTPUTS
+        if filename in COMPUTATIONAL_OUTPUT_FILENAMES
+        else INTEGRATED_OUTPUTS
+    )
+    return output_root / filename
+
+
+def _case_study_script(filename: str) -> Path:
+    script_root = (
+        COMPUTATIONAL_SCRIPTS
+        if filename in COMPUTATIONAL_SCRIPT_FILENAMES
+        else INTEGRATED_SCRIPTS
+    )
+    return script_root / filename
+
+
+def _assert_csv_matches(actual: str, expected_path: Path) -> None:
+    assert actual.rstrip("\n") == expected_path.read_text().rstrip("\n")
 
 
 def test_cli_writes_style_table_2_9_json_report() -> None:
@@ -105,12 +148,12 @@ def test_cli_writes_physical_profile_fuel_targeted_summary_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "table_2_9_physical_profile_fuel_targeted_summary.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_physical_profile_fuel_targeted_operating_components() -> None:
@@ -130,12 +173,12 @@ def test_cli_writes_physical_profile_fuel_targeted_operating_components() -> Non
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "table_2_9_physical_profile_fuel_targeted_operating_components.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_physical_profile_fuel_targeted_operating_targets() -> None:
@@ -155,12 +198,12 @@ def test_cli_writes_physical_profile_fuel_targeted_operating_targets() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "table_2_9_physical_profile_fuel_targeted_operating_targets.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_physical_profile_fuel_and_operating_targeted_summary() -> None:
@@ -181,12 +224,12 @@ def test_cli_writes_physical_profile_fuel_and_operating_targeted_summary() -> No
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "table_2_9_physical_profile_fuel_and_operating_targeted_summary.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_physical_profile_fuel_family_report() -> None:
@@ -205,12 +248,12 @@ def test_cli_writes_physical_profile_fuel_family_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "table_2_9_physical_profile_fuel_families.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_physical_profile_fuel_ranking_report() -> None:
@@ -229,12 +272,12 @@ def test_cli_writes_physical_profile_fuel_ranking_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "table_2_9_physical_profile_fuel_ranking.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_physical_profile_fuel_equipment_report() -> None:
@@ -253,12 +296,12 @@ def test_cli_writes_physical_profile_fuel_equipment_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "table_2_9_physical_profile_fuel_equipment.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_physical_profile_fuel_capacity_report() -> None:
@@ -277,12 +320,12 @@ def test_cli_writes_physical_profile_fuel_capacity_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "table_2_9_physical_profile_fuel_capacity.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_physical_profile_fuel_diagnosis_report() -> None:
@@ -301,12 +344,12 @@ def test_cli_writes_physical_profile_fuel_diagnosis_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "table_2_9_physical_profile_fuel_diagnosis.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_physical_profile_fuel_target_report() -> None:
@@ -325,12 +368,12 @@ def test_cli_writes_physical_profile_fuel_target_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "table_2_9_physical_profile_fuel_targets.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_steam_property_json_report() -> None:
@@ -492,12 +535,12 @@ def test_cli_writes_style_decomposition_trajectory_report() -> None:
         stdout=stdout,
     )
 
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "contribution2_physical_profile_decomposition_trajectories.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_style_decomposition_cost_comparison_report() -> None:
@@ -516,12 +559,12 @@ def test_cli_writes_style_decomposition_cost_comparison_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "contribution2_physical_profile_decomposition_cost_comparison.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_candidate_decomposition_skipped_candidate_report() -> None:
@@ -538,12 +581,12 @@ def test_cli_writes_candidate_decomposition_skipped_candidate_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "contribution2_candidate_decomposition_skipped_candidate.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_candidate_decomposition_cost_comparison_report() -> None:
@@ -560,12 +603,12 @@ def test_cli_writes_candidate_decomposition_cost_comparison_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "contribution2_candidate_decomposition_cost_comparison.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_candidate_decomposition_skipped_candidate_diagnostics() -> None:
@@ -582,12 +625,12 @@ def test_cli_writes_candidate_decomposition_skipped_candidate_diagnostics() -> N
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "contribution2_candidate_decomposition_skipped_candidates.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_candidate_decomposition_pool_report() -> None:
@@ -604,12 +647,12 @@ def test_cli_writes_candidate_decomposition_pool_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "contribution2_candidate_decomposition_pool.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_candidate_decomposition_pool_comparison_report() -> None:
@@ -626,12 +669,12 @@ def test_cli_writes_candidate_decomposition_pool_comparison_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "contribution2_candidate_decomposition_pool_comparison.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_candidate_decomposition_selection_delta_report() -> None:
@@ -648,12 +691,12 @@ def test_cli_writes_candidate_decomposition_selection_delta_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "contribution2_candidate_decomposition_selection_delta.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_candidate_decomposition_selection_delta_summary() -> None:
@@ -670,12 +713,12 @@ def test_cli_writes_candidate_decomposition_selection_delta_summary() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "contribution2_candidate_decomposition_selection_delta_summary.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_candidate_decomposition_skipped_delta_summary() -> None:
@@ -692,12 +735,12 @@ def test_cli_writes_candidate_decomposition_skipped_delta_summary() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "contribution2_candidate_decomposition_skip_delta_summary.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_candidate_decomposition_audit_bundle() -> None:
@@ -714,12 +757,12 @@ def test_cli_writes_candidate_decomposition_audit_bundle() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "contribution2_candidate_decomposition_audit_bundle.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_candidate_decomposition_source_summary() -> None:
@@ -736,12 +779,12 @@ def test_cli_writes_candidate_decomposition_source_summary() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "contribution2_candidate_decomposition_source_summary.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_candidate_decomposition_source_detail() -> None:
@@ -758,12 +801,12 @@ def test_cli_writes_candidate_decomposition_source_detail() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "contribution2_candidate_decomposition_source_detail.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_writes_candidate_decomposition_source_variables() -> None:
@@ -780,12 +823,12 @@ def test_cli_writes_candidate_decomposition_source_variables() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "contribution2_candidate_decomposition_source_variables.csv"
     )
 
     assert exit_code == 0
-    assert stdout.getvalue() == f"{expected_output.read_text()}\n"
+    _assert_csv_matches(stdout.getvalue(), expected_output)
 
 
 def test_cli_examples_match_generated_csv_reports() -> None:
@@ -793,42 +836,42 @@ def test_cli_examples_match_generated_csv_reports() -> None:
         (
             "reported-equipment",
             ("--catalog", "reported-equipment"),
-            PROJECT_ROOT / "examples" / "table_2_9_reported_equipment.csv",
+            _checked_output("table_2_9_reported_equipment.csv"),
         ),
         (
             "physical-profile",
             ("--catalog", "physical-profile"),
-            PROJECT_ROOT / "examples" / "table_2_9_physical_profile.csv",
+            _checked_output("table_2_9_physical_profile.csv"),
         ),
         (
             "steam-properties",
             ("--report", "steam-properties"),
-            PROJECT_ROOT / "examples" / "steam_property_comparisons.csv",
+            _checked_output("steam_property_comparisons.csv"),
         ),
         (
             "model-statistics",
             ("--report", "model-statistics"),
-            PROJECT_ROOT / "examples" / "model_statistics.csv",
+            _checked_output("model_statistics.csv"),
         ),
         (
             "computational-results",
             ("--report", "computational-results"),
-            PROJECT_ROOT / "examples" / "computational_results.csv",
+            _checked_output("computational_results.csv"),
         ),
         (
             "computational-best-method",
             ("--report", "computational-results", "--view", "best-method"),
-            PROJECT_ROOT / "examples" / "computational_best_methods.csv",
+            _checked_output("computational_best_methods.csv"),
         ),
         (
             "computational-method-summary",
             ("--report", "computational-results", "--view", "method-summary"),
-            PROJECT_ROOT / "examples" / "computational_method_summary.csv",
+            _checked_output("computational_method_summary.csv"),
         ),
         (
             "computational-bilevel-trajectory",
             ("--report", "computational-results", "--view", "bilevel-trajectory"),
-            PROJECT_ROOT / "examples" / "computational_bilevel_trajectory.csv",
+            _checked_output("computational_bilevel_trajectory.csv"),
         ),
     )
 
@@ -837,14 +880,14 @@ def test_cli_examples_match_generated_csv_reports() -> None:
 
         main([*args, "--format", "csv"], stdout=stdout)
 
-        assert stdout.getvalue() == f"{example_path.read_text()}\n"
+        _assert_csv_matches(stdout.getvalue(), example_path)
 
 
 def test_reported_bilevel_comparison_example_matches_checked_output() -> None:
-    example_script = PROJECT_ROOT / "examples" / (
+    example_script = _case_study_script(
         "contribution2_bilevel_reported_comparison.py"
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "contribution2_bilevel_reported_comparison.csv"
     )
 
@@ -856,14 +899,14 @@ def test_reported_bilevel_comparison_example_matches_checked_output() -> None:
         text=True,
     )
 
-    assert result.stdout == expected_output.read_text()
+    _assert_csv_matches(result.stdout, expected_output)
 
 
 def test_physical_profile_decomposition_smoke_example_matches_checked_output() -> None:
-    example_script = PROJECT_ROOT / "examples" / (
+    example_script = _case_study_script(
         "contribution2_physical_profile_decomposition_smoke.py"
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "contribution2_physical_profile_decomposition_smoke.csv"
     )
 
@@ -875,14 +918,14 @@ def test_physical_profile_decomposition_smoke_example_matches_checked_output() -
         text=True,
     )
 
-    assert result.stdout == expected_output.read_text()
+    _assert_csv_matches(result.stdout, expected_output)
 
 
 def test_candidate_decomposition_skipped_candidate_example_matches_checked_output() -> None:
-    example_script = PROJECT_ROOT / "examples" / (
+    example_script = _case_study_script(
         "contribution2_candidate_decomposition_skipped_candidate.py"
     )
-    expected_output = PROJECT_ROOT / "examples" / (
+    expected_output = _checked_output(
         "contribution2_candidate_decomposition_skipped_candidate.csv"
     )
 
@@ -894,4 +937,4 @@ def test_candidate_decomposition_skipped_candidate_example_matches_checked_outpu
         text=True,
     )
 
-    assert result.stdout == expected_output.read_text()
+    _assert_csv_matches(result.stdout, expected_output)

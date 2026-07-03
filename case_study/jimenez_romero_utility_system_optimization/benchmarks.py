@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from OpenPinch.classes.stream import Stream
+from OpenPinch.classes.stream_collection import StreamCollection
+from OpenPinch.classes.zone import Zone
+
 
 @dataclass(frozen=True)
 class StyleBenchmarkResult:
@@ -92,91 +96,6 @@ class StyleSiteConfig:
             "boiler_feedwater_temperature",
         )
         _require_positive(self.vhp_pressure, "vhp_pressure")
-
-
-@dataclass(frozen=True)
-class StyleProcessStream:
-    """OpenPinch-style process stream row extracted from a STYLE case-study table."""
-
-    case_study: str
-    process: str
-    name: str
-    stream_type: str
-    supply_temperature: float
-    target_temperature: float
-    heat_load: float
-    heat_capacity_flow: float
-    minimum_temperature_difference: float
-    active: bool = True
-
-    def __post_init__(self) -> None:
-        _require_text(self.case_study, "case_study")
-        _require_text(self.process, "process")
-        _require_text(self.name, "stream name")
-        normalized_type = self.stream_type.strip().lower()
-        if normalized_type not in {"hot", "cold"}:
-            raise ValueError("stream_type must be 'hot' or 'cold'")
-        object.__setattr__(self, "stream_type", normalized_type)
-        _require_positive(self.heat_load, "heat_load")
-        _require_positive(self.heat_capacity_flow, "heat_capacity_flow")
-        _require_non_negative(
-            self.minimum_temperature_difference,
-            "minimum_temperature_difference",
-        )
-
-    @property
-    def type(self) -> str:
-        """OpenPinch-compatible stream type alias."""
-
-        return self.stream_type
-
-    @property
-    def CP(self) -> float:
-        """OpenPinch-compatible heat-capacity-flow alias."""
-
-        return self.heat_capacity_flow
-
-    @property
-    def shifted_supply_temperature(self) -> float:
-        """Supply temperature shifted by half of the local minimum approach."""
-
-        return self._shift_temperature(self.supply_temperature)
-
-    @property
-    def shifted_target_temperature(self) -> float:
-        """Target temperature shifted by half of the local minimum approach."""
-
-        return self._shift_temperature(self.target_temperature)
-
-    @property
-    def shifted_minimum_temperature(self) -> float:
-        """OpenPinch-compatible shifted minimum temperature."""
-
-        return min(self.shifted_supply_temperature, self.shifted_target_temperature)
-
-    @property
-    def shifted_maximum_temperature(self) -> float:
-        """OpenPinch-compatible shifted maximum temperature."""
-
-        return max(self.shifted_supply_temperature, self.shifted_target_temperature)
-
-    @property
-    def t_min_star(self) -> float:
-        """Alternative OpenPinch shifted minimum temperature alias."""
-
-        return self.shifted_minimum_temperature
-
-    @property
-    def t_max_star(self) -> float:
-        """Alternative OpenPinch shifted maximum temperature alias."""
-
-        return self.shifted_maximum_temperature
-
-    def _shift_temperature(self, temperature: float) -> float:
-        shift = self.minimum_temperature_difference / 2.0
-        if self.stream_type == "hot":
-            return temperature - shift
-        return temperature + shift
 
 
 @dataclass(frozen=True)
@@ -1285,59 +1204,102 @@ def _case_study_2_stream(
     supply_temperature: float,
     target_temperature: float,
     heat_load: float,
-    heat_capacity_flow: float,
     minimum_temperature_difference: float,
-) -> StyleProcessStream:
-    return StyleProcessStream(
-        case_study="case-study-2",
-        process=process,
-        name=name,
-        stream_type=stream_type,
-        supply_temperature=supply_temperature,
-        target_temperature=target_temperature,
-        heat_load=heat_load,
-        heat_capacity_flow=heat_capacity_flow,
-        minimum_temperature_difference=minimum_temperature_difference,
+) -> tuple[str, Stream]:
+    _require_text(process, "process")
+    _require_text(name, "stream name")
+    normalized_type = stream_type.strip().lower()
+    if normalized_type not in {"hot", "cold"}:
+        raise ValueError("stream_type must be 'hot' or 'cold'")
+    _require_positive(heat_load, "heat_load")
+    _require_non_negative(
+        minimum_temperature_difference,
+        "minimum_temperature_difference",
     )
+    stream = Stream(
+        name=name,
+        t_supply=supply_temperature,
+        t_target=target_temperature,
+        dt_cont=0.5 * minimum_temperature_difference,
+        heat_flow=heat_load,
+        is_process_stream=True,
+    )
+    if stream.type.lower() != normalized_type:
+        raise ValueError(f"stream {name!r} temperatures do not match {stream_type!r}")
+    return process, stream
 
 
-STYLE_CASE_STUDY_2_STREAMS: tuple[StyleProcessStream, ...] = (
-    _case_study_2_stream("A", "A-1", "hot", 300.0, 280.0, 30.000, 1.500, 15.0),
-    _case_study_2_stream("A", "A-2", "hot", 148.0, 135.0, 10.000, 0.769, 15.0),
-    _case_study_2_stream("A", "A-3", "hot", 135.0, 110.0, 20.000, 0.800, 15.0),
-    _case_study_2_stream("A", "A-4", "hot", 110.0, 100.0, 10.000, 1.000, 15.0),
-    _case_study_2_stream("B", "B-1", "hot", 270.0, 260.0, 10.000, 1.000, 5.0),
-    _case_study_2_stream("B", "B-2", "hot", 260.0, 241.0, 10.000, 0.526, 5.0),
-    _case_study_2_stream("B", "B-3", "hot", 241.0, 240.0, 20.000, 20.000, 5.0),
-    _case_study_2_stream("B", "B-4", "hot", 240.0, 220.0, 10.000, 0.500, 5.0),
-    _case_study_2_stream("B", "B-5", "hot", 220.0, 200.0, 5.000, 0.250, 5.0),
-    _case_study_2_stream("B", "B-6", "hot", 200.0, 150.0, 5.000, 0.100, 5.0),
-    _case_study_2_stream("B", "B-7", "hot", 150.0, 135.0, 10.000, 0.667, 5.0),
-    _case_study_2_stream("B", "B-8", "hot", 135.0, 90.0, 10.000, 0.222, 5.0),
-    _case_study_2_stream("C", "C-1", "cold", 169.0, 174.0, 10.000, 2.000, 15.0),
-    _case_study_2_stream("C", "C-2", "cold", 168.0, 169.0, 10.000, 10.000, 15.0),
-    _case_study_2_stream("C", "C-3", "cold", 159.0, 168.0, 10.000, 1.111, 15.0),
-    _case_study_2_stream("C", "C-4", "hot", 179.0, 160.0, 5.000, 0.263, 15.0),
-    _case_study_2_stream("C", "C-5", "hot", 160.0, 150.0, 15.000, 1.500, 15.0),
-    _case_study_2_stream("C", "C-6", "hot", 150.0, 135.0, 5.000, 0.333, 15.0),
-    _case_study_2_stream("C", "C-7", "hot", 135.0, 90.0, 5.000, 0.111, 15.0),
-    _case_study_2_stream("C", "C-8", "hot", 90.0, 85.0, 8.000, 1.600, 15.0),
-    _case_study_2_stream("C", "C-9", "hot", 85.0, 84.0, 12.000, 12.000, 15.0),
-    _case_study_2_stream("D", "D-1", "cold", 209.0, 210.0, 20.000, 20.000, 5.0),
-    _case_study_2_stream("D", "D-2", "cold", 149.0, 150.0, 20.000, 20.000, 5.0),
-    _case_study_2_stream("D", "D-3", "cold", 104.0, 105.0, 30.000, 30.000, 5.0),
-    _case_study_2_stream("D", "D-4", "hot", 119.0, 118.0, 20.000, 20.000, 5.0),
-    _case_study_2_stream("D", "D-5", "hot", 101.0, 100.0, 30.000, 30.000, 5.0),
-    _case_study_2_stream("D", "D-6", "hot", 95.0, 94.0, 20.000, 20.000, 5.0),
-    _case_study_2_stream("E", "E-1", "cold", 235.0, 237.0, 5.714, 2.857, 10.0),
-    _case_study_2_stream("E", "E-2", "cold", 230.0, 235.0, 16.104, 3.221, 10.0),
-    _case_study_2_stream("E", "E-3", "cold", 180.0, 230.0, 18.182, 0.364, 10.0),
-    _case_study_2_stream("E", "E-4", "cold", 160.0, 180.0, 30.000, 1.500, 10.0),
-    _case_study_2_stream("E", "E-5", "cold", 110.0, 160.0, 20.000, 0.400, 10.0),
-    _case_study_2_stream("E", "E-6", "cold", 95.0, 110.0, 5.000, 0.333, 10.0),
-    _case_study_2_stream("E", "E-7", "cold", 90.0, 95.0, 25.000, 5.000, 10.0),
-    _case_study_2_stream("E", "E-8", "hot", 110.0, 90.0, 40.000, 2.000, 10.0),
-    _case_study_2_stream("E", "E-9", "hot", 90.0, 80.0, 20.000, 2.000, 10.0),
+def _add_stream_to_zone(zone: Zone, stream: Stream) -> None:
+    if stream.type == "Hot":
+        zone.hot_streams.add(stream)
+        return
+    if stream.type == "Cold":
+        zone.cold_streams.add(stream)
+        return
+    raise ValueError(f"unsupported process stream type {stream.type!r}")
+
+
+def _case_study_2_total_site_zone(
+    stream_rows: tuple[tuple[str, Stream], ...],
+) -> Zone:
+    site = Zone(name="case-study-2")
+    subzones: dict[str, Zone] = {}
+    for process, stream in stream_rows:
+        subzone = subzones.get(process)
+        if subzone is None:
+            subzone = Zone(name=process, parent_zone=site)
+            subzones[process] = subzone
+        _add_stream_to_zone(subzone, stream)
+    for subzone in subzones.values():
+        site.add_zone(subzone)
+    site.import_hot_and_cold_streams_from_sub_zones()
+    return site
+
+
+_STYLE_CASE_STUDY_2_STREAM_ROWS: tuple[tuple[str, Stream], ...] = (
+    _case_study_2_stream("A", "A-1", "hot", 300.0, 280.0, 30.000, 15.0),
+    _case_study_2_stream("A", "A-2", "hot", 148.0, 135.0, 10.000, 15.0),
+    _case_study_2_stream("A", "A-3", "hot", 135.0, 110.0, 20.000, 15.0),
+    _case_study_2_stream("A", "A-4", "hot", 110.0, 100.0, 10.000, 15.0),
+    _case_study_2_stream("B", "B-1", "hot", 270.0, 260.0, 10.000, 5.0),
+    _case_study_2_stream("B", "B-2", "hot", 260.0, 241.0, 10.000, 5.0),
+    _case_study_2_stream("B", "B-3", "hot", 241.0, 240.0, 20.000, 5.0),
+    _case_study_2_stream("B", "B-4", "hot", 240.0, 220.0, 10.000, 5.0),
+    _case_study_2_stream("B", "B-5", "hot", 220.0, 200.0, 5.000, 5.0),
+    _case_study_2_stream("B", "B-6", "hot", 200.0, 150.0, 5.000, 5.0),
+    _case_study_2_stream("B", "B-7", "hot", 150.0, 135.0, 10.000, 5.0),
+    _case_study_2_stream("B", "B-8", "hot", 135.0, 90.0, 10.000, 5.0),
+    _case_study_2_stream("C", "C-1", "cold", 169.0, 174.0, 10.000, 15.0),
+    _case_study_2_stream("C", "C-2", "cold", 168.0, 169.0, 10.000, 15.0),
+    _case_study_2_stream("C", "C-3", "cold", 159.0, 168.0, 10.000, 15.0),
+    _case_study_2_stream("C", "C-4", "hot", 179.0, 160.0, 5.000, 15.0),
+    _case_study_2_stream("C", "C-5", "hot", 160.0, 150.0, 15.000, 15.0),
+    _case_study_2_stream("C", "C-6", "hot", 150.0, 135.0, 5.000, 15.0),
+    _case_study_2_stream("C", "C-7", "hot", 135.0, 90.0, 5.000, 15.0),
+    _case_study_2_stream("C", "C-8", "hot", 90.0, 85.0, 8.000, 15.0),
+    _case_study_2_stream("C", "C-9", "hot", 85.0, 84.0, 12.000, 15.0),
+    _case_study_2_stream("D", "D-1", "cold", 209.0, 210.0, 20.000, 5.0),
+    _case_study_2_stream("D", "D-2", "cold", 149.0, 150.0, 20.000, 5.0),
+    _case_study_2_stream("D", "D-3", "cold", 104.0, 105.0, 30.000, 5.0),
+    _case_study_2_stream("D", "D-4", "hot", 119.0, 118.0, 20.000, 5.0),
+    _case_study_2_stream("D", "D-5", "hot", 101.0, 100.0, 30.000, 5.0),
+    _case_study_2_stream("D", "D-6", "hot", 95.0, 94.0, 20.000, 5.0),
+    _case_study_2_stream("E", "E-1", "cold", 235.0, 237.0, 5.714, 10.0),
+    _case_study_2_stream("E", "E-2", "cold", 230.0, 235.0, 16.104, 10.0),
+    _case_study_2_stream("E", "E-3", "cold", 180.0, 230.0, 18.182, 10.0),
+    _case_study_2_stream("E", "E-4", "cold", 160.0, 180.0, 30.000, 10.0),
+    _case_study_2_stream("E", "E-5", "cold", 110.0, 160.0, 20.000, 10.0),
+    _case_study_2_stream("E", "E-6", "cold", 95.0, 110.0, 5.000, 10.0),
+    _case_study_2_stream("E", "E-7", "cold", 90.0, 95.0, 25.000, 10.0),
+    _case_study_2_stream("E", "E-8", "hot", 110.0, 90.0, 40.000, 10.0),
+    _case_study_2_stream("E", "E-9", "hot", 90.0, 80.0, 20.000, 10.0),
+)
+
+STYLE_CASE_STUDY_2_STREAMS = StreamCollection(
+    [stream for _, stream in _STYLE_CASE_STUDY_2_STREAM_ROWS],
+)
+STYLE_CASE_STUDY_2_TOTAL_SITE_ZONE = _case_study_2_total_site_zone(
+    _STYLE_CASE_STUDY_2_STREAM_ROWS,
 )
 
 
@@ -1507,6 +1469,7 @@ __all__ = (
     "STYLE_CASE_STUDY_2_RESULTS",
     "STYLE_CASE_STUDY_2_SITE_CONFIG",
     "STYLE_CASE_STUDY_2_STREAMS",
+    "STYLE_CASE_STUDY_2_TOTAL_SITE_ZONE",
     "STYLE_GAS_TURBINE_AMBIENT_CORRECTION",
     "STYLE_GAS_TURBINE_FULL_LOAD_COEFFICIENTS",
     "STYLE_GAS_TURBINE_PART_LOAD_COEFFICIENTS",
@@ -1516,7 +1479,6 @@ __all__ = (
     "StyleGasTurbineFullLoadCoefficient",
     "StyleGasTurbinePartLoadCoefficient",
     "StyleHotOilDesignResult",
-    "StyleProcessStream",
     "StyleResource",
     "StyleSiteConfig",
     "StyleSteamSystemTarget",

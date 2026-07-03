@@ -20,8 +20,8 @@ resources, storage, and sustainability inventories.
 
 ## Architecture
 
-- `OpenUtility.thermal`: adapters and pure calculations over OpenPinch-style
-  streams. These functions stay solver-free.
+- `OpenUtility.thermal`: pure calculations over OpenPinch `Stream`,
+  `StreamCollection`, and `Zone` objects. These functions stay solver-free.
 - `OpenUtility.style.data`: immutable typed inputs for the STYLE formulation.
 - `OpenUtility.style.pyomo_model`: Pyomo model construction. Functions build
   one model concern at a time: sets, parameters, variables, constraints, and
@@ -29,7 +29,7 @@ resources, storage, and sustainability inventories.
 - `case_study/jimenez_romero_utility_system_optimization/benchmarks.py`:
   extracted source result fixtures used as regression targets.
 - Future service layer: orchestration of data preparation, model build, solve,
-  post-processing, and OpenPinch-compatible result export.
+  post-processing, and OpenPinch result export.
 
 ## TDD Milestones
 
@@ -108,7 +108,7 @@ resources, storage, and sustainability inventories.
 Implemented now:
 
 - Package scaffold and Pyomo dependency declaration.
-- OpenPinch-compatible thermal interval extraction.
+- OpenPinch `Stream`, `StreamCollection`, and `Zone` thermal interval extraction.
 - `HeatIntervalProfile` to `StyleModelData` adapter.
 - Static STYLE source and sink cascade model builder.
 - Process steam-use and desuperheating mass/energy equations with fixed
@@ -145,8 +145,8 @@ Implemented now:
 - Regression fixtures for STYLE case study 1 steam targets, case study 1
   hot-oil design economics, and STYLE case study 2 economics.
 - PDF-backed fixtures for STYLE case study 2 site constants and the full P1.D.5
-  process stream table, represented as OpenPinch-style stream records with
-  shifted-temperature aliases for thermal profile construction.
+  process stream table, represented as OpenPinch `Stream`, `StreamCollection`,
+  and total-site `Zone` objects for thermal profile construction.
 - PDF-backed fixtures for STYLE case study 2 resource prices and linear
   equipment capital-cost coefficients from Tables P1.D.3 and P1.D.4.
 - PDF-backed fixtures for gas-turbine full-load, ambient-correction, and
@@ -328,53 +328,53 @@ Implemented now:
   fuel-consumption deviations by boiler, gas-turbine, HRSG-supplementary,
   VHP-source, hot-oil, and table-total rows, with CLI
   `--catalog physical-profile --view fuel-families` checked output in
-  `examples/table_2_9_physical_profile_fuel_families.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_families.csv`.
 - Physical-profile fuel-residual ranking reports scenario rank, residual
   percentage of benchmark, and largest included fuel-family share, with CLI
   `--catalog physical-profile --view fuel-ranking` checked output in
-  `examples/table_2_9_physical_profile_fuel_ranking.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_ranking.csv`.
 - Physical-profile equipment-level fuel tracing reports each equipment fuel
   variable, multiplier, family total, and share of family total, with CLI
   `--catalog physical-profile --view fuel-equipment` checked output in
-  `examples/table_2_9_physical_profile_fuel_equipment.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_equipment.csv`.
 - Physical-profile fuel-capacity context reports selected state, capacity basis,
   capacity value, actual basis value, and utilization for fuel-consuming
   equipment, with CLI `--catalog physical-profile --view fuel-capacity` checked
-  output in `examples/table_2_9_physical_profile_fuel_capacity.csv`.
+  output in `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_capacity.csv`.
 - Physical-profile fuel residual diagnosis classifies each remaining
   fuel-consumption delta from capacity context as capped fuel-capacity,
   hot-oil heat-load context, auxiliary VHP fuel context, within tolerance, or
   unclassified, with CLI `--catalog physical-profile --view fuel-diagnosis`
   checked output in
-  `examples/table_2_9_physical_profile_fuel_diagnosis.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_diagnosis.csv`.
 - Physical-profile fuel calibration target reporting translates each capped
   residual into the largest contributing equipment fuel-consumption adjustment
   needed to hit the Table 2-9 benchmark, with CLI
   `--catalog physical-profile --view fuel-targets` checked output in
-  `examples/table_2_9_physical_profile_fuel_targets.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_targets.csv`.
 - Opt-in physical-profile fuel accounting factors can be applied from computed
   target rows through `FuelConsumptionAccountingFactor`, the physical-profile
   catalog `fuel_consumption_factors_by_scenario` argument, and CLI
   `--apply-fuel-targets`. The factors adjust the reported Table 2-9 fuel basis
   without changing the Pyomo heat-balance constraints. The adjusted summary is
   checked in
-  `examples/table_2_9_physical_profile_fuel_targeted_summary.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_targeted_summary.csv`.
 - Fuel-targeted operating-cost component reporting compares fuel, hot-oil,
   electricity, auxiliary/unallocated, and total operating-cost buckets against
   the Table 2-9 benchmark. It isolates the remaining utility-system stand-alone
   residual in the auxiliary/unallocated bucket, with checked output in
-  `examples/table_2_9_physical_profile_fuel_targeted_operating_components.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_targeted_operating_components.csv`.
 - Fuel-targeted operating-cost target reporting translates the remaining total
   operating-cost residual into the auxiliary/unallocated adjustment required to
   close the utility-system stand-alone benchmark gap, with checked output in
-  `examples/table_2_9_physical_profile_fuel_targeted_operating_targets.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_targeted_operating_targets.csv`.
 - Opt-in operating-cost accounting adjustments apply computed auxiliary targets
   through `OperatingCostAccountingAdjustment`, the physical-profile catalog
   `operating_cost_adjustments_by_scenario` argument, and CLI
   `--apply-operating-targets`. The fuel-and-operating-targeted summary closes
   the remaining utility-system stand-alone operating-cost and
   total-annualized-cost residuals, with checked output in
-  `examples/table_2_9_physical_profile_fuel_and_operating_targeted_summary.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile_fuel_and_operating_targeted_summary.csv`.
 - Public Contribution 2 physical-profile scenario catalog entries for all four
   Table 2-9 rows. The catalog exposes calibrated rows that reuse the current
   physical-profile controls and uncalibrated rows for exploratory solves through
@@ -452,43 +452,43 @@ Implemented now:
   and a fixture-backed subproblem to exercise the run, trajectory-row, and
   benchmark-comparison helpers end to end for a selected reported test/scenario.
 - Persisted CLI example outputs for the reported-equipment and physical-profile
-  Table 2-9 catalogs in `examples/table_2_9_reported_equipment.csv` and
-  `examples/table_2_9_physical_profile.csv`.
+  Table 2-9 catalogs in `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_reported_equipment.csv` and
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/table_2_9_physical_profile.csv`.
 - Persisted steam-property comparison CLI example in
-  `examples/steam_property_comparisons.csv`, covered by the same generated-output
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_computational_performance/outputs/steam_property_comparisons.csv`, covered by the same generated-output
   regression as the Table 2-9 examples.
 - Persisted model-statistics, computational-result, and aggregate
-  computational-summary CLI examples in `examples/model_statistics.csv`,
-  `examples/computational_results.csv`, `examples/computational_best_methods.csv`,
-  `examples/computational_method_summary.csv`, and
-  `examples/computational_bilevel_trajectory.csv`, covered by generated-output
+  computational-summary CLI examples in `case_study/jimenez_romero_utility_system_optimization/contribution2_computational_performance/outputs/model_statistics.csv`,
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_computational_performance/outputs/computational_results.csv`, `case_study/jimenez_romero_utility_system_optimization/contribution2_computational_performance/outputs/computational_best_methods.csv`,
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_computational_performance/outputs/computational_method_summary.csv`, and
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_computational_performance/outputs/computational_bilevel_trajectory.csv`, covered by generated-output
   regressions.
 - Executable Contribution 2 reported bilevel comparison example in
-  `examples/contribution2_bilevel_reported_comparison.py`, with checked CSV
-  output in `examples/contribution2_bilevel_reported_comparison.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_computational_performance/scripts/contribution2_bilevel_reported_comparison.py`, with checked CSV
+  output in `case_study/jimenez_romero_utility_system_optimization/contribution2_computational_performance/outputs/contribution2_bilevel_reported_comparison.csv`.
 - Executable Contribution 2 physical-profile decomposition smoke example in
-  `examples/contribution2_physical_profile_decomposition_smoke.py`, with checked
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/scripts/contribution2_physical_profile_decomposition_smoke.py`, with checked
   CSV output in
-  `examples/contribution2_physical_profile_decomposition_smoke.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_physical_profile_decomposition_smoke.csv`.
 - CLI `style-decomposition` report for all calibrated Contribution 2
   physical-profile decomposition trajectories, with catalog/case/scenario
   metadata and checked CSV output in
-  `examples/contribution2_physical_profile_decomposition_trajectories.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_physical_profile_decomposition_trajectories.csv`.
 - CLI `style-decomposition --view summary` report comparing decomposition
   objective values with Table 2-9 total costs, with checked CSV output in
-  `examples/contribution2_physical_profile_decomposition_cost_comparison.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_physical_profile_decomposition_cost_comparison.csv`.
 - Executable candidate-driven decomposition example in
-  `examples/contribution2_candidate_decomposition_skipped_candidate.py`, with
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/scripts/contribution2_candidate_decomposition_skipped_candidate.py`, with
   checked CSV output in
-  `examples/contribution2_candidate_decomposition_skipped_candidate.csv`,
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_skipped_candidate.csv`,
   demonstrating a non-zero skipped-candidate count.
 - CLI `style-decomposition --view candidate-trajectory` report for the same
   candidate-driven skipped-candidate trajectory, using the checked CSV output in
-  `examples/contribution2_candidate_decomposition_skipped_candidate.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_skipped_candidate.csv`.
 - CLI `style-decomposition --view candidate-summary` report comparing the
   candidate-driven decomposition objective with the Table 2-9 total cost, with
   checked CSV output in
-  `examples/contribution2_candidate_decomposition_cost_comparison.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_cost_comparison.csv`.
 - Candidate-record provenance for solved scenario assignments, so compatible
   candidate pools preserve the source scenario that produced each assignment.
 - Accepted candidate source labels are carried into decomposition trajectory
@@ -500,49 +500,49 @@ Implemented now:
 - Candidate-pool inventory reporting lists compatible source-labeled candidate
   assignments before no-good cuts are applied, with CLI
   `style-decomposition --view candidate-pool` checked output in
-  `examples/contribution2_candidate_decomposition_pool.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_pool.csv`.
 - Candidate source-filtering summary reporting exposes solved-record counts,
   compatible/incompatible candidate counts, target master variable counts, and
   source-label partitions before decomposition, with CLI
   `style-decomposition --view candidate-source-summary` checked output in
-  `examples/contribution2_candidate_decomposition_source_summary.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_source_summary.csv`.
 - Candidate source-filtering detail reporting lists each solved source record's
   source catalog, source scenario, binary variable count, selected count,
   compatibility flag, and missing/extra variable counts, with CLI
   `style-decomposition --view candidate-source-detail` checked output in
-  `examples/contribution2_candidate_decomposition_source_detail.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_source_detail.csv`.
 - Candidate source-filtering variable diagnostics list exact missing-target and
   extra-candidate binary variables for incompatible source records, with CLI
   `style-decomposition --view candidate-source-variables` checked output in
-  `examples/contribution2_candidate_decomposition_source_variables.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_source_variables.csv`.
 - Candidate-pool comparison reporting measures each compatible assignment's
   Hamming distance from the accepted incumbent assignment, with CLI
   `style-decomposition --view candidate-pool-comparison` checked output in
-  `examples/contribution2_candidate_decomposition_pool_comparison.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_pool_comparison.csv`.
 - Candidate selection-delta reporting lists each binary variable selected
   differently between compatible candidates and the accepted incumbent
   assignment, with CLI `style-decomposition --view candidate-selection-delta`
   checked output in
-  `examples/contribution2_candidate_decomposition_selection_delta.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_selection_delta.csv`.
 - Grouped candidate selection-delta summary reporting aggregates those
   accepted-only and candidate-only differences by binary component family, with
   CLI `style-decomposition --view candidate-selection-summary` checked output in
-  `examples/contribution2_candidate_decomposition_selection_delta_summary.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_selection_delta_summary.csv`.
 - Skipped-candidate delta summary reporting joins fixed-assignment failure
   diagnostics with component-family accepted-only and candidate-only selection
   differences, with CLI
   `style-decomposition --view candidate-skip-delta-summary` checked output in
-  `examples/contribution2_candidate_decomposition_skip_delta_summary.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_skip_delta_summary.csv`.
 - Candidate audit-bundle reporting consolidates accepted incumbent context,
   compatible candidate-pool rows, candidate delta summaries, skipped-candidate
   diagnostics, and skipped-candidate delta summaries into one reproducible CSV,
   with CLI `style-decomposition --view candidate-audit-bundle` checked output in
-  `examples/contribution2_candidate_decomposition_audit_bundle.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_audit_bundle.csv`.
 - Skipped-candidate diagnostics on candidate-driven decomposition runs,
   including candidate label, candidate source scenario, fixed assignment,
   selected-variable audit string, and failure reason, with CLI
   `style-decomposition --view candidate-skips` checked output in
-  `examples/contribution2_candidate_decomposition_skipped_candidates.csv`.
+  `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/outputs/contribution2_candidate_decomposition_skipped_candidates.csv`.
 - Binary-only STYLE selection master boundary. Canonical binary selection names
   can now be extracted from a full STYLE model-data build into a separated
   Pyomo master, read back into `BilevelIntegerAssignment`, and used to drive the

@@ -12,7 +12,7 @@ Notebook-first workflow
 
 Start with the checked example notebook:
 
-``examples/notebooks/style_table_2_9_case_study.ipynb``
+``case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/notebooks/replication.ipynb``
 
 The notebook loads Contribution 2 case-study 2, solves the physical-profile
 Table 2-9 scenarios with the SciPy/HiGHS Pyomo model path, and presents model
