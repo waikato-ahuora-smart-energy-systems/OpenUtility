@@ -15,7 +15,7 @@ Start with the checked example notebook:
 ``case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/notebooks/replication.ipynb``
 
 The notebook loads Contribution 2 case-study 2, solves the physical-profile
-Table 2-9 scenarios with the SciPy/HiGHS Pyomo model path, and presents model
+Table 2-9 scenarios with the Pyomo/HiGHS SolverFactory path, and presents model
 versus benchmark outputs as pandas tables and matplotlib plots.
 
 .. toctree::

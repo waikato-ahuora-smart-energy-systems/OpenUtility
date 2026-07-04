@@ -12,9 +12,9 @@ the package in editable mode with development dependencies:
 python -m pip install -e ".[dev]"
 ```
 
-The default Table 2-9 workflow uses the SciPy/HiGHS MILP adapter and does not
-require an external MILP executable. Pyomo solver adapters remain available for
-environments with GLPK, CBC, or another configured solver.
+The default Table 2-9 workflow uses the Pyomo/HiGHS SolverFactory path with the
+required `highspy` package and Pyomo `appsi_highs` solver. The package uses
+Pyomo solver adapters directly; `appsi_highs` is the supported default.
 
 ## Verify
 

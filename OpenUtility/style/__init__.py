@@ -181,9 +181,7 @@ from .runner import (
 from .scenarios import StaticStyleScenarioCatalog
 from .solvers import (
     pyomo_static_style_solver,
-    scipy_milp_static_style_solver,
     solve_static_style_model_with_pyomo,
-    solve_static_style_model_with_scipy_milp,
 )
 
 __all__ = [
@@ -312,9 +310,7 @@ __all__ = [
     "run_static_style_binary_selection_decomposition",
     "run_static_style_fixed_assignment_decomposition",
     "run_static_style_scenario",
-    "scipy_milp_static_style_solver",
     "solve_static_style_model_with_pyomo",
-    "solve_static_style_model_with_scipy_milp",
     "steam_main_superheating_balances_from_model",
     "steam_property_update_spec_from_stage4_model",
     "steam_property_update_spec_from_model",

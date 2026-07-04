@@ -12,8 +12,8 @@ from OpenUtility.style import (
     build_static_style_model,
     compatible_bilevel_candidate_assignments,
     format_style_decomposition_trajectory_rows,
+    pyomo_static_style_solver,
     run_static_style_binary_selection_candidate_decomposition,
-    scipy_milp_static_style_solver,
     style_binary_selection_candidate_records_from_scenarios,
     style_decomposition_trajectory_rows,
     style_master_binary_variables,
@@ -35,7 +35,7 @@ def trajectory_rows() -> tuple[dict[str, object], ...]:
     candidates = compatible_bilevel_candidate_assignments(
         style_binary_selection_candidate_records_from_scenarios(
             calibrated_scenarios + uncalibrated_scenarios,
-            solve=scipy_milp_static_style_solver(),
+            solve=pyomo_static_style_solver("appsi_highs"),
             source_label_factory=_source_label_factory(calibrated_scenarios),
         ),
         variable_names=style_master_binary_variables(target_model),
@@ -43,7 +43,7 @@ def trajectory_rows() -> tuple[dict[str, object], ...]:
     run = run_static_style_binary_selection_candidate_decomposition(
         target,
         candidates=candidates,
-        solve_subproblem=scipy_milp_static_style_solver(),
+        solve_subproblem=pyomo_static_style_solver("appsi_highs"),
         max_iterations=2,
     )
     return style_decomposition_trajectory_rows(

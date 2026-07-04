@@ -11,8 +11,8 @@ from case_study.jimenez_romero_utility_system_optimization.style_model_builders 
 from OpenUtility.style import (
     bilevel_decomposition_run_rows,
     format_bilevel_decomposition_run_rows,
+    pyomo_static_style_solver,
     run_static_style_fixed_assignment_decomposition,
-    scipy_milp_static_style_solver,
 )
 
 
@@ -20,8 +20,8 @@ def trajectory_rows() -> tuple[dict[str, object], ...]:
     scenario = next(iter(style_case_study_2_contribution2_physical_profile_catalog()))
     run = run_static_style_fixed_assignment_decomposition(
         scenario,
-        solve_master=scipy_milp_static_style_solver(),
-        solve_subproblem=scipy_milp_static_style_solver(),
+        solve_master=pyomo_static_style_solver("appsi_highs"),
+        solve_subproblem=pyomo_static_style_solver("appsi_highs"),
         max_iterations=1,
     )
     return bilevel_decomposition_run_rows(run)

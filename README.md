@@ -70,10 +70,10 @@ The first implementation slice contains:
   delegates solving through an injected callback, extracts results, and compares
   them with source benchmark fixtures when provided.
 - A Pyomo `SolverFactory` adapter that turns configured MILP solvers into
-  runner-compatible solve callbacks while normalizing solver status metadata.
-- A SciPy/HiGHS MILP adapter for linear Pyomo models, including solution
-  write-back into Pyomo variables and runner-compatible status reporting when
-  external solvers such as GLPK or CBC are not installed.
+  static STYLE solve callbacks while normalizing solver status metadata.
+- A Pyomo/HiGHS SolverFactory path for linear Pyomo models using the required
+  `highspy` package, including solution write-back into Pyomo variables and
+  normalized status reporting.
 - A static STYLE scenario catalog boundary for registering, listing, and looking
   up benchmark scenario definitions by `(case_study, scenario)` key.
 - Case-study 2 builder helpers that reconstruct the shifted heat-interval
@@ -149,7 +149,7 @@ The first implementation slice contains:
   being duplicated across every reported main.
 - Solver-backed coverage for the multi-main physical-profile best-configuration
   bridge, including enthalpy-basis pseudo-deltas on the selected reported target
-  level so the physical heat-profile data is feasible under the SciPy MILP
+  level so the physical heat-profile data is feasible under the Pyomo/HiGHS
   runner. The current result remains an uncalibrated physical-profile solve,
   with Table 2-9 field deltas reported through the existing best-configuration
   comparison helper.
@@ -182,7 +182,7 @@ The first implementation slice contains:
   Table 2-9 rows, with calibrated and uncalibrated variants runnable through the
   static STYLE scenario runner.
 - A `openutility-style-table2-9` CLI/reporting entry point that runs the
-  reported-equipment or physical-profile Table 2-9 catalogs with the SciPy MILP
+  reported-equipment or physical-profile Table 2-9 catalogs with the Pyomo/HiGHS
   solver and exports benchmark deviations as CSV or JSON.
 - Contribution 2 steam-property comparison report helpers and CLI output for
   the IAPWS-versus-model turbine enthalpy-drop and power-generation rows,
@@ -277,7 +277,7 @@ The first implementation slice contains:
   capital, utility-steam, fuel, and operating controls enabled, the current
   smoke scenario closes every benchmark field on the reported comparison basis.
 - Solver-backed regression coverage for that assembled case-study 2 scenario
-  through the SciPy MILP runner. The current solve is intentionally transparent
+  through the Pyomo/HiGHS runner. The current solve is intentionally transparent
   about opt-in accounting bridges until steam-main structure, fuel assumptions,
   and benchmark-specific physical choices are fully aligned to the source
   tables.

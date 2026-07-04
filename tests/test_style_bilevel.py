@@ -47,7 +47,7 @@ from OpenUtility.style import (
     run_bilevel_decomposition_iteration,
     run_static_style_binary_selection_candidate_decomposition,
     run_static_style_fixed_assignment_decomposition,
-    scipy_milp_static_style_solver,
+    pyomo_static_style_solver,
     style_binary_selection_candidate_from_scenario,
     style_binary_selection_candidate_records_from_scenarios,
     style_binary_selection_candidate_solver,
@@ -526,7 +526,7 @@ def test_style_fixed_assignment_subproblem_result_solves_static_style_model() ->
     subproblem = style_fixed_assignment_subproblem_result(
         scenario,
         assignment,
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
 
     assert subproblem.objective_value == pytest.approx(0.0)
@@ -555,8 +555,8 @@ def test_run_static_style_fixed_assignment_decomposition_uses_style_master() -> 
 
     run = run_static_style_fixed_assignment_decomposition(
         scenario,
-        solve_master=scipy_milp_static_style_solver(),
-        solve_subproblem=scipy_milp_static_style_solver(),
+        solve_master=pyomo_static_style_solver("appsi_highs"),
+        solve_subproblem=pyomo_static_style_solver("appsi_highs"),
         max_iterations=1,
     )
     iteration = run.iterations[0]
@@ -599,7 +599,7 @@ def test_static_style_binary_selection_decomposition_evaluates_fixed_subproblem(
     run = run_static_style_binary_selection_decomposition(
         scenario,
         solve_master=solve_master,
-        solve_subproblem=scipy_milp_static_style_solver(),
+        solve_subproblem=pyomo_static_style_solver("appsi_highs"),
         max_iterations=1,
     )
     iteration = run.iterations[0]
@@ -655,7 +655,7 @@ def test_style_binary_selection_candidate_from_scenario_solves_and_extracts_assi
 
     assignment = style_binary_selection_candidate_from_scenario(
         scenario,
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
 
     assert len(assignment.selected_variables) == 7
@@ -673,7 +673,7 @@ def test_style_binary_selection_candidates_from_scenarios_are_unique_and_ordered
 
     candidates = style_binary_selection_candidates_from_scenarios(
         scenarios,
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
 
     assert len(candidates) == 4
@@ -695,7 +695,7 @@ def test_style_binary_selection_candidate_records_preserve_source_labels() -> No
 
     records = style_binary_selection_candidate_records_from_scenarios(
         scenarios,
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
 
     assert len(records) == 4
@@ -718,7 +718,7 @@ def test_style_binary_selection_candidate_records_accept_source_label_factory() 
 
     records = style_binary_selection_candidate_records_from_scenarios(
         scenarios[:1],
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
         source_label_factory=lambda scenario: f"calibrated:{scenario.scenario}",
     )
 
@@ -734,7 +734,7 @@ def test_compatible_bilevel_integer_assignments_filters_to_target_variables() ->
     scenarios = tuple(calibrated_catalog) + tuple(uncalibrated_catalog)
     candidates = style_binary_selection_candidates_from_scenarios(
         scenarios,
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
     target = calibrated_catalog.get(
         "contribution-2-case-study-2-physical-profile",
@@ -768,7 +768,7 @@ def test_compatible_bilevel_candidate_assignments_keeps_source_labels() -> None:
     )
     records = style_binary_selection_candidate_records_from_scenarios(
         tuple(calibrated_catalog) + tuple(uncalibrated_catalog),
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
 
     compatible = compatible_bilevel_candidate_assignments(
@@ -803,7 +803,7 @@ def test_solved_candidate_pool_drives_binary_selection_master_after_cut() -> Non
     candidates = compatible_bilevel_integer_assignments(
         style_binary_selection_candidates_from_scenarios(
             tuple(calibrated_catalog) + tuple(uncalibrated_catalog),
-            solve=scipy_milp_static_style_solver(),
+            solve=pyomo_static_style_solver("appsi_highs"),
         ),
         variable_names=target_variables,
     )
@@ -848,7 +848,7 @@ def test_static_style_binary_selection_candidate_decomposition_skips_failed_cand
     candidates = compatible_bilevel_integer_assignments(
         style_binary_selection_candidates_from_scenarios(
             tuple(calibrated_catalog) + tuple(uncalibrated_catalog),
-            solve=scipy_milp_static_style_solver(),
+            solve=pyomo_static_style_solver("appsi_highs"),
         ),
         variable_names=build_static_style_binary_selection_master(
             target.data,
@@ -858,7 +858,7 @@ def test_static_style_binary_selection_candidate_decomposition_skips_failed_cand
     run = run_static_style_binary_selection_candidate_decomposition(
         target,
         candidates=candidates,
-        solve_subproblem=scipy_milp_static_style_solver(),
+        solve_subproblem=pyomo_static_style_solver("appsi_highs"),
         max_iterations=2,
     )
 
@@ -887,7 +887,7 @@ def test_candidate_decomposition_skipped_diagnostic_reports_candidate_source() -
     candidates = compatible_bilevel_candidate_assignments(
         style_binary_selection_candidate_records_from_scenarios(
             tuple(calibrated_catalog) + tuple(uncalibrated_catalog),
-            solve=scipy_milp_static_style_solver(),
+            solve=pyomo_static_style_solver("appsi_highs"),
         ),
         variable_names=build_static_style_binary_selection_master(
             target.data,
@@ -897,7 +897,7 @@ def test_candidate_decomposition_skipped_diagnostic_reports_candidate_source() -
     run = run_static_style_binary_selection_candidate_decomposition(
         target,
         candidates=candidates,
-        solve_subproblem=scipy_milp_static_style_solver(),
+        solve_subproblem=pyomo_static_style_solver("appsi_highs"),
         max_iterations=2,
     )
 
@@ -953,7 +953,7 @@ def test_static_style_binary_selection_decomposition_advances_after_no_good_cut(
     run = run_static_style_binary_selection_decomposition(
         scenario,
         solve_master=style_binary_selection_candidate_solver((first, second)),
-        solve_subproblem=scipy_milp_static_style_solver(),
+        solve_subproblem=pyomo_static_style_solver("appsi_highs"),
         max_iterations=2,
     )
 
@@ -975,8 +975,8 @@ def test_static_style_fixed_assignment_decomposition_runs_physical_profile_catal
 
     run = run_static_style_fixed_assignment_decomposition(
         scenario,
-        solve_master=scipy_milp_static_style_solver(),
-        solve_subproblem=scipy_milp_static_style_solver(),
+        solve_master=pyomo_static_style_solver("appsi_highs"),
+        solve_subproblem=pyomo_static_style_solver("appsi_highs"),
         max_iterations=1,
     )
     rows = bilevel_decomposition_run_rows(run)

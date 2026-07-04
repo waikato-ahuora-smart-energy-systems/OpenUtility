@@ -261,7 +261,7 @@ controls:
 openutility-style-table2-9 --catalog physical-profile --uncalibrated --format csv
 ```
 
-The CLI uses the SciPy/HiGHS MILP adapter bundled through SciPy. Use
+The CLI uses the Pyomo/HiGHS SolverFactory path configured through Pyomo `SolverFactory("appsi_highs")`. Use
 `--solver-time-limit` to change the per-scenario solver limit.
 
 Checked CSV examples are stored in:
@@ -331,11 +331,11 @@ from case_study.jimenez_romero_utility_system_optimization.style_model_builders 
 from OpenUtility.style import (
     compare_static_style_result_to_best_configuration,
     run_static_style_scenario,
-    scipy_milp_static_style_solver,
+    pyomo_static_style_solver,
 )
 
 catalog = style_case_study_2_contribution2_best_configuration_catalog()
-solve = scipy_milp_static_style_solver(options={"time_limit": 20.0})
+solve = pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0})
 
 for scenario in catalog:
     run = run_static_style_scenario(scenario, solve=solve)
@@ -474,7 +474,7 @@ from OpenUtility.style import (
     build_static_style_binary_selection_master,
     compatible_bilevel_integer_assignments,
     fix_style_master_integer_assignment,
-    scipy_milp_static_style_solver,
+    pyomo_static_style_solver,
     style_fixed_assignment_subproblem_result,
     style_master_binary_variables,
     style_master_integer_assignment_from_model,
@@ -499,12 +499,12 @@ fix_style_master_integer_assignment(subproblem_model, assignment)
 subproblem = style_fixed_assignment_subproblem_result(
     scenario,
     assignment,
-    solve=scipy_milp_static_style_solver(),
+    solve=pyomo_static_style_solver("appsi_highs"),
 )
 decomposition_run = run_static_style_fixed_assignment_decomposition(
     scenario,
-    solve_master=scipy_milp_static_style_solver(),
-    solve_subproblem=scipy_milp_static_style_solver(),
+    solve_master=pyomo_static_style_solver("appsi_highs"),
+    solve_subproblem=pyomo_static_style_solver("appsi_highs"),
     max_iterations=1,
 )
 binary_master = build_static_style_binary_selection_master(scenario.data)
@@ -515,16 +515,16 @@ binary_assignment = style_binary_selection_master_assignment_from_model(binary_m
 binary_master_run = run_static_style_binary_selection_decomposition(
     scenario,
     solve_master=style_binary_selection_candidate_solver((binary_assignment,)),
-    solve_subproblem=scipy_milp_static_style_solver(),
+    solve_subproblem=pyomo_static_style_solver("appsi_highs"),
     max_iterations=1,
 )
 solved_candidate = style_binary_selection_candidate_from_scenario(
     scenario,
-    solve=scipy_milp_static_style_solver(),
+    solve=pyomo_static_style_solver("appsi_highs"),
 )
 candidate_pool = style_binary_selection_candidates_from_scenarios(
     catalog,
-    solve=scipy_milp_static_style_solver(),
+    solve=pyomo_static_style_solver("appsi_highs"),
 )
 compatible_candidates = compatible_bilevel_integer_assignments(
     candidate_pool,
@@ -533,7 +533,7 @@ compatible_candidates = compatible_bilevel_integer_assignments(
 candidate_run = run_static_style_binary_selection_candidate_decomposition(
     scenario,
     candidates=compatible_candidates,
-    solve_subproblem=scipy_milp_static_style_solver(),
+    solve_subproblem=pyomo_static_style_solver("appsi_highs"),
     max_iterations=1,
 )
 ```

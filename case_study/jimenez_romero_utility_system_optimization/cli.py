@@ -48,7 +48,7 @@ from OpenUtility.style import (
     run_static_style_binary_selection_candidate_decomposition,
     run_static_style_fixed_assignment_decomposition,
     run_static_style_scenario,
-    scipy_milp_static_style_solver,
+    pyomo_static_style_solver,
     style_binary_selection_candidate_records_from_scenarios,
     style_candidate_audit_bundle_rows,
     style_candidate_pool_comparison_rows,
@@ -344,7 +344,7 @@ def _parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
         "--solver-time-limit",
         type=float,
         default=20.0,
-        help="SciPy/HiGHS MILP time limit in seconds.",
+        help="Pyomo/HiGHS MILP time limit in seconds.",
     )
     return parser.parse_args(argv)
 
@@ -435,7 +435,7 @@ def _style_table_2_9_report_rows(
     view: str,
 ) -> tuple[dict[str, object], ...]:
     rows: list[dict[str, object]] = []
-    solve = scipy_milp_static_style_solver(options={"time_limit": solver_time_limit})
+    solve = _pyomo_highs_solver(solver_time_limit=solver_time_limit)
     for scenario in catalog:
         run = run_static_style_scenario(scenario, solve=solve)
         if view in {"fuel-capacity", "fuel-diagnosis", "fuel-targets"}:
@@ -524,7 +524,7 @@ def _style_decomposition_rows(
     view: str,
 ) -> tuple[dict[str, object], ...]:
     rows: list[dict[str, object]] = []
-    solve = scipy_milp_static_style_solver(options={"time_limit": solver_time_limit})
+    solve = _pyomo_highs_solver(solver_time_limit=solver_time_limit)
     for scenario in catalog:
         run = run_static_style_fixed_assignment_decomposition(
             scenario,
@@ -559,7 +559,7 @@ def _style_candidate_decomposition_rows(
     solver_time_limit: float,
     view: str,
 ) -> tuple[dict[str, object], ...]:
-    solve = scipy_milp_static_style_solver(options={"time_limit": solver_time_limit})
+    solve = _pyomo_highs_solver(solver_time_limit=solver_time_limit)
     calibrated_catalog = style_case_study_2_contribution2_physical_profile_catalog()
     uncalibrated_catalog = style_case_study_2_contribution2_physical_profile_catalog(
         calibrated=False,
@@ -737,6 +737,13 @@ def _format_style_candidate_decomposition_rows(
     return format_style_decomposition_trajectory_rows(
         rows,
         output_format=output_format,
+    )
+
+
+def _pyomo_highs_solver(*, solver_time_limit: float):
+    return pyomo_static_style_solver(
+        "appsi_highs",
+        options={"time_limit": solver_time_limit},
     )
 
 

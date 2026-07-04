@@ -14,8 +14,8 @@ from OpenUtility.style import (
     best_configuration_comparison_rows,
     best_configuration_summary_row,
     compare_static_style_result_to_best_configuration,
+    pyomo_static_style_solver,
     run_static_style_scenario,
-    scipy_milp_static_style_solver,
     style_fuel_calibration_target_rows,
     style_fuel_consumption_capacity_rows,
     style_fuel_consumption_factor_map_from_calibration_target_rows,
@@ -196,7 +196,7 @@ def _fuel_capacity_rows(
     solver_time_limit: float,
 ) -> tuple[dict[str, object], ...]:
     rows: list[dict[str, object]] = []
-    solve = scipy_milp_static_style_solver(options={"time_limit": solver_time_limit})
+    solve = _pyomo_highs_solver(solver_time_limit=solver_time_limit)
     for scenario in catalog:
         run = run_static_style_scenario(scenario, solve=solve)
         rows.extend(
@@ -218,7 +218,7 @@ def _operating_cost_component_rows(
     solver_time_limit: float,
 ) -> tuple[dict[str, object], ...]:
     rows: list[dict[str, object]] = []
-    solve = scipy_milp_static_style_solver(options={"time_limit": solver_time_limit})
+    solve = _pyomo_highs_solver(solver_time_limit=solver_time_limit)
     for scenario in catalog:
         run = run_static_style_scenario(scenario, solve=solve)
         rows.extend(
@@ -242,7 +242,7 @@ def _comparison_and_summary_rows(
 ) -> tuple[tuple[dict[str, Any], ...], tuple[dict[str, Any], ...]]:
     comparison_rows: list[dict[str, Any]] = []
     summary_rows: list[dict[str, Any]] = []
-    solve = scipy_milp_static_style_solver(options={"time_limit": solver_time_limit})
+    solve = _pyomo_highs_solver(solver_time_limit=solver_time_limit)
     for scenario in scenario_catalog:
         run = run_static_style_scenario(scenario, solve=solve)
         comparison = compare_static_style_result_to_best_configuration(
@@ -263,6 +263,13 @@ def _comparison_and_summary_rows(
             ),
         )
     return tuple(comparison_rows), tuple(summary_rows)
+
+
+def _pyomo_highs_solver(*, solver_time_limit: float):
+    return pyomo_static_style_solver(
+        "appsi_highs",
+        options={"time_limit": solver_time_limit},
+    )
 
 
 def _rows_to_frame(rows: tuple[dict[str, Any], ...], *, digits: int | None) -> pd.DataFrame:

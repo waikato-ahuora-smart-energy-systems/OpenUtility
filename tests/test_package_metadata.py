@@ -16,7 +16,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 def test_pyproject_declares_cli_entry_point_and_packages_case_study_data() -> None:
     pyproject = tomllib.loads((PROJECT_ROOT / "pyproject.toml").read_text())
 
+    assert "highspy>=1.15.1" in pyproject["project"]["dependencies"]
     assert "OpenPinch>=0.4.5" in pyproject["project"]["dependencies"]
+    assert "scipy>=1.11" not in pyproject["project"]["dependencies"]
     assert "openpinch" not in pyproject["project"]["optional-dependencies"]
     assert pyproject["project"]["scripts"]["openutility-style-table2-9"] == (
         "case_study.jimenez_romero_utility_system_optimization.cli:main"
@@ -36,7 +38,6 @@ def test_root_api_exposes_generic_core_helpers() -> None:
         "StyleBenchmarkRecord",
         "run_static_style_scenario",
         "pyomo_static_style_solver",
-        "scipy_milp_static_style_solver",
     )
 
     for name in current_public_names:
@@ -56,6 +57,8 @@ def test_root_api_does_not_expose_removed_compatibility_names() -> None:
         "openpinch_streams_from_case_study_streams",
         "openpinch_stream_collection_from_thesis_streams",
         "openpinch_streams_from_thesis_streams",
+        "scipy_milp_static_style_solver",
+        "solve_static_style_model_with_scipy_milp",
         "style_case_study_2_contribution2_physical_profile_catalog",
     )
 

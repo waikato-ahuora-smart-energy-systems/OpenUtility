@@ -9,11 +9,9 @@ from OpenUtility.style import (
     StaticStyleScenario,
     SteamLevelCandidate,
     StyleModelData,
-    run_static_style_scenario,
     pyomo_static_style_solver,
-    scipy_milp_static_style_solver,
+    run_static_style_scenario,
     solve_static_style_model_with_pyomo,
-    solve_static_style_model_with_scipy_milp,
 )
 
 
@@ -45,6 +43,7 @@ def test_solve_static_style_model_with_pyomo_reports_solver_status(
     assert solver.options == {"mipgap": 0.01}
     assert solver.solved_model is model
     assert solver.tee is True
+    assert solver.load_solutions is False
     assert status.status == "ok"
     assert status.termination_condition == "optimal"
     assert status.message == "fixed test solve"
@@ -88,7 +87,7 @@ def test_solve_static_style_model_with_pyomo_requires_available_solver(
         solve_static_style_model_with_pyomo(pyo.ConcreteModel(), "missing")
 
 
-def test_solve_static_style_model_with_scipy_milp_sets_pyomo_values() -> None:
+def test_solve_static_style_model_with_pyomo_sets_pyomo_values() -> None:
     model = pyo.ConcreteModel()
     model.use_unit = pyo.Var(domain=pyo.Binary)
     model.load_flow = pyo.Var(domain=pyo.NonNegativeReals, bounds=(0.0, 10.0))
@@ -97,7 +96,7 @@ def test_solve_static_style_model_with_scipy_milp_sets_pyomo_values() -> None:
     )
     model.objective = pyo.Objective(expr=0.1 * model.use_unit + model.load_flow)
 
-    status = solve_static_style_model_with_scipy_milp(model)
+    status = solve_static_style_model_with_pyomo(model, "appsi_highs")
 
     assert status.status == "ok"
     assert status.termination_condition == "optimal"
@@ -105,12 +104,12 @@ def test_solve_static_style_model_with_scipy_milp_sets_pyomo_values() -> None:
     assert pyo.value(model.load_flow) == pytest.approx(0.5)
 
 
-def test_scipy_milp_static_style_solver_returns_runner_callback() -> None:
+def test_pyomo_static_style_solver_solves_scalar_model() -> None:
     model = pyo.ConcreteModel()
     model.x = pyo.Var(domain=pyo.NonNegativeReals)
     model.minimum = pyo.Constraint(expr=model.x >= 2.0)
     model.objective = pyo.Objective(expr=model.x)
-    solve = scipy_milp_static_style_solver(options={"time_limit": 10.0})
+    solve = pyomo_static_style_solver("appsi_highs", options={"time_limit": 10.0})
 
     status = solve(model)
 
@@ -118,16 +117,7 @@ def test_scipy_milp_static_style_solver_returns_runner_callback() -> None:
     assert pyo.value(model.x) == pytest.approx(2.0)
 
 
-def test_solve_static_style_model_with_scipy_milp_requires_linear_model() -> None:
-    model = pyo.ConcreteModel()
-    model.x = pyo.Var(domain=pyo.NonNegativeReals)
-    model.objective = pyo.Objective(expr=model.x**2)
-
-    with pytest.raises(ValueError, match="objective must be linear"):
-        solve_static_style_model_with_scipy_milp(model)
-
-
-def test_scipy_milp_solver_solves_static_style_runner_smoke() -> None:
+def test_pyomo_highs_solver_solves_static_style_runner_smoke() -> None:
     scenario = StaticStyleScenario(
         case_study="solver-smoke",
         scenario="balanced-one-level",
@@ -154,7 +144,7 @@ def test_scipy_milp_solver_solves_static_style_runner_smoke() -> None:
 
     run = run_static_style_scenario(
         scenario,
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
 
     assert run.solver.status == "ok"
@@ -165,7 +155,7 @@ def test_scipy_milp_solver_solves_static_style_runner_smoke() -> None:
     assert run.result.total_annualized_cost == pytest.approx(0.0)
 
 
-def test_scipy_milp_solver_allows_selected_header_heat_to_cascade_to_lower_sink() -> None:
+def test_pyomo_highs_solver_allows_selected_header_heat_to_cascade_to_lower_sink() -> None:
     scenario = StaticStyleScenario(
         case_study="solver-smoke",
         scenario="selected-header-cascades-sink-heat",
@@ -205,7 +195,7 @@ def test_scipy_milp_solver_allows_selected_header_heat_to_cascade_to_lower_sink(
 
     run = run_static_style_scenario(
         scenario,
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
 
     assert run.solver.status == "ok"
@@ -222,20 +212,23 @@ class _FakeAvailableSolver:
         self.options = {}
         self.solved_model = None
         self.tee = None
+        self.load_solutions = None
 
     def available(self, exception_flag: bool = False) -> bool:
         assert exception_flag is False
         return True
 
-    def solve(self, model, tee: bool = False):
+    def solve(self, model, tee: bool = False, load_solutions: bool = True):
         self.solved_model = model
         self.tee = tee
+        self.load_solutions = load_solutions
         return SimpleNamespace(
             solver=SimpleNamespace(
                 status="ok",
                 termination_condition="optimal",
                 message="fixed test solve",
             ),
+            solution=(),
         )
 
 

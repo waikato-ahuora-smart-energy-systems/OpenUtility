@@ -62,7 +62,7 @@ from OpenUtility.style import (
     build_static_style_model,
     compare_static_style_result_to_best_configuration,
     run_static_style_scenario,
-    scipy_milp_static_style_solver,
+    pyomo_static_style_solver,
     static_style_fuel_consumption_by_equipment,
 )
 
@@ -635,7 +635,7 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_uses_
     )
 
 
-def test_style_case_study_2_best_configuration_physical_profile_model_data_solves_with_scipy_milp() -> None:
+def test_style_case_study_2_best_configuration_physical_profile_model_data_solves_with_pyomo_highs() -> None:
     data = style_case_study_2_best_configuration_physical_profile_model_data(
         "utility-system-microgrid",
         turbine_type="industrial",
@@ -654,7 +654,7 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_solve
 
     run = run_static_style_scenario(
         scenario,
-        solve=scipy_milp_static_style_solver(options={"time_limit": 20.0}),
+        solve=pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0}),
     )
 
     assert run.solver.status == "ok"
@@ -681,7 +681,7 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_repor
             scenario="utility-system-microgrid-physical-profile",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(options={"time_limit": 20.0}),
+        solve=pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0}),
     )
     comparison = compare_static_style_result_to_best_configuration(
         run.result,
@@ -720,7 +720,7 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_f
             scenario="utility-system-microgrid-physical-profile",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(options={"time_limit": 20.0}),
+        solve=pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0}),
     )
     comparison = compare_static_style_result_to_best_configuration(
         run.result,
@@ -768,7 +768,7 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_a
             scenario="utility-system-microgrid-physical-profile",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(options={"time_limit": 20.0}),
+        solve=pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0}),
     )
     comparison = compare_static_style_result_to_best_configuration(
         run.result,
@@ -807,7 +807,7 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_m
             scenario="utility-system-microgrid-physical-profile",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(options={"time_limit": 20.0}),
+        solve=pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0}),
     )
     comparison = compare_static_style_result_to_best_configuration(
         run.result,
@@ -849,7 +849,7 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_a
             scenario="utility-system-microgrid-physical-profile",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(options={"time_limit": 20.0}),
+        solve=pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0}),
     )
     comparison = compare_static_style_result_to_best_configuration(
         run.result,
@@ -887,7 +887,7 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_a
             scenario="utility-system-stand-alone-physical-profile",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(options={"time_limit": 20.0}),
+        solve=pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0}),
     )
     comparison = compare_static_style_result_to_best_configuration(
         run.result,
@@ -977,7 +977,7 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_c
             scenario="hot-oil-fsr-microgrid-physical-profile",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(options={"time_limit": 20.0}),
+        solve=pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0}),
     )
     comparison = compare_static_style_result_to_best_configuration(
         run.result,
@@ -1035,7 +1035,7 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_c
             scenario="hot-oil-fsr-stand-alone-physical-profile",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(options={"time_limit": 20.0}),
+        solve=pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0}),
     )
     comparison = compare_static_style_result_to_best_configuration(
         run.result,
@@ -1364,7 +1364,7 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_sol
             scenario="utility-system-microgrid",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
 
     assert run.solver.termination_condition == "optimal"
@@ -1389,7 +1389,7 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_rep
             scenario="utility-system-microgrid",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
 
     comparison = compare_static_style_result_to_best_configuration(
@@ -1426,7 +1426,7 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
             scenario="utility-system-microgrid",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
     comparison = compare_static_style_result_to_best_configuration(
         run.result,
@@ -1470,7 +1470,7 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
             scenario="utility-system-stand-alone",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
 
     assert data.grid_export_limit == pytest.approx(1.67)
@@ -1496,7 +1496,7 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
             scenario="utility-system-microgrid",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
 
     assert run.result.maintenance_cost == pytest.approx(3.59)
@@ -1522,7 +1522,7 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
             scenario="utility-system-microgrid",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
 
     assert data.electricity_cost is not None
@@ -1550,7 +1550,7 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
             scenario="utility-system-microgrid",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
 
     assert run.result.operating_cost == pytest.approx(50.49, abs=1e-4)
@@ -1575,7 +1575,7 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
             scenario="utility-system-microgrid",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
 
     assert run.result.capital_cost == pytest.approx(10.78, abs=1e-4)
@@ -1603,7 +1603,7 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_mat
             scenario="utility-system-microgrid",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
     comparison = compare_static_style_result_to_best_configuration(
         run.result,
@@ -1747,7 +1747,7 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_fix
             scenario="hot-oil-fsr-microgrid",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
 
     assert run.result.utility_steam_flow == pytest.approx(136.67)
@@ -1775,7 +1775,7 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
             scenario="hot-oil-fsr-microgrid",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
     comparison = compare_static_style_result_to_best_configuration(
         run.result,
@@ -1810,7 +1810,7 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
             scenario="hot-oil-fsr-microgrid",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
     comparison = compare_static_style_result_to_best_configuration(
         run.result,
@@ -1842,7 +1842,7 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
             scenario="hot-oil-fsr-microgrid",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
     comparison = compare_static_style_result_to_best_configuration(
         run.result,
@@ -1876,7 +1876,7 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_aux
             scenario="hot-oil-fsr-stand-alone",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
 
     assert data.vhp_sources[0].max_capacity == pytest.approx(47.652)
@@ -1909,7 +1909,7 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
             scenario="hot-oil-fsr-stand-alone",
             data=data,
         ),
-        solve=scipy_milp_static_style_solver(),
+        solve=pyomo_static_style_solver("appsi_highs"),
     )
     comparison = compare_static_style_result_to_best_configuration(
         run.result,
@@ -2279,7 +2279,7 @@ def test_style_case_study_2_complete_static_scenario_catalog_can_include_vhp_tur
     assert list(model.VHP_TURBINES.data()) == ["vhp-to-mp-st"]
 
 
-def test_style_case_study_2_complete_static_scenario_runs_with_scipy_milp() -> None:
+def test_style_case_study_2_complete_static_scenario_runs_with_pyomo_highs() -> None:
     vhp_steam_enthalpy, vhp_feedwater_enthalpy = style_case_study_2_vhp_enthalpies(
         steam_temperature=570.0,
     )
@@ -2328,7 +2328,7 @@ def test_style_case_study_2_complete_static_scenario_runs_with_scipy_milp() -> N
 
     run = run_static_style_scenario(
         scenario,
-        solve=scipy_milp_static_style_solver(options={"time_limit": 20.0}),
+        solve=pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0}),
     )
 
     assert run.solver.status == "ok"
@@ -2388,7 +2388,7 @@ def test_style_case_study_2_complete_static_scenario_can_match_benchmark_power_g
 
     run = run_static_style_scenario(
         scenario,
-        solve=scipy_milp_static_style_solver(options={"time_limit": 20.0}),
+        solve=pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0}),
     )
 
     assert run.comparison is not None
@@ -2446,7 +2446,7 @@ def test_style_case_study_2_complete_static_scenario_can_match_benchmark_mainten
 
     run = run_static_style_scenario(
         scenario,
-        solve=scipy_milp_static_style_solver(options={"time_limit": 20.0}),
+        solve=pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0}),
     )
 
     assert run.comparison is not None
@@ -2504,7 +2504,7 @@ def test_style_case_study_2_complete_static_scenario_can_match_benchmark_capital
 
     run = run_static_style_scenario(
         scenario,
-        solve=scipy_milp_static_style_solver(options={"time_limit": 20.0}),
+        solve=pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0}),
     )
 
     assert run.comparison is not None
@@ -2566,7 +2566,7 @@ def test_style_case_study_2_complete_static_scenario_can_apply_operating_cost_ad
     baseline_scenario = baseline_catalog.get("case-study-2", "proposed-without-hot-oil")
     baseline_run = run_static_style_scenario(
         baseline_scenario,
-        solve=scipy_milp_static_style_solver(options={"time_limit": 20.0}),
+        solve=pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0}),
     )
     benchmark = baseline_scenario.benchmark
     assert benchmark is not None
@@ -2581,7 +2581,7 @@ def test_style_case_study_2_complete_static_scenario_can_apply_operating_cost_ad
     targeted_scenario = targeted_catalog.get("case-study-2", "proposed-without-hot-oil")
     targeted_run = run_static_style_scenario(
         targeted_scenario,
-        solve=scipy_milp_static_style_solver(options={"time_limit": 20.0}),
+        solve=pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0}),
     )
 
     assert targeted_run.comparison is not None
@@ -2653,7 +2653,7 @@ def test_style_case_study_2_complete_static_scenario_can_apply_utility_steam_flo
     baseline_scenario = baseline_catalog.get("case-study-2", "proposed-without-hot-oil")
     baseline_run = run_static_style_scenario(
         baseline_scenario,
-        solve=scipy_milp_static_style_solver(options={"time_limit": 20.0}),
+        solve=pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0}),
     )
     benchmark = baseline_scenario.benchmark
     assert benchmark is not None
@@ -2668,7 +2668,7 @@ def test_style_case_study_2_complete_static_scenario_can_apply_utility_steam_flo
     targeted_scenario = targeted_catalog.get("case-study-2", "proposed-without-hot-oil")
     targeted_run = run_static_style_scenario(
         targeted_scenario,
-        solve=scipy_milp_static_style_solver(options={"time_limit": 20.0}),
+        solve=pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0}),
     )
 
     assert targeted_run.comparison is not None
@@ -2736,7 +2736,7 @@ def test_style_case_study_2_complete_static_scenario_can_apply_fuel_consumption_
     baseline_scenario = baseline_catalog.get("case-study-2", "proposed-without-hot-oil")
     baseline_run = run_static_style_scenario(
         baseline_scenario,
-        solve=scipy_milp_static_style_solver(options={"time_limit": 20.0}),
+        solve=pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0}),
     )
     benchmark = baseline_scenario.benchmark
     assert benchmark is not None
@@ -2773,7 +2773,7 @@ def test_style_case_study_2_complete_static_scenario_can_apply_fuel_consumption_
     targeted_scenario = targeted_catalog.get("case-study-2", "proposed-without-hot-oil")
     targeted_run = run_static_style_scenario(
         targeted_scenario,
-        solve=scipy_milp_static_style_solver(options={"time_limit": 20.0}),
+        solve=pyomo_static_style_solver("appsi_highs", options={"time_limit": 20.0}),
     )
 
     assert targeted_run.comparison is not None
@@ -2792,7 +2792,7 @@ def test_style_case_study_2_contribution2_best_configuration_catalog_solves_cali
     for scenario in catalog:
         run = run_static_style_scenario(
             scenario,
-            solve=scipy_milp_static_style_solver(),
+            solve=pyomo_static_style_solver("appsi_highs"),
         )
         comparison = compare_static_style_result_to_best_configuration(
             run.result,
@@ -2818,7 +2818,7 @@ def test_style_case_study_2_contribution2_physical_profile_catalog_solves_calibr
     for scenario in catalog:
         run = run_static_style_scenario(
             scenario,
-            solve=scipy_milp_static_style_solver(),
+            solve=pyomo_static_style_solver("appsi_highs"),
         )
         comparison = compare_static_style_result_to_best_configuration(
             run.result,
@@ -2868,7 +2868,7 @@ def test_style_case_study_2_contribution2_physical_profile_catalog_can_apply_fue
     for scenario in catalog:
         run = run_static_style_scenario(
             scenario,
-            solve=scipy_milp_static_style_solver(),
+            solve=pyomo_static_style_solver("appsi_highs"),
         )
         comparison = compare_static_style_result_to_best_configuration(
             run.result,
@@ -2910,7 +2910,7 @@ def test_style_case_study_2_contribution2_physical_profile_catalog_can_apply_ope
     for scenario in catalog:
         run = run_static_style_scenario(
             scenario,
-            solve=scipy_milp_static_style_solver(),
+            solve=pyomo_static_style_solver("appsi_highs"),
         )
         comparison = compare_static_style_result_to_best_configuration(
             run.result,
@@ -2943,7 +2943,7 @@ def test_style_case_study_2_contribution2_physical_profile_catalog_solves_uncali
     for scenario in catalog:
         run = run_static_style_scenario(
             scenario,
-            solve=scipy_milp_static_style_solver(),
+            solve=pyomo_static_style_solver("appsi_highs"),
         )
 
         assert run.solver.termination_condition == "optimal"
