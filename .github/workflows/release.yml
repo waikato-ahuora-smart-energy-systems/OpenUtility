@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: Build and publish
+    runs-on: ubuntu-24.04
+    environment: pypi
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - uses: astral-sh/setup-uv@v5
+      - name: Install release dependencies
+        run: uv sync --extra dev --extra docs --extra notebook --extra release
+      - name: Run release readiness gate
+        run: uv run --extra dev --extra docs --extra notebook --extra release python tools/release_check.py
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

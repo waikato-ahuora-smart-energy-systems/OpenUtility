@@ -112,12 +112,12 @@ def test_case_study_2_stream_table_is_captured() -> None:
     assert streams["A-1"].type == "Hot"
     assert streams.get_stream_names()[-1] == "E-9"
     assert streams["E-9"].type == "Hot"
-    assert sum(stream.heat_flow.value for stream in streams if stream.type == "Hot") == (
-        pytest.approx(330.0)
-    )
-    assert sum(stream.heat_flow.value for stream in streams if stream.type == "Cold") == (
-        pytest.approx(220.0)
-    )
+    assert sum(
+        stream.heat_flow.value for stream in streams if stream.type == "Hot"
+    ) == (pytest.approx(330.0))
+    assert sum(
+        stream.heat_flow.value for stream in streams if stream.type == "Cold"
+    ) == (pytest.approx(220.0))
 
     stream_a1 = streams["A-1"]
     assert stream_a1.t_max_star.value == pytest.approx(292.5)

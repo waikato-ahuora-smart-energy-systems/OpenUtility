@@ -6,10 +6,10 @@ clean checkout.
 ## Install
 
 Create or activate a Python environment with Python 3.14.2 or newer, then install
-the package in editable mode with development dependencies:
+the package in editable mode with release dependencies:
 
 ```bash
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev,docs,notebook,release]"
 ```
 
 The default Table 2-9 workflow uses the Pyomo/HiGHS SolverFactory path with the
@@ -18,17 +18,23 @@ Pyomo solver adapters directly; `appsi_highs` is the supported default.
 
 ## Verify
 
-Run the full test suite:
+Run the release gate:
 
 ```bash
-python -m pytest
+python tools/release_check.py
 ```
 
-Run lint checks:
+For offline local triage only, skip the network-dependent audit and fresh wheel
+install smoke test:
 
 ```bash
-python -m ruff check .
+python tools/release_check.py --skip-audit --skip-smoke-install
 ```
+
+The gate runs Ruff linting and format checks, mypy, pytest with coverage,
+case-study notebook execution through the test suite, Sphinx docs with warnings
+as errors, package build, wheel inspection, Twine checks, dependency audit, and
+fresh wheel-install smoke tests.
 
 ## Recreate Reports
 

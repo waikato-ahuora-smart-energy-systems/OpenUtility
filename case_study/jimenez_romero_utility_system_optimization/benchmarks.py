@@ -1069,10 +1069,7 @@ def _case_study_2_equipment_cost(
     )
 
 
-STYLE_CASE_STUDY_2_EQUIPMENT_COSTS: tuple[
-    StyleEquipmentCostCoefficient,
-    ...
-] = (
+STYLE_CASE_STUDY_2_EQUIPMENT_COSTS: tuple[StyleEquipmentCostCoefficient, ...] = (
     _case_study_2_equipment_cost(
         "boiler",
         "packaged",

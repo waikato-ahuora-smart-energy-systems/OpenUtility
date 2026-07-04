@@ -67,19 +67,7 @@ def test_descriptive_case_study_folders_alias_extracted_datasets() -> None:
     )
 
 
-def test_case_study_dataset_exports_descriptive_type_names_only() -> None:
-    old_type_names = (
-        "ThesisGasTurbineAmbientCorrection",
-        "ThesisGasTurbineFullLoadCoefficient",
-        "ThesisGasTurbinePartLoadCoefficient",
-        "ThesisStyleEquipmentCostCoefficient",
-        "ThesisStyleHotOilResult",
-        "ThesisStyleResource",
-        "ThesisStyleResult",
-        "ThesisStyleSiteConfig",
-        "ThesisStyleSteamTarget",
-        "ThesisStyleStream",
-    )
+def test_case_study_dataset_exports_current_type_names() -> None:
     descriptive_type_names = (
         "StyleBenchmarkResult",
         "StyleEquipmentCostCoefficient",
@@ -92,10 +80,9 @@ def test_case_study_dataset_exports_descriptive_type_names_only() -> None:
         "StyleSteamSystemTarget",
     )
 
-    for name in old_type_names:
-        assert name not in benchmarks.__all__
-        assert not hasattr(benchmarks, name)
-
     for name in descriptive_type_names:
         assert name in benchmarks.__all__
         assert hasattr(benchmarks, name)
+
+    assert "StyleProcessStream" not in benchmarks.__all__
+    assert not hasattr(benchmarks, "StyleProcessStream")

@@ -159,9 +159,7 @@ def test_inter_header_connections_conserve_mass_and_energy() -> None:
     assert pyomo.value(model.steam_main_energy_balance["HP_12"].body) == pytest.approx(
         0.0
     )
-    assert pyomo.value(model.steam_main_mass_balance["MP_3"].body) == pytest.approx(
-        0.0
-    )
+    assert pyomo.value(model.steam_main_mass_balance["MP_3"].body) == pytest.approx(0.0)
     assert pyomo.value(model.steam_main_energy_balance["MP_3"].body) == pytest.approx(
         0.0
     )
@@ -229,9 +227,7 @@ def test_sink_cascade_balance_moves_residual_heat_down_temperature_levels() -> N
     model.sink_heat_from_steam["MP_95"].fix(0.0)
     model.sink_residual_heat["MP_95"].fix(0.0)
 
-    assert pyomo.value(model.sink_cascade_balance["MP_185"].body) == pytest.approx(
-        0.0
-    )
+    assert pyomo.value(model.sink_cascade_balance["MP_185"].body) == pytest.approx(0.0)
     assert pyomo.value(model.sink_cascade_balance["MP_95"].body) == pytest.approx(0.0)
 
 
@@ -571,9 +567,7 @@ def test_deaerator_feedwater_accounting_tracks_site_water_requirement() -> None:
     assert pyomo.value(
         model.deaerator_condensate_return_equation.body
     ) == pytest.approx(0.0)
-    assert pyomo.value(model.deaerator_makeup_water_equation.body) == pytest.approx(
-        0.0
-    )
+    assert pyomo.value(model.deaerator_makeup_water_equation.body) == pytest.approx(0.0)
     assert pyomo.value(model.deaerator_energy_balance.body) == pytest.approx(0.0)
 
 
@@ -1026,9 +1020,7 @@ def test_fuel_electricity_and_water_costs_contribute_to_objective() -> None:
     model.grid_power_export.fix(1.0)
     model.deaerator_makeup_water.fix(2.0)
 
-    assert pyomo.value(model.fuel_operating_cost["boiler_fuel"]) == pytest.approx(
-        50.0
-    )
+    assert pyomo.value(model.fuel_operating_cost["boiler_fuel"]) == pytest.approx(50.0)
     assert pyomo.value(model.total_fuel_operating_cost) == pytest.approx(50.0)
     assert pyomo.value(model.electricity_operating_cost) == pytest.approx(11.0)
     assert pyomo.value(model.water_operating_cost) == pytest.approx(4.0)
@@ -1116,9 +1108,7 @@ def test_cost_scaling_applies_operating_hours_and_currency_scale() -> None:
     model.grid_power_export.fix(1.0)
     model.deaerator_makeup_water.fix(2.0)
 
-    assert pyomo.value(model.fuel_operating_cost["boiler_fuel"]) == pytest.approx(
-        0.4
-    )
+    assert pyomo.value(model.fuel_operating_cost["boiler_fuel"]) == pytest.approx(0.4)
     assert pyomo.value(model.electricity_operating_cost) == pytest.approx(0.088)
     assert pyomo.value(model.water_operating_cost) == pytest.approx(0.032)
     assert pyomo.value(model.total_annualized_capital_cost) == pytest.approx(0.000042)
@@ -1320,9 +1310,7 @@ def test_cascades_reset_between_steam_mains() -> None:
     assert pyomo.value(model.source_cascade_balance["MP_185"].body) == pytest.approx(
         0.0
     )
-    assert pyomo.value(model.sink_cascade_balance["MP_185"].body) == pytest.approx(
-        0.0
-    )
+    assert pyomo.value(model.sink_cascade_balance["MP_185"].body) == pytest.approx(0.0)
 
 
 def test_cooling_water_load_sums_bottom_source_residuals_by_main() -> None:
@@ -1429,9 +1417,7 @@ def test_hot_oil_supplies_selected_sink_heat_and_adds_fuel_cost() -> None:
     model.total_hot_oil_heat_load.fix(8.0)
     model.hot_oil_fuel_consumption.fix(8.0 / 0.75)
 
-    assert pyomo.value(model.sink_cascade_balance["MP_185"].body) == pytest.approx(
-        0.0
-    )
+    assert pyomo.value(model.sink_cascade_balance["MP_185"].body) == pytest.approx(0.0)
     assert pyomo.value(model.hot_oil_heat_to_sink_equation["MP_185"].body) == (
         pytest.approx(0.0)
     )
@@ -1845,9 +1831,9 @@ def test_gas_turbine_generates_power_and_exhaust_heat() -> None:
     model.gas_turbine_power_generation["gt_1"].fix(1.5)
     model.gas_turbine_exhaust_heat["gt_1"].fix(48.5)
 
-    assert pyomo.value(
-        model.gas_turbine_power_equation["gt_1"].body
-    ) == pytest.approx(0.0)
+    assert pyomo.value(model.gas_turbine_power_equation["gt_1"].body) == pytest.approx(
+        0.0
+    )
     assert pyomo.value(
         model.gas_turbine_exhaust_heat_equation["gt_1"].body
     ) == pytest.approx(0.0)

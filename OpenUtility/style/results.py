@@ -82,29 +82,67 @@ class StaticStyleBenchmarkDeviation:
 
 
 class StyleBenchmarkRecord(Protocol):
-    case_study: str
-    scenario: str
-    utility_steam_flow: float
-    fuel_consumption: float
-    power_generation: float
-    operating_cost: float
-    maintenance_cost: float | None
-    capital_cost: float
-    total_annualized_cost: float
+    @property
+    def case_study(self) -> str: ...
+
+    @property
+    def scenario(self) -> str: ...
+
+    @property
+    def utility_steam_flow(self) -> float: ...
+
+    @property
+    def fuel_consumption(self) -> float: ...
+
+    @property
+    def power_generation(self) -> float: ...
+
+    @property
+    def operating_cost(self) -> float: ...
+
+    @property
+    def maintenance_cost(self) -> float | None: ...
+
+    @property
+    def capital_cost(self) -> float: ...
+
+    @property
+    def total_annualized_cost(self) -> float: ...
 
 
 class BestConfigurationBenchmarkRecord(Protocol):
-    utility_steam_generation: float
-    fuel_consumption: float
-    power_generation: float
-    steam_turbine_power: float
-    gas_turbine_power: float
-    operating_cost: float
-    maintenance_cost: float
-    capital_cost: float
-    total_cost: float
-    fuel_cost: float
-    hot_oil_operating_cost: float | None
+    @property
+    def utility_steam_generation(self) -> float: ...
+
+    @property
+    def fuel_consumption(self) -> float: ...
+
+    @property
+    def power_generation(self) -> float: ...
+
+    @property
+    def steam_turbine_power(self) -> float: ...
+
+    @property
+    def gas_turbine_power(self) -> float: ...
+
+    @property
+    def operating_cost(self) -> float: ...
+
+    @property
+    def maintenance_cost(self) -> float: ...
+
+    @property
+    def capital_cost(self) -> float: ...
+
+    @property
+    def total_cost(self) -> float: ...
+
+    @property
+    def fuel_cost(self) -> float: ...
+
+    @property
+    def hot_oil_operating_cost(self) -> float | None: ...
 
 
 @dataclass(frozen=True)
@@ -395,7 +433,10 @@ def compare_static_style_result_to_benchmark(
 ) -> StaticStyleBenchmarkComparison:
     """Compare extracted static STYLE values against a source benchmark row."""
 
-    if result.case_study != benchmark.case_study or result.scenario != benchmark.scenario:
+    if (
+        result.case_study != benchmark.case_study
+        or result.scenario != benchmark.scenario
+    ):
         raise ValueError("result and benchmark identify different STYLE scenarios")
     fields = (
         "utility_steam_flow",
@@ -406,20 +447,23 @@ def compare_static_style_result_to_benchmark(
         "capital_cost",
         "total_annualized_cost",
     )
-    deviations = tuple(
-        _benchmark_deviation(
-            field,
-            getattr(result, field),
-            _benchmark_value(benchmark, field),
-            absolute_tolerance,
+    deviations: list[StaticStyleBenchmarkDeviation] = []
+    for field in fields:
+        benchmark_value = _benchmark_value(benchmark, field)
+        if benchmark_value is None:
+            continue
+        deviations.append(
+            _benchmark_deviation(
+                field,
+                getattr(result, field),
+                benchmark_value,
+                absolute_tolerance,
+            ),
         )
-        for field in fields
-        if _benchmark_value(benchmark, field) is not None
-    )
     return StaticStyleBenchmarkComparison(
         actual=result,
         benchmark=benchmark,
-        deviations=deviations,
+        deviations=tuple(deviations),
     )
 
 
@@ -552,10 +596,7 @@ def _sum_component(model: pyo.ConcreteModel, component_name: str) -> float:
     if not component.is_indexed():
         value = _component_value_or_none(model, component_name)
         return 0.0 if value is None else value
-    return sum(
-        _component_value(model, component_name, index)
-        for index in component
-    )
+    return sum(_component_value(model, component_name, index) for index in component)
 
 
 def _sum_component_with_factor(
@@ -568,9 +609,14 @@ def _sum_component_with_factor(
     component = getattr(model, component_name)
     if not component.is_indexed():
         value = _component_value_or_none(model, component_name)
-        return 0.0 if value is None else value * _fuel_consumption_factor(
-            model,
-            factor_name,
+        return (
+            0.0
+            if value is None
+            else value
+            * _fuel_consumption_factor(
+                model,
+                factor_name,
+            )
         )
     return sum(
         _component_value(model, component_name, index)
@@ -590,9 +636,13 @@ def _sum_indexed_product(
         return 0.0
     variable = getattr(model, variable_name)
     if not variable.is_indexed():
-        factor = 1.0 if factor_name is None else _fuel_consumption_factor(
-            model,
-            factor_name,
+        factor = (
+            1.0
+            if factor_name is None
+            else _fuel_consumption_factor(
+                model,
+                factor_name,
+            )
         )
         return (
             _component_value(model, variable_name)

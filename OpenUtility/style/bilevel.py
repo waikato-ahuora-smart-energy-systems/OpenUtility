@@ -36,13 +36,26 @@ STYLE_MASTER_BINARY_COMPONENT_NAMES: tuple[str, ...] = (
 
 
 class _ComputationalResultRecord(Protocol):
-    test_number: int
-    scenario: int
-    method: str
-    best_solution_found: float
-    best_possible: float | None
-    computational_time_seconds: float
-    hit_time_limit: bool
+    @property
+    def test_number(self) -> int: ...
+
+    @property
+    def scenario(self) -> int: ...
+
+    @property
+    def method(self) -> str: ...
+
+    @property
+    def best_solution_found(self) -> float: ...
+
+    @property
+    def best_possible(self) -> float | None: ...
+
+    @property
+    def computational_time_seconds(self) -> float: ...
+
+    @property
+    def hit_time_limit(self) -> bool: ...
 
 
 @dataclass(frozen=True)
@@ -95,9 +108,7 @@ class BilevelIntegerAssignment:
         if values.keys() != other_values.keys():
             raise ValueError("bilevel assignments must contain the same variables")
         return sum(
-            1
-            for variable, value in values.items()
-            if value != other_values[variable]
+            1 for variable, value in values.items() if value != other_values[variable]
         )
 
 
@@ -324,9 +335,8 @@ class BilevelDecompositionRun:
                 "skipped_candidate_count",
                 len(self.skipped_candidates),
             )
-        if (
+        if self.skipped_candidates and self.skipped_candidate_count != len(
             self.skipped_candidates
-            and self.skipped_candidate_count != len(self.skipped_candidates)
         ):
             raise ValueError(
                 "skipped candidate count must match skipped candidate diagnostics",
@@ -573,7 +583,9 @@ def style_master_binary_variables(
         component = model.component(component_name)
         if component is None or component.ctype is not pyo.Var:
             continue
-        variables.update(_style_binary_variables_from_component(component_name, component))
+        variables.update(
+            _style_binary_variables_from_component(component_name, component)
+        )
     return variables
 
 
@@ -1042,8 +1054,7 @@ def _validate_unique_incumbent_assignments(
     for incumbent in incumbents:
         if incumbent.assignment in assignments:
             raise ValueError(
-                "duplicate bilevel incumbent assignment "
-                f"for {incumbent.label!r}",
+                f"duplicate bilevel incumbent assignment for {incumbent.label!r}",
             )
         assignments.add(incumbent.assignment)
 
@@ -1065,11 +1076,11 @@ def _missing_pyomo_binary_variables(
 def _lookup_pyomo_binary_variable(binary_variables: Any, variable: str) -> Any:
     try:
         return binary_variables[variable]
-    except (KeyError, IndexError, TypeError):
+    except KeyError, IndexError, TypeError:
         pass
     try:
         return binary_variables[(variable,)]
-    except (KeyError, IndexError, TypeError):
+    except KeyError, IndexError, TypeError:
         raise KeyError(variable) from None
 
 

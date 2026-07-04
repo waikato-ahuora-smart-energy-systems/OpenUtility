@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, replace
 import math
 from typing import Protocol
@@ -211,7 +211,9 @@ class SteamPropertyUpdateSpec:
 
     def __post_init__(self) -> None:
         if not self.levels and not self.vhp_headers:
-            raise ValueError("at least one steam level or VHP header target is required")
+            raise ValueError(
+                "at least one steam level or VHP header target is required"
+            )
         _require_unique(
             (target.steam_level for target in self.levels),
             "steam level property targets",
@@ -357,17 +359,17 @@ def apply_steam_property_update(
     vhp_enthalpies: dict[str, float] = {}
     updated_vhp_headers = []
     for header in data.vhp_headers:
-        target = vhp_targets.get(header.name)
-        if target is None:
+        vhp_target = vhp_targets.get(header.name)
+        if vhp_target is None:
             updated_vhp_headers.append(header)
             continue
 
         steam_enthalpy = properties.enthalpy(
-            pressure=target.pressure,
-            temperature=target.temperature,
+            pressure=vhp_target.pressure,
+            temperature=vhp_target.temperature,
         )
         updated_vhp_headers.append(replace(header, steam_enthalpy=steam_enthalpy))
-        vhp_temperatures[header.name] = target.temperature
+        vhp_temperatures[header.name] = vhp_target.temperature
         vhp_enthalpies[header.name] = steam_enthalpy
 
     isentropic_enthalpy_deltas = {
@@ -627,7 +629,9 @@ def _max_temperature_change(
     )
 
 
-def _temperature_values(snapshot: SteamPropertySnapshot) -> dict[tuple[str, str], float]:
+def _temperature_values(
+    snapshot: SteamPropertySnapshot,
+) -> dict[tuple[str, str], float]:
     values = {
         ("steam_level", name): temperature
         for name, temperature in snapshot.level_temperatures.items()
@@ -643,7 +647,7 @@ def _temperature_values(snapshot: SteamPropertySnapshot) -> dict[tuple[str, str]
 
 def _require_known_targets(
     targets: Mapping[str, object],
-    configured_names: object,
+    configured_names: Iterable[object],
 ) -> None:
     configured = set(configured_names)
     for name in targets:
@@ -734,10 +738,7 @@ def _steam_main_superheating_balance(
         level_name,
     )
     inlet_heat = (
-        source_steam_heat
-        + utility_steam_heat
-        + inter_header_heat
-        + feedwater_heat
+        source_steam_heat + utility_steam_heat + inter_header_heat + feedwater_heat
     )
     calculated_enthalpy = inlet_heat / outlet_mass
     calculated_temperature = properties.temperature(
@@ -992,8 +993,8 @@ def _steam_main_turbine_property_target(
     )
 
 
-def _require_unique(values: object, label: str) -> None:
-    materialized = tuple(values)
+def _require_unique(values: Iterable[object], label: str) -> None:
+    materialized: tuple[object, ...] = tuple(values)
     if len(set(materialized)) != len(materialized):
         raise ValueError(f"{label} must be unique")
 

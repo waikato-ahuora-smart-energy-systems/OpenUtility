@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 
@@ -10,6 +11,7 @@ def test_readthedocs_config_builds_sphinx_docs() -> None:
     config = (PROJECT_ROOT / ".readthedocs.yaml").read_text()
 
     assert "configuration: docs/conf.py" in config
+    assert 'python: "3.14"' in config
     assert "extra_requirements:" in config
     assert "- docs" in config
 
@@ -48,3 +50,19 @@ def test_input_docs_explain_openpinch_stream_reuse() -> None:
     assert "OpenPinch ``Zone``" in docs
     assert "``heat_load`` is mapped to OpenPinch ``heat_flow``" in docs
     assert "``dt_cont`` is half the extracted minimum temperature difference" in docs
+
+
+def test_case_study_notebooks_advertise_python_314_kernel() -> None:
+    notebook_paths = sorted(
+        (
+            PROJECT_ROOT / "case_study" / "jimenez_romero_utility_system_optimization"
+        ).glob("**/notebooks/*.ipynb"),
+    )
+
+    assert len(notebook_paths) == 3
+    for path in notebook_paths:
+        notebook = json.loads(path.read_text())
+        metadata = notebook["metadata"]
+        assert metadata["kernelspec"]["display_name"] == "Python 3.14"
+        assert metadata["kernelspec"]["name"] == "python3"
+        assert metadata["language_info"]["version"] == "3.14"

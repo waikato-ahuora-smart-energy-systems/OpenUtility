@@ -9,8 +9,28 @@ description = "Pyomo-based utility-system optimization model and reporting helpe
 readme = "README.md"
 requires-python = ">=3.14.2"
 license = "MIT"
+license-files = ["LICENSE"]
 authors = [
   { name = "Tim Walmsley", email = "tim.walmsley@waikato.ac.nz" },
+]
+keywords = [
+  "energy-systems",
+  "heat-integration",
+  "mathematical-optimization",
+  "pinch-analysis",
+  "pyomo",
+  "utility-systems",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Mathematics",
 ]
 dependencies = [
   "CoolProp>=6.6",
@@ -21,6 +41,12 @@ dependencies = [
   "pandas>=2.0",
   "pyomo>=6.10.0",
 ]
+
+[project.urls]
+Changelog = "https://github.com/waikato-ahuora-smart-energy-systems/OpenUtility/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/waikato-ahuora-smart-energy-systems/OpenUtility/tree/main/docs"
+Issues = "https://github.com/waikato-ahuora-smart-energy-systems/OpenUtility/issues"
+Repository = "https://github.com/waikato-ahuora-smart-energy-systems/OpenUtility"
 
 [project.scripts]
 openutility-style-table2-9 = "case_study.jimenez_romero_utility_system_optimization.cli:main"
@@ -34,15 +60,77 @@ docs = [
   "sphinx>=7",
 ]
 dev = [
+  "mypy>=1.18",
+  "pytest-cov>=7.0",
   "pytest>=8.0",
   "ruff>=0.8",
+]
+release = [
+  "build>=1.3",
+  "hatchling>=1.26",
+  "pip-audit>=2.9",
+  "twine>=6.2",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/CHANGELOG.md",
+  "/LICENSE",
+  "/OpenUtility",
+  "/README.md",
+  "/case_study",
+  "/docs",
+  "/pyproject.toml",
+  "/tests",
+  "/uv.lock",
 ]
 
 [tool.hatch.build.targets.wheel]
 packages = ["OpenUtility", "case_study"]
+include = [
+  "/OpenUtility/py.typed",
+  "/case_study/**/*.csv",
+  "/case_study/**/*.ipynb",
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
 
 [tool.ruff]
 line-length = 88
+target-version = "py314"
+
+[tool.mypy]
+python_version = "3.14"
+files = ["OpenUtility", "case_study"]
+ignore_missing_imports = true
+check_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+disallow_untyped_defs = false
+disable_error_code = [
+  "attr-defined",
+  "call-arg",
+  "index",
+  "misc",
+  "operator",
+  "union-attr",
+]
+
+[tool.coverage.run]
+source = ["OpenUtility", "case_study"]
+omit = [
+  "case_study/**/notebooks/*",
+  "case_study/**/outputs/*",
+  "case_study/**/scripts/*",
+]
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+skip_covered = true
+exclude_also = [
+  "if TYPE_CHECKING:",
+  "if __name__ == .__main__.:",
+  "raise NotImplementedError",
+]

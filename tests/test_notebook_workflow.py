@@ -155,7 +155,9 @@ def test_case_study_replication_notebooks_execute(monkeypatch, tmp_path) -> None
     )
     pd.testing.assert_frame_equal(
         computational_namespace["model_statistics"],
-        pd.DataFrame(contribution2_model_statistic_rows(CONTRIBUTION2_MODEL_STATISTICS)),
+        pd.DataFrame(
+            contribution2_model_statistic_rows(CONTRIBUTION2_MODEL_STATISTICS)
+        ),
     )
     pd.testing.assert_frame_equal(
         computational_namespace["computational_results"],

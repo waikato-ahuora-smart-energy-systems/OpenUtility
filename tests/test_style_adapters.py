@@ -95,7 +95,9 @@ def test_style_model_data_from_heat_profile_sets_tight_cumulative_bounds() -> No
     ]
 
 
-def test_style_model_data_from_heat_profile_for_steam_mains_repeats_interval_candidates_per_main() -> None:
+def test_style_model_data_from_heat_profile_for_steam_mains_repeats_interval_candidates_per_main() -> (
+    None
+):
     profile = HeatIntervalProfile(
         intervals=(
             TemperatureInterval(195.0, 185.0),
@@ -146,7 +148,9 @@ def test_style_model_data_from_heat_profile_for_steam_mains_repeats_interval_can
     )
 
 
-def test_style_model_data_from_heat_profile_for_steam_mains_can_assign_heat_loads_to_one_main() -> None:
+def test_style_model_data_from_heat_profile_for_steam_mains_can_assign_heat_loads_to_one_main() -> (
+    None
+):
     profile = HeatIntervalProfile(
         intervals=(
             TemperatureInterval(195.0, 185.0),
@@ -185,7 +189,9 @@ def test_style_model_data_from_heat_profile_for_steam_mains_can_assign_heat_load
     )
 
 
-def test_style_model_data_from_heat_profile_for_steam_mains_rejects_unknown_heat_load_main() -> None:
+def test_style_model_data_from_heat_profile_for_steam_mains_rejects_unknown_heat_load_main() -> (
+    None
+):
     profile = HeatIntervalProfile(
         intervals=(TemperatureInterval(195.0, 185.0),),
         source_heat={(195.0, 185.0): 100.0},

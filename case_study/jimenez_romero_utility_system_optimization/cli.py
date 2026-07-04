@@ -102,7 +102,9 @@ def main(argv: Sequence[str] | None = None, *, stdout: TextIO | None = None) -> 
                 CONTRIBUTION2_STEAM_PROPERTY_COMPARISONS,
             )
             if args.computed
-            else steam_property_comparison_rows(CONTRIBUTION2_STEAM_PROPERTY_COMPARISONS)
+            else steam_property_comparison_rows(
+                CONTRIBUTION2_STEAM_PROPERTY_COMPARISONS
+            )
         )
         output.write(
             format_steam_property_comparison_rows(

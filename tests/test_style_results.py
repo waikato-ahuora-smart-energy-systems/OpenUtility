@@ -284,7 +284,9 @@ def test_compare_static_style_result_to_benchmark_detects_mismatch() -> None:
     )
 
 
-def test_compare_static_style_result_to_best_configuration_reports_split_power() -> None:
+def test_compare_static_style_result_to_best_configuration_reports_split_power() -> (
+    None
+):
     benchmark = get_contribution2_case_study2_best_configuration(
         "utility-system-microgrid",
     )
@@ -317,7 +319,9 @@ def test_compare_static_style_result_to_best_configuration_reports_split_power()
     )
 
 
-def test_compare_static_style_result_to_best_configuration_reports_detailed_operating_costs_when_available() -> None:
+def test_compare_static_style_result_to_best_configuration_reports_detailed_operating_costs_when_available() -> (
+    None
+):
     benchmark = get_contribution2_case_study2_best_configuration(
         "hot-oil-fsr-microgrid",
     )

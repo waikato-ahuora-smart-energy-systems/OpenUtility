@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import replace
+from typing import TypedDict
 
 from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
     CONTRIBUTION2_CASE_STUDY_2_BEST_CONFIGURATIONS,
@@ -63,6 +64,19 @@ from OpenUtility.style.properties import (
 )
 from OpenUtility.style.runner import StaticStyleScenario
 from OpenUtility.style.scenarios import StaticStyleScenarioCatalog
+
+
+class _PhysicalProfileCalibrationKwargs(TypedDict, total=False):
+    fix_reported_loads: bool
+    allow_unpaid_power_export: bool
+    reported_fixed_maintenance_cost: float
+    reported_capital_cost: float
+    match_reported_fuel_cost: bool
+    reported_auxiliary_operating_cost: float
+    reported_power_revenue: float
+    target_steam_level: str
+    match_reported_hot_oil_operating_cost: bool
+    include_auxiliary_vhp_source: bool
 
 
 _DEFAULT_MODEL_EQUIPMENT_TYPES = {
@@ -516,21 +530,17 @@ def style_case_study_2_best_configuration_physical_profile_model_data(
     if hot_oil_fuel is not None:
         if match_reported_hot_oil_operating_cost:
             if fix_reported_loads:
-                hot_oil_thermal_efficiency = (
-                    _physical_profile_hot_oil_thermal_efficiency_for_reported_operating_cost(
-                        data,
-                        configuration,
-                        fuel=hot_oil_fuel,
-                        selected_steam_levels=(target_level,),
-                        supply_temperature=hot_oil_supply_temperature,
-                    )
+                hot_oil_thermal_efficiency = _physical_profile_hot_oil_thermal_efficiency_for_reported_operating_cost(
+                    data,
+                    configuration,
+                    fuel=hot_oil_fuel,
+                    selected_steam_levels=(target_level,),
+                    supply_temperature=hot_oil_supply_temperature,
                 )
             else:
-                hot_oil_thermal_efficiency = (
-                    style_case_study_2_best_configuration_hot_oil_thermal_efficiency_for_reported_operating_cost(
-                        scenario,
-                        fuel=hot_oil_fuel,
-                    )
+                hot_oil_thermal_efficiency = style_case_study_2_best_configuration_hot_oil_thermal_efficiency_for_reported_operating_cost(
+                    scenario,
+                    fuel=hot_oil_fuel,
                 )
         elif hot_oil_thermal_efficiency is None:
             raise ValueError(
@@ -758,9 +768,7 @@ def style_case_study_2_best_configuration_hrsg_candidate(
     if enthalpy_delta <= 0.0:
         raise ValueError("VHP steam enthalpy must exceed feedwater enthalpy")
     max_heat_input = (
-        configuration.hrsg_flowrate
-        * enthalpy_delta
-        / steam_generation_efficiency
+        configuration.hrsg_flowrate * enthalpy_delta / steam_generation_efficiency
     )
     supplementary_fuel_lhv = 0.0
     max_supplementary_fuel_flow = 0.0
@@ -824,7 +832,9 @@ def style_case_study_2_best_configuration_hot_oil_thermal_efficiency_for_reporte
 
     configuration = get_contribution2_case_study2_best_configuration(scenario)
     if configuration.hot_oil_system_load is None:
-        raise ValueError(f"best configuration {scenario!r} does not report hot-oil load")
+        raise ValueError(
+            f"best configuration {scenario!r} does not report hot-oil load"
+        )
     if configuration.hot_oil_operating_cost is None:
         raise ValueError(
             f"best configuration {scenario!r} does not report hot-oil cost"
@@ -1033,10 +1043,7 @@ def style_case_study_2_best_configuration_with_gas_turbine_hrsg(
             equipment_name=gas_turbine_name,
         ),
     )
-    if (
-        hrsg_supplementary_fuel is not None
-        and hrsg.max_supplementary_fuel_flow > 0.0
-    ):
+    if hrsg_supplementary_fuel is not None and hrsg.max_supplementary_fuel_flow > 0.0:
         fuel_costs = (
             *fuel_costs,
             style_case_study_2_fuel_cost(
@@ -1164,9 +1171,7 @@ def style_case_study_2_best_configuration_hrsg_supplementary_firing_efficiency_f
             "does not require supplementary heat"
         )
     if target_supplementary_fuel <= 0.0:
-        raise ValueError(
-            "reported fuel consumption is below non-HRSG fuel consumption"
-        )
+        raise ValueError("reported fuel consumption is below non-HRSG fuel consumption")
     return supplementary_heat / target_supplementary_fuel
 
 
@@ -1672,15 +1677,18 @@ def style_case_study_2_best_configuration_reported_equipment_model_data(
     if match_reported_economics:
         match_reported_fuel_consumption = True
         match_reported_fuel_cost = True
-        if hot_oil_fuel is not None and configuration.hot_oil_operating_cost is not None:
+        if (
+            hot_oil_fuel is not None
+            and configuration.hot_oil_operating_cost is not None
+        ):
             match_reported_hot_oil_operating_cost = True
         if reported_fixed_maintenance_cost is None:
             reported_fixed_maintenance_cost = configuration.maintenance_cost
         if reported_power_revenue is None and configuration.power_revenue is not None:
             reported_power_revenue = configuration.power_revenue
         if reported_auxiliary_operating_cost is None:
-            reported_auxiliary_operating_cost = (
-                _reported_auxiliary_operating_cost(configuration)
+            reported_auxiliary_operating_cost = _reported_auxiliary_operating_cost(
+                configuration
             )
         if reported_capital_cost is None:
             reported_capital_cost = configuration.capital_cost
@@ -1703,11 +1711,9 @@ def style_case_study_2_best_configuration_reported_equipment_model_data(
         )
     if hot_oil_fuel is not None:
         if match_reported_hot_oil_operating_cost:
-            hot_oil_thermal_efficiency = (
-                style_case_study_2_best_configuration_hot_oil_thermal_efficiency_for_reported_operating_cost(
-                    scenario,
-                    fuel=hot_oil_fuel,
-                )
+            hot_oil_thermal_efficiency = style_case_study_2_best_configuration_hot_oil_thermal_efficiency_for_reported_operating_cost(
+                scenario,
+                fuel=hot_oil_fuel,
             )
         elif hot_oil_thermal_efficiency is None:
             raise ValueError(
@@ -1757,22 +1763,19 @@ def style_case_study_2_best_configuration_reported_equipment_model_data(
     if match_reported_fuel_consumption:
         if hrsg_supplementary_fuel is None:
             raise ValueError(
-                "hrsg_supplementary_fuel is required to match reported fuel "
-                "consumption"
+                "hrsg_supplementary_fuel is required to match reported fuel consumption"
             )
-        hrsg_supplementary_firing_efficiency = (
-            style_case_study_2_best_configuration_hrsg_supplementary_firing_efficiency_for_reported_fuel_consumption(
-                scenario,
-                turbine_type=turbine_type,
-                gas_turbine_fuel=gas_turbine_fuel,
-                steam_generation_efficiency=steam_generation_efficiency,
-                boiler_thermal_efficiency=boiler_thermal_efficiency,
-                auxiliary_vhp_source_fuel_consumption_per_steam=(
-                    auxiliary_vhp_source_fuel_consumption_per_steam
-                ),
-                vhp_header_name=vhp_header_name,
-                properties=properties,
-            )
+        hrsg_supplementary_firing_efficiency = style_case_study_2_best_configuration_hrsg_supplementary_firing_efficiency_for_reported_fuel_consumption(
+            scenario,
+            turbine_type=turbine_type,
+            gas_turbine_fuel=gas_turbine_fuel,
+            steam_generation_efficiency=steam_generation_efficiency,
+            boiler_thermal_efficiency=boiler_thermal_efficiency,
+            auxiliary_vhp_source_fuel_consumption_per_steam=(
+                auxiliary_vhp_source_fuel_consumption_per_steam
+            ),
+            vhp_header_name=vhp_header_name,
+            properties=properties,
         )
     data = style_case_study_2_best_configuration_with_gas_turbine_hrsg(
         data,
@@ -1831,7 +1834,9 @@ def style_case_study_2_best_configuration_reported_equipment_model_data(
     if fix_reported_loads:
         data = _with_required_reported_equipment(
             data,
-            boiler_name=boiler_name if configuration.boiler_flowrate is not None else None,
+            boiler_name=boiler_name
+            if configuration.boiler_flowrate is not None
+            else None,
             gas_turbine_name=gas_turbine_name,
             hrsg_name=hrsg_name,
             vhp_turbine_name=vhp_turbine_name,
@@ -2168,8 +2173,7 @@ def style_case_study_2_complete_static_scenario_catalog(
     if vhp_turbine_name is not None or vhp_turbine_power_slope is not None:
         if vhp_turbine_name is None or vhp_turbine_power_slope is None:
             raise ValueError(
-                "vhp_turbine_name and vhp_turbine_power_slope must be provided "
-                "together"
+                "vhp_turbine_name and vhp_turbine_power_slope must be provided together"
             )
         connected_data = style_case_study_2_with_vhp_back_pressure_turbine(
             connected_data,
@@ -2197,7 +2201,9 @@ def style_case_study_2_complete_static_scenario_catalog(
         )
     if match_benchmark_capital_cost:
         if vhp_turbine_name is None:
-            raise ValueError("benchmark capital matching requires a configured VHP turbine")
+            raise ValueError(
+                "benchmark capital matching requires a configured VHP turbine"
+            )
         connected_data = _with_benchmark_fixed_capital_cost(
             connected_data,
             benchmark,
@@ -2526,10 +2532,10 @@ def _contribution2_best_configuration_tolerance(scenario: str) -> float:
 def _physical_profile_calibration_kwargs(
     configuration,
     calibrated: bool,
-) -> dict[str, object]:
+) -> _PhysicalProfileCalibrationKwargs:
     if not calibrated:
         return {}
-    kwargs: dict[str, object] = {
+    kwargs: _PhysicalProfileCalibrationKwargs = {
         "fix_reported_loads": True,
         "allow_unpaid_power_export": not configuration.microgrid,
         "reported_fixed_maintenance_cost": configuration.maintenance_cost,
@@ -2652,7 +2658,9 @@ def _with_reported_auxiliary_operating_cost(
     reported_auxiliary_operating_cost: float,
 ) -> StyleModelData:
     if data.cooling_water is None:
-        raise ValueError("reported auxiliary operating cost requires cooling water data")
+        raise ValueError(
+            "reported auxiliary operating cost requires cooling water data"
+        )
     additional_utility_load = reported_auxiliary_operating_cost / (
         data.cooling_water.unit_cost * data.operating_hours * data.cost_scale
     )
@@ -2680,7 +2688,9 @@ def _with_reported_fuel_cost(
     )
     return replace(
         data,
-        fuel_costs=tuple(replace(cost, unit_cost=unit_cost) for cost in data.fuel_costs),
+        fuel_costs=tuple(
+            replace(cost, unit_cost=unit_cost) for cost in data.fuel_costs
+        ),
     )
 
 
@@ -2698,7 +2708,9 @@ def _with_reported_fuel_cost_on_physical_basis(
     )
     return replace(
         data,
-        fuel_costs=tuple(replace(cost, unit_cost=unit_cost) for cost in data.fuel_costs),
+        fuel_costs=tuple(
+            replace(cost, unit_cost=unit_cost) for cost in data.fuel_costs
+        ),
     )
 
 
@@ -2737,7 +2749,9 @@ def _with_operating_cost_accounting_adjustments(
 
 def _fixed_load_physical_fuel_consumption(data: StyleModelData) -> float:
     return (
-        sum(_fixed_load_boiler_fuel_consumption(data, boiler) for boiler in data.boilers)
+        sum(
+            _fixed_load_boiler_fuel_consumption(data, boiler) for boiler in data.boilers
+        )
         + sum(
             gas_turbine.max_fuel_flow * gas_turbine.fuel_lhv
             for gas_turbine in data.gas_turbines
@@ -2748,7 +2762,10 @@ def _fixed_load_physical_fuel_consumption(data: StyleModelData) -> float:
             for hrsg in data.hrsgs
             if hrsg.must_select
         )
-        + sum(source.max_capacity * source.fuel_consumption_per_steam for source in data.vhp_sources)
+        + sum(
+            source.max_capacity * source.fuel_consumption_per_steam
+            for source in data.vhp_sources
+        )
     )
 
 
@@ -2765,9 +2782,7 @@ def _fixed_load_boiler_fuel_consumption(
         + boiler.load_fuel_coefficient * boiler.max_capacity
     )
     blowdown_fuel = (
-        boiler.blowdown_fraction
-        * boiler.max_capacity
-        * boiler.blowdown_enthalpy_delta
+        boiler.blowdown_fraction * boiler.max_capacity * boiler.blowdown_enthalpy_delta
     )
     return fuel_from_size_and_load + blowdown_fuel
 
@@ -2804,9 +2819,7 @@ def _with_required_reported_equipment(
     return replace(
         data,
         boilers=tuple(
-            replace(boiler, must_select=True)
-            if boiler.name == boiler_name
-            else boiler
+            replace(boiler, must_select=True) if boiler.name == boiler_name else boiler
             for boiler in data.boilers
         ),
         gas_turbines=tuple(
@@ -2887,8 +2900,7 @@ def _reported_design_capital_cost(data: StyleModelData) -> float:
             cost.annualization_factor
             * cost.installation_factor
             * (
-                cost.variable_capital_cost
-                * _reported_equipment_design_size(data, cost)
+                cost.variable_capital_cost * _reported_equipment_design_size(data, cost)
                 + cost.fixed_capital_cost
             )
             * data.cost_scale
@@ -2907,12 +2919,20 @@ def _reported_equipment_design_size(data: StyleModelData, cost: EquipmentCost) -
     if cost.equipment_type == "hrsg":
         return _hrsg_by_name(data, cost.equipment_name).max_heat_input
     if cost.equipment_type == "vhp_turbine":
-        turbine = _vhp_turbine_by_name(data, cost.equipment_name)
-        return turbine.power_slope * turbine.max_capacity - turbine.power_intercept
+        vhp_turbine = _vhp_turbine_by_name(data, cost.equipment_name)
+        return (
+            vhp_turbine.power_slope * vhp_turbine.max_capacity
+            - vhp_turbine.power_intercept
+        )
     if cost.equipment_type == "steam_main_turbine":
-        turbine = _steam_main_turbine_by_name(data, cost.equipment_name)
-        return turbine.power_slope * turbine.max_capacity - turbine.power_intercept
-    raise ValueError(f"unsupported reported equipment cost type {cost.equipment_type!r}")
+        steam_main_turbine = _steam_main_turbine_by_name(data, cost.equipment_name)
+        return (
+            steam_main_turbine.power_slope * steam_main_turbine.max_capacity
+            - steam_main_turbine.power_intercept
+        )
+    raise ValueError(
+        f"unsupported reported equipment cost type {cost.equipment_type!r}"
+    )
 
 
 def _equipment_cost_by_equipment_name(
@@ -3114,7 +3134,9 @@ def _best_configuration_steam_level(
 ) -> SteamLevelCandidate:
     main_enthalpy = properties.enthalpy(pressure=pressure, temperature=temperature)
     resolved_generation_enthalpy_delta = (
-        main_enthalpy if generation_enthalpy_delta is None else generation_enthalpy_delta
+        main_enthalpy
+        if generation_enthalpy_delta is None
+        else generation_enthalpy_delta
     )
     resolved_use_enthalpy_delta = (
         main_enthalpy if use_enthalpy_delta is None else use_enthalpy_delta

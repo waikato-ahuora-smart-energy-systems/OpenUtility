@@ -15,8 +15,12 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CASE_STUDY_ROOT = (
     PROJECT_ROOT / "case_study" / "jimenez_romero_utility_system_optimization"
 )
-INTEGRATED_OUTPUTS = CASE_STUDY_ROOT / "contribution2_integrated_hot_oil_fsr" / "outputs"
-INTEGRATED_SCRIPTS = CASE_STUDY_ROOT / "contribution2_integrated_hot_oil_fsr" / "scripts"
+INTEGRATED_OUTPUTS = (
+    CASE_STUDY_ROOT / "contribution2_integrated_hot_oil_fsr" / "outputs"
+)
+INTEGRATED_SCRIPTS = (
+    CASE_STUDY_ROOT / "contribution2_integrated_hot_oil_fsr" / "scripts"
+)
 COMPUTATIONAL_OUTPUTS = (
     CASE_STUDY_ROOT / "contribution2_computational_performance" / "outputs"
 )
@@ -248,9 +252,7 @@ def test_cli_writes_physical_profile_fuel_family_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = _checked_output(
-        "table_2_9_physical_profile_fuel_families.csv"
-    )
+    expected_output = _checked_output("table_2_9_physical_profile_fuel_families.csv")
 
     assert exit_code == 0
     _assert_csv_matches(stdout.getvalue(), expected_output)
@@ -272,9 +274,7 @@ def test_cli_writes_physical_profile_fuel_ranking_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = _checked_output(
-        "table_2_9_physical_profile_fuel_ranking.csv"
-    )
+    expected_output = _checked_output("table_2_9_physical_profile_fuel_ranking.csv")
 
     assert exit_code == 0
     _assert_csv_matches(stdout.getvalue(), expected_output)
@@ -296,9 +296,7 @@ def test_cli_writes_physical_profile_fuel_equipment_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = _checked_output(
-        "table_2_9_physical_profile_fuel_equipment.csv"
-    )
+    expected_output = _checked_output("table_2_9_physical_profile_fuel_equipment.csv")
 
     assert exit_code == 0
     _assert_csv_matches(stdout.getvalue(), expected_output)
@@ -320,9 +318,7 @@ def test_cli_writes_physical_profile_fuel_capacity_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = _checked_output(
-        "table_2_9_physical_profile_fuel_capacity.csv"
-    )
+    expected_output = _checked_output("table_2_9_physical_profile_fuel_capacity.csv")
 
     assert exit_code == 0
     _assert_csv_matches(stdout.getvalue(), expected_output)
@@ -344,9 +340,7 @@ def test_cli_writes_physical_profile_fuel_diagnosis_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = _checked_output(
-        "table_2_9_physical_profile_fuel_diagnosis.csv"
-    )
+    expected_output = _checked_output("table_2_9_physical_profile_fuel_diagnosis.csv")
 
     assert exit_code == 0
     _assert_csv_matches(stdout.getvalue(), expected_output)
@@ -368,9 +362,7 @@ def test_cli_writes_physical_profile_fuel_target_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = _checked_output(
-        "table_2_9_physical_profile_fuel_targets.csv"
-    )
+    expected_output = _checked_output("table_2_9_physical_profile_fuel_targets.csv")
 
     assert exit_code == 0
     _assert_csv_matches(stdout.getvalue(), expected_output)
@@ -647,9 +639,7 @@ def test_cli_writes_candidate_decomposition_pool_report() -> None:
         ],
         stdout=stdout,
     )
-    expected_output = _checked_output(
-        "contribution2_candidate_decomposition_pool.csv"
-    )
+    expected_output = _checked_output("contribution2_candidate_decomposition_pool.csv")
 
     assert exit_code == 0
     _assert_csv_matches(stdout.getvalue(), expected_output)
@@ -884,12 +874,8 @@ def test_cli_examples_match_generated_csv_reports() -> None:
 
 
 def test_reported_bilevel_comparison_example_matches_checked_output() -> None:
-    example_script = _case_study_script(
-        "contribution2_bilevel_reported_comparison.py"
-    )
-    expected_output = _checked_output(
-        "contribution2_bilevel_reported_comparison.csv"
-    )
+    example_script = _case_study_script("contribution2_bilevel_reported_comparison.py")
+    expected_output = _checked_output("contribution2_bilevel_reported_comparison.csv")
 
     result = subprocess.run(
         [sys.executable, str(example_script)],
@@ -921,7 +907,9 @@ def test_physical_profile_decomposition_smoke_example_matches_checked_output() -
     _assert_csv_matches(result.stdout, expected_output)
 
 
-def test_candidate_decomposition_skipped_candidate_example_matches_checked_output() -> None:
+def test_candidate_decomposition_skipped_candidate_example_matches_checked_output() -> (
+    None
+):
     example_script = _case_study_script(
         "contribution2_candidate_decomposition_skipped_candidate.py"
     )

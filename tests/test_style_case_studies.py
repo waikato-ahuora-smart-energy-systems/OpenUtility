@@ -104,7 +104,9 @@ def test_style_case_study_2_base_model_data_uses_site_and_resource_fixtures() ->
     sink_heat = sum(level.sink_heat_demand for level in data.steam_levels)
 
     assert data.steam_mains == ("MP",)
-    assert len(data.steam_levels) == len(style_case_study_2_heat_interval_profile().intervals)
+    assert len(data.steam_levels) == len(
+        style_case_study_2_heat_interval_profile().intervals
+    )
     assert source_heat > sink_heat
     assert data.power_demand == pytest.approx(40.0)
     assert data.grid_export_limit == pytest.approx(10.0)
@@ -122,8 +124,12 @@ def test_style_case_study_2_base_model_data_uses_site_and_resource_fixtures() ->
         level.generation_enthalpy_delta == pytest.approx(2.0)
         for level in data.steam_levels
     )
-    assert all(level.use_enthalpy_delta == pytest.approx(1.0) for level in data.steam_levels)
-    assert all(level.feedwater_enthalpy == pytest.approx(0.5) for level in data.steam_levels)
+    assert all(
+        level.use_enthalpy_delta == pytest.approx(1.0) for level in data.steam_levels
+    )
+    assert all(
+        level.feedwater_enthalpy == pytest.approx(0.5) for level in data.steam_levels
+    )
 
 
 def test_style_case_study_2_capital_recovery_factor_uses_site_finance() -> None:
@@ -150,7 +156,9 @@ def test_style_case_study_2_resource_helpers_create_model_cost_inputs() -> None:
     assert water.unit_cost == pytest.approx(0.301)
 
 
-def test_style_case_study_2_equipment_cost_input_selects_piecewise_coefficients() -> None:
+def test_style_case_study_2_equipment_cost_input_selects_piecewise_coefficients() -> (
+    None
+):
     packaged_boiler = style_case_study_2_equipment_cost_input(
         equipment_type="boiler",
         subtype="packaged",
@@ -226,8 +234,7 @@ def test_style_case_study_2_gas_turbine_candidate_uses_p1b_coefficients() -> Non
     assert candidate.power_slope == pytest.approx(13.08 / (2.5948 * ambient_ratio))
     assert candidate.power_intercept == pytest.approx(30.093 / 2.5948)
     assert (
-        candidate.power_slope * candidate.max_fuel_flow
-        - candidate.power_intercept
+        candidate.power_slope * candidate.max_fuel_flow - candidate.power_intercept
     ) == pytest.approx(40.0)
 
 
@@ -258,7 +265,9 @@ def test_style_case_study_2_static_scenario_wraps_base_data_and_benchmark() -> N
     assert scenario.data.steam_levels[0].feedwater_enthalpy == pytest.approx(0.5)
 
 
-def test_style_case_study_2_gas_turbine_scenario_data_adds_candidate_and_costs() -> None:
+def test_style_case_study_2_gas_turbine_scenario_data_adds_candidate_and_costs() -> (
+    None
+):
     data = style_case_study_2_gas_turbine_scenario_data(
         steam_main="MP",
         generation_enthalpy_delta=2.0,
@@ -348,7 +357,9 @@ def test_style_case_study_2_hrsg_cost_converts_exhaust_flow_to_heat_basis() -> N
     assert cost.fixed_capital_cost == pytest.approx(135.33)
 
 
-def test_style_case_study_2_boiler_candidate_maps_efficiency_to_fuel_coefficient() -> None:
+def test_style_case_study_2_boiler_candidate_maps_efficiency_to_fuel_coefficient() -> (
+    None
+):
     boiler = style_case_study_2_boiler_candidate(
         name="boiler-packaged",
         vhp_header="VHP_100",
@@ -366,7 +377,9 @@ def test_style_case_study_2_boiler_candidate_maps_efficiency_to_fuel_coefficient
     assert boiler.minimum_load_fraction == pytest.approx(0.25)
 
 
-def test_style_case_study_2_vhp_enthalpies_use_site_pressure_and_feedwater_temperature() -> None:
+def test_style_case_study_2_vhp_enthalpies_use_site_pressure_and_feedwater_temperature() -> (
+    None
+):
     steam_enthalpy, feedwater_enthalpy = style_case_study_2_vhp_enthalpies(
         steam_temperature=570.0,
     )
@@ -376,7 +389,9 @@ def test_style_case_study_2_vhp_enthalpies_use_site_pressure_and_feedwater_tempe
     assert steam_enthalpy - feedwater_enthalpy == pytest.approx(0.8447, abs=1e-4)
 
 
-def test_style_case_study_2_best_configuration_property_spec_uses_reported_conditions() -> None:
+def test_style_case_study_2_best_configuration_property_spec_uses_reported_conditions() -> (
+    None
+):
     spec = style_case_study_2_best_configuration_property_spec(
         "utility-system-microgrid",
     )
@@ -393,7 +408,9 @@ def test_style_case_study_2_best_configuration_property_spec_uses_reported_condi
     assert spec.vhp_headers[0].temperature == pytest.approx(570.0)
 
 
-def test_style_case_study_2_best_configuration_property_spec_updates_model_data() -> None:
+def test_style_case_study_2_best_configuration_property_spec_updates_model_data() -> (
+    None
+):
     data = StyleModelData(
         steam_mains=("HP", "MP", "LP"),
         steam_levels=(
@@ -457,7 +474,9 @@ def test_style_case_study_2_best_configuration_property_spec_updates_model_data(
     )
 
 
-def test_style_case_study_2_best_configuration_property_spec_accepts_level_name_mapping() -> None:
+def test_style_case_study_2_best_configuration_property_spec_accepts_level_name_mapping() -> (
+    None
+):
     spec = style_case_study_2_best_configuration_property_spec(
         "hot-oil-fsr-microgrid",
         steam_level_names={"MP": "MP_295p5", "LP": "LP_150"},
@@ -469,7 +488,9 @@ def test_style_case_study_2_best_configuration_property_spec_accepts_level_name_
     assert spec.vhp_headers[0].vhp_header == "VHP_100bar"
 
 
-def test_style_case_study_2_best_configuration_reported_flow_model_data_is_buildable() -> None:
+def test_style_case_study_2_best_configuration_reported_flow_model_data_is_buildable() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_flow_model_data(
         "utility-system-microgrid",
     )
@@ -490,7 +511,9 @@ def test_style_case_study_2_best_configuration_reported_flow_model_data_is_build
     assert list(model.STEAM_MAINS.data()) == ["HP", "MP", "LP"]
 
 
-def test_style_case_study_2_best_configuration_physical_profile_model_data_uses_extracted_heat_loads() -> None:
+def test_style_case_study_2_best_configuration_physical_profile_model_data_uses_extracted_heat_loads() -> (
+    None
+):
     baseline = style_case_study_2_base_model_data(
         steam_main="MP",
         generation_enthalpy_delta=1.0,
@@ -534,7 +557,9 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_uses_
     ]
 
 
-def test_style_case_study_2_best_configuration_physical_profile_model_data_defaults_to_reported_mains() -> None:
+def test_style_case_study_2_best_configuration_physical_profile_model_data_defaults_to_reported_mains() -> (
+    None
+):
     baseline = style_case_study_2_base_model_data(
         steam_main="HP",
         generation_enthalpy_delta=1.0,
@@ -610,7 +635,9 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_defau
     assert len(model.one_level_per_main) == 3
 
 
-def test_style_case_study_2_best_configuration_physical_profile_model_data_uses_enthalpy_basis_for_target_level() -> None:
+def test_style_case_study_2_best_configuration_physical_profile_model_data_uses_enthalpy_basis_for_target_level() -> (
+    None
+):
     data = style_case_study_2_best_configuration_physical_profile_model_data(
         "utility-system-microgrid",
         turbine_type="industrial",
@@ -635,7 +662,9 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_uses_
     )
 
 
-def test_style_case_study_2_best_configuration_physical_profile_model_data_solves_with_pyomo_highs() -> None:
+def test_style_case_study_2_best_configuration_physical_profile_model_data_solves_with_pyomo_highs() -> (
+    None
+):
     data = style_case_study_2_best_configuration_physical_profile_model_data(
         "utility-system-microgrid",
         turbine_type="industrial",
@@ -664,7 +693,9 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_solve
     assert run.result.total_annualized_cost == pytest.approx(57.29270032002185)
 
 
-def test_style_case_study_2_best_configuration_physical_profile_model_data_reports_table_2_9_deltas() -> None:
+def test_style_case_study_2_best_configuration_physical_profile_model_data_reports_table_2_9_deltas() -> (
+    None
+):
     data = style_case_study_2_best_configuration_physical_profile_model_data(
         "utility-system-microgrid",
         turbine_type="industrial",
@@ -702,7 +733,9 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_repor
     )
 
 
-def test_style_case_study_2_best_configuration_physical_profile_model_data_can_fix_reported_loads() -> None:
+def test_style_case_study_2_best_configuration_physical_profile_model_data_can_fix_reported_loads() -> (
+    None
+):
     data = style_case_study_2_best_configuration_physical_profile_model_data(
         "utility-system-microgrid",
         turbine_type="industrial",
@@ -728,9 +761,7 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_f
         absolute_tolerance=1e-2,
     )
 
-    assert data.boilers[0].min_capacity == pytest.approx(
-        data.boilers[0].max_capacity
-    )
+    assert data.boilers[0].min_capacity == pytest.approx(data.boilers[0].max_capacity)
     assert data.boilers[0].must_select is True
     assert data.gas_turbines[0].must_select is True
     assert data.hrsgs[0].must_select is True
@@ -748,7 +779,9 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_f
     )
 
 
-def test_style_case_study_2_best_configuration_physical_profile_model_data_can_apply_reported_maintenance_and_capital() -> None:
+def test_style_case_study_2_best_configuration_physical_profile_model_data_can_apply_reported_maintenance_and_capital() -> (
+    None
+):
     data = style_case_study_2_best_configuration_physical_profile_model_data(
         "utility-system-microgrid",
         turbine_type="industrial",
@@ -786,7 +819,9 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_a
     )
 
 
-def test_style_case_study_2_best_configuration_physical_profile_model_data_can_match_reported_fuel_cost_basis() -> None:
+def test_style_case_study_2_best_configuration_physical_profile_model_data_can_match_reported_fuel_cost_basis() -> (
+    None
+):
     data = style_case_study_2_best_configuration_physical_profile_model_data(
         "utility-system-microgrid",
         turbine_type="industrial",
@@ -827,7 +862,9 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_m
     )
 
 
-def test_style_case_study_2_best_configuration_physical_profile_model_data_can_apply_residual_auxiliary_cost() -> None:
+def test_style_case_study_2_best_configuration_physical_profile_model_data_can_apply_residual_auxiliary_cost() -> (
+    None
+):
     data = style_case_study_2_best_configuration_physical_profile_model_data(
         "utility-system-microgrid",
         turbine_type="industrial",
@@ -865,7 +902,9 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_a
     assert comparison.deviation_for("total_annualized_cost").within_tolerance is True
 
 
-def test_style_case_study_2_best_configuration_physical_profile_model_data_can_allow_unpaid_export_for_stand_alone_fixed_loads() -> None:
+def test_style_case_study_2_best_configuration_physical_profile_model_data_can_allow_unpaid_export_for_stand_alone_fixed_loads() -> (
+    None
+):
     data = style_case_study_2_best_configuration_physical_profile_model_data(
         "utility-system-stand-alone",
         turbine_type="industrial",
@@ -909,7 +948,9 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_a
     )
 
 
-def test_style_case_study_2_best_configuration_physical_profile_model_data_can_include_hot_oil_and_fsr() -> None:
+def test_style_case_study_2_best_configuration_physical_profile_model_data_can_include_hot_oil_and_fsr() -> (
+    None
+):
     data = style_case_study_2_best_configuration_physical_profile_model_data(
         "hot-oil-fsr-microgrid",
         turbine_type="industrial",
@@ -942,7 +983,9 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_i
     assert list(model.FLASH_ROUTES.data()) == ["MP-to-LP-FSR"]
 
 
-def test_style_case_study_2_best_configuration_physical_profile_model_data_can_calibrate_hot_oil_fsr_costs() -> None:
+def test_style_case_study_2_best_configuration_physical_profile_model_data_can_calibrate_hot_oil_fsr_costs() -> (
+    None
+):
     benchmark = get_contribution2_case_study2_best_configuration(
         "hot-oil-fsr-microgrid",
     )
@@ -998,7 +1041,9 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_c
     )
 
 
-def test_style_case_study_2_best_configuration_physical_profile_model_data_can_calibrate_hot_oil_fsr_stand_alone_costs() -> None:
+def test_style_case_study_2_best_configuration_physical_profile_model_data_can_calibrate_hot_oil_fsr_stand_alone_costs() -> (
+    None
+):
     benchmark = get_contribution2_case_study2_best_configuration(
         "hot-oil-fsr-stand-alone",
     )
@@ -1055,7 +1100,9 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_can_c
     assert comparison.deviation_for("total_annualized_cost").within_tolerance is True
 
 
-def test_style_case_study_2_best_configuration_physical_profile_model_data_requires_fixed_loads_to_match_fuel_cost_basis() -> None:
+def test_style_case_study_2_best_configuration_physical_profile_model_data_requires_fixed_loads_to_match_fuel_cost_basis() -> (
+    None
+):
     with pytest.raises(ValueError, match="requires fixed reported loads"):
         style_case_study_2_best_configuration_physical_profile_model_data(
             "utility-system-microgrid",
@@ -1070,7 +1117,9 @@ def test_style_case_study_2_best_configuration_physical_profile_model_data_requi
         )
 
 
-def test_style_case_study_2_best_configuration_reported_flow_model_data_accepts_level_names() -> None:
+def test_style_case_study_2_best_configuration_reported_flow_model_data_accepts_level_names() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_flow_model_data(
         "hot-oil-fsr-microgrid",
         steam_level_names={"MP": "MP_295p5", "LP": "LP_150"},
@@ -1085,7 +1134,9 @@ def test_style_case_study_2_best_configuration_reported_flow_model_data_accepts_
     )
 
 
-def test_style_case_study_2_best_configuration_reported_flow_model_data_can_use_enthalpy_basis() -> None:
+def test_style_case_study_2_best_configuration_reported_flow_model_data_can_use_enthalpy_basis() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_flow_model_data(
         "hot-oil-fsr-microgrid",
         generation_enthalpy_delta=None,
@@ -1106,7 +1157,9 @@ def test_style_case_study_2_best_configuration_reported_flow_model_data_can_use_
     )
 
 
-def test_style_case_study_2_best_configuration_vhp_turbine_candidate_uses_reported_power() -> None:
+def test_style_case_study_2_best_configuration_vhp_turbine_candidate_uses_reported_power() -> (
+    None
+):
     turbine = style_case_study_2_best_configuration_vhp_turbine_candidate(
         "utility-system-microgrid",
         name="vhp-st",
@@ -1122,7 +1175,9 @@ def test_style_case_study_2_best_configuration_vhp_turbine_candidate_uses_report
     assert turbine.max_capacity == pytest.approx(217.78)
 
 
-def test_style_case_study_2_best_configuration_boiler_candidate_uses_reported_flow() -> None:
+def test_style_case_study_2_best_configuration_boiler_candidate_uses_reported_flow() -> (
+    None
+):
     boiler = style_case_study_2_best_configuration_boiler_candidate(
         "utility-system-microgrid",
         name="reported-boiler",
@@ -1136,7 +1191,9 @@ def test_style_case_study_2_best_configuration_boiler_candidate_uses_reported_fl
     assert boiler.load_fuel_coefficient == pytest.approx(1.0 / 0.85)
 
 
-def test_style_case_study_2_best_configuration_boiler_requires_reported_boiler_flow() -> None:
+def test_style_case_study_2_best_configuration_boiler_requires_reported_boiler_flow() -> (
+    None
+):
     with pytest.raises(ValueError, match="does not report a boiler flowrate"):
         style_case_study_2_best_configuration_boiler_candidate(
             "hot-oil-fsr-microgrid",
@@ -1146,7 +1203,9 @@ def test_style_case_study_2_best_configuration_boiler_requires_reported_boiler_f
         )
 
 
-def test_style_case_study_2_best_configuration_with_boiler_wires_reported_flow_data() -> None:
+def test_style_case_study_2_best_configuration_with_boiler_wires_reported_flow_data() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_flow_model_data(
         "utility-system-microgrid",
     )
@@ -1169,7 +1228,9 @@ def test_style_case_study_2_best_configuration_with_boiler_wires_reported_flow_d
     assert list(model.BOILERS.data()) == ["reported-boiler"]
 
 
-def test_style_case_study_2_best_configuration_gas_turbine_candidate_uses_reported_power() -> None:
+def test_style_case_study_2_best_configuration_gas_turbine_candidate_uses_reported_power() -> (
+    None
+):
     turbine = style_case_study_2_best_configuration_gas_turbine_candidate(
         "utility-system-microgrid",
         name="reported-gt",
@@ -1184,7 +1245,9 @@ def test_style_case_study_2_best_configuration_gas_turbine_candidate_uses_report
     ) == pytest.approx(25.79)
 
 
-def test_style_case_study_2_best_configuration_hrsg_candidate_uses_reported_flow() -> None:
+def test_style_case_study_2_best_configuration_hrsg_candidate_uses_reported_flow() -> (
+    None
+):
     steam_enthalpy, feedwater_enthalpy = style_case_study_2_vhp_enthalpies(
         steam_temperature=570.0,
     )
@@ -1211,7 +1274,9 @@ def test_style_case_study_2_best_configuration_hrsg_candidate_uses_reported_flow
     assert hrsg.max_heat_input == pytest.approx(expected_heat_input)
 
 
-def test_style_case_study_2_best_configuration_hrsg_candidate_sizes_supplementary_firing() -> None:
+def test_style_case_study_2_best_configuration_hrsg_candidate_sizes_supplementary_firing() -> (
+    None
+):
     steam_enthalpy, feedwater_enthalpy = style_case_study_2_vhp_enthalpies(
         steam_temperature=570.0,
     )
@@ -1247,20 +1312,22 @@ def test_style_case_study_2_best_configuration_hrsg_candidate_sizes_supplementar
     )
 
 
-def test_style_case_study_2_best_configuration_hrsg_supplementary_efficiency_matches_reported_fuel() -> None:
-    efficiency = (
-        style_case_study_2_best_configuration_hrsg_supplementary_firing_efficiency_for_reported_fuel_consumption(
-            "hot-oil-fsr-microgrid",
-            turbine_type="industrial",
-            gas_turbine_fuel="natural-gas",
-            steam_generation_efficiency=0.8,
-        )
+def test_style_case_study_2_best_configuration_hrsg_supplementary_efficiency_matches_reported_fuel() -> (
+    None
+):
+    efficiency = style_case_study_2_best_configuration_hrsg_supplementary_firing_efficiency_for_reported_fuel_consumption(
+        "hot-oil-fsr-microgrid",
+        turbine_type="industrial",
+        gas_turbine_fuel="natural-gas",
+        steam_generation_efficiency=0.8,
     )
 
     assert efficiency == pytest.approx(1.0849, abs=1e-4)
 
 
-def test_style_case_study_2_best_configuration_with_gas_turbine_hrsg_wires_reported_flow_data() -> None:
+def test_style_case_study_2_best_configuration_with_gas_turbine_hrsg_wires_reported_flow_data() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_flow_model_data(
         "utility-system-microgrid",
     )
@@ -1287,7 +1354,9 @@ def test_style_case_study_2_best_configuration_with_gas_turbine_hrsg_wires_repor
     assert list(model.HRSGS.data()) == ["reported-hrsg"]
 
 
-def test_style_case_study_2_best_configuration_with_vhp_turbine_wires_reported_flow_data() -> None:
+def test_style_case_study_2_best_configuration_with_vhp_turbine_wires_reported_flow_data() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_flow_model_data(
         "utility-system-microgrid",
     )
@@ -1307,7 +1376,9 @@ def test_style_case_study_2_best_configuration_with_vhp_turbine_wires_reported_f
     assert list(model.VHP_TURBINES.data()) == ["vhp-st"]
 
 
-def test_style_case_study_2_best_configuration_reported_equipment_model_data_combines_helpers() -> None:
+def test_style_case_study_2_best_configuration_reported_equipment_model_data_combines_helpers() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_equipment_model_data(
         "utility-system-microgrid",
         turbine_type="industrial",
@@ -1331,7 +1402,9 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_com
     assert list(model.VHP_TURBINES.data()) == ["reported-vhp-st"]
 
 
-def test_style_case_study_2_best_configuration_reported_equipment_model_data_skips_absent_boiler() -> None:
+def test_style_case_study_2_best_configuration_reported_equipment_model_data_skips_absent_boiler() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_equipment_model_data(
         "hot-oil-fsr-microgrid",
         turbine_type="industrial",
@@ -1346,7 +1419,9 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_ski
     assert [hrsg.name for hrsg in data.hrsgs] == ["reported-hrsg"]
 
 
-def test_style_case_study_2_best_configuration_reported_equipment_model_data_solves_enthalpy_basis() -> None:
+def test_style_case_study_2_best_configuration_reported_equipment_model_data_solves_enthalpy_basis() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_equipment_model_data(
         "utility-system-microgrid",
         turbine_type="industrial",
@@ -1372,7 +1447,9 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_sol
     assert run.result.power_generation >= data.power_demand
 
 
-def test_style_case_study_2_best_configuration_reported_equipment_model_data_reports_calibration_gap() -> None:
+def test_style_case_study_2_best_configuration_reported_equipment_model_data_reports_calibration_gap() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_equipment_model_data(
         "utility-system-microgrid",
         turbine_type="industrial",
@@ -1408,7 +1485,9 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_rep
     )
 
 
-def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_fix_reported_loads() -> None:
+def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_fix_reported_loads() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_equipment_model_data(
         "utility-system-microgrid",
         turbine_type="industrial",
@@ -1451,7 +1530,9 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
     )
 
 
-def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_allow_unpaid_export() -> None:
+def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_allow_unpaid_export() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_equipment_model_data(
         "utility-system-stand-alone",
         turbine_type="industrial",
@@ -1477,7 +1558,9 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
     assert run.result.power_generation == pytest.approx(41.67)
 
 
-def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_apply_reported_maintenance() -> None:
+def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_apply_reported_maintenance() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_equipment_model_data(
         "utility-system-microgrid",
         turbine_type="industrial",
@@ -1503,7 +1586,9 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
     assert run.result.total_annualized_cost == pytest.approx(61.9430, abs=1e-4)
 
 
-def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_match_reported_power_revenue() -> None:
+def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_match_reported_power_revenue() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_equipment_model_data(
         "utility-system-microgrid",
         turbine_type="industrial",
@@ -1530,7 +1615,9 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
     assert run.result.operating_cost == pytest.approx(48.4470, abs=1e-4)
 
 
-def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_apply_auxiliary_operating_cost() -> None:
+def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_apply_auxiliary_operating_cost() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_equipment_model_data(
         "utility-system-microgrid",
         turbine_type="industrial",
@@ -1556,7 +1643,9 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
     assert run.result.operating_cost == pytest.approx(50.49, abs=1e-4)
 
 
-def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_match_reported_capital() -> None:
+def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_match_reported_capital() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_equipment_model_data(
         "utility-system-microgrid",
         turbine_type="industrial",
@@ -1581,7 +1670,9 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
     assert run.result.capital_cost == pytest.approx(10.78, abs=1e-4)
 
 
-def test_style_case_study_2_best_configuration_reported_equipment_model_data_matches_reported_economics() -> None:
+def test_style_case_study_2_best_configuration_reported_equipment_model_data_matches_reported_economics() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_equipment_model_data(
         "utility-system-microgrid",
         turbine_type="industrial",
@@ -1622,7 +1713,9 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_mat
     )
 
 
-def test_style_case_study_2_best_configuration_hot_oil_config_uses_reported_load() -> None:
+def test_style_case_study_2_best_configuration_hot_oil_config_uses_reported_load() -> (
+    None
+):
     config = style_case_study_2_best_configuration_hot_oil_config(
         "hot-oil-fsr-microgrid",
         fuel="natural-gas",
@@ -1634,18 +1727,20 @@ def test_style_case_study_2_best_configuration_hot_oil_config_uses_reported_load
     assert config.high_temperature_heat_demand == pytest.approx(51.86)
 
 
-def test_style_case_study_2_best_configuration_hot_oil_efficiency_matches_reported_cost() -> None:
-    efficiency = (
-        style_case_study_2_best_configuration_hot_oil_thermal_efficiency_for_reported_operating_cost(
-            "hot-oil-fsr-microgrid",
-            fuel="natural-gas",
-        )
+def test_style_case_study_2_best_configuration_hot_oil_efficiency_matches_reported_cost() -> (
+    None
+):
+    efficiency = style_case_study_2_best_configuration_hot_oil_thermal_efficiency_for_reported_operating_cost(
+        "hot-oil-fsr-microgrid",
+        fuel="natural-gas",
     )
 
     assert efficiency == pytest.approx(0.7848, abs=1e-4)
 
 
-def test_style_case_study_2_best_configuration_hot_oil_config_requires_reported_load() -> None:
+def test_style_case_study_2_best_configuration_hot_oil_config_requires_reported_load() -> (
+    None
+):
     with pytest.raises(ValueError, match="does not report a hot-oil system load"):
         style_case_study_2_best_configuration_hot_oil_config(
             "utility-system-microgrid",
@@ -1654,7 +1749,9 @@ def test_style_case_study_2_best_configuration_hot_oil_config_requires_reported_
         )
 
 
-def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_include_hot_oil() -> None:
+def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_include_hot_oil() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_equipment_model_data(
         "hot-oil-fsr-microgrid",
         turbine_type="industrial",
@@ -1673,7 +1770,9 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
     assert model.hot_oil_high_temperature_heat_demand.value == pytest.approx(51.86)
 
 
-def test_style_case_study_2_best_configuration_flash_steam_recovery_config_uses_reported_flash() -> None:
+def test_style_case_study_2_best_configuration_flash_steam_recovery_config_uses_reported_flash() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_flow_model_data(
         "hot-oil-fsr-microgrid",
     )
@@ -1691,7 +1790,9 @@ def test_style_case_study_2_best_configuration_flash_steam_recovery_config_uses_
     assert config.condensate_return_fraction == pytest.approx(0.9808, abs=1e-4)
 
 
-def test_style_case_study_2_best_configuration_flash_steam_recovery_config_accepts_level_names() -> None:
+def test_style_case_study_2_best_configuration_flash_steam_recovery_config_accepts_level_names() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_flow_model_data(
         "hot-oil-fsr-microgrid",
         steam_level_names={"MP": "MP_295p5", "LP": "LP_150"},
@@ -1707,7 +1808,9 @@ def test_style_case_study_2_best_configuration_flash_steam_recovery_config_accep
     assert config.routes[0].target_level == "LP_150"
 
 
-def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_include_fsr() -> None:
+def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_include_fsr() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_equipment_model_data(
         "hot-oil-fsr-microgrid",
         turbine_type="industrial",
@@ -1727,7 +1830,9 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
     assert list(model.FLASH_ROUTES.data()) == ["MP-to-LP-FSR"]
 
 
-def test_style_case_study_2_best_configuration_reported_equipment_model_data_fixed_loads_force_reported_units_with_hot_oil_and_fsr() -> None:
+def test_style_case_study_2_best_configuration_reported_equipment_model_data_fixed_loads_force_reported_units_with_hot_oil_and_fsr() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_equipment_model_data(
         "hot-oil-fsr-microgrid",
         turbine_type="industrial",
@@ -1754,7 +1859,9 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_fix
     assert run.result.power_generation == pytest.approx(46.67)
 
 
-def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_match_hot_oil_fsr_fuel_consumption() -> None:
+def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_match_hot_oil_fsr_fuel_consumption() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_equipment_model_data(
         "hot-oil-fsr-microgrid",
         turbine_type="industrial",
@@ -1788,7 +1895,9 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
     assert comparison.deviation_for("fuel_consumption").within_tolerance is True
 
 
-def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_match_hot_oil_operating_cost() -> None:
+def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_match_hot_oil_operating_cost() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_equipment_model_data(
         "hot-oil-fsr-microgrid",
         turbine_type="industrial",
@@ -1822,7 +1931,9 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
     assert comparison.deviation_for("fuel_consumption").within_tolerance is True
 
 
-def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_match_hot_oil_fsr_microgrid_economics() -> None:
+def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_match_hot_oil_fsr_microgrid_economics() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_equipment_model_data(
         "hot-oil-fsr-microgrid",
         turbine_type="industrial",
@@ -1853,7 +1964,9 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
     assert comparison.within_tolerance is True
 
 
-def test_style_case_study_2_best_configuration_reported_equipment_model_data_auxiliary_source_solves_hot_oil_fsr_stand_alone() -> None:
+def test_style_case_study_2_best_configuration_reported_equipment_model_data_auxiliary_source_solves_hot_oil_fsr_stand_alone() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_equipment_model_data(
         "hot-oil-fsr-stand-alone",
         turbine_type="industrial",
@@ -1887,7 +2000,9 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_aux
     assert run.result.power_generation == pytest.approx(41.67, abs=1e-4)
 
 
-def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_match_hot_oil_fsr_stand_alone_economics() -> None:
+def test_style_case_study_2_best_configuration_reported_equipment_model_data_can_match_hot_oil_fsr_stand_alone_economics() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_equipment_model_data(
         "hot-oil-fsr-stand-alone",
         turbine_type="industrial",
@@ -1920,7 +2035,9 @@ def test_style_case_study_2_best_configuration_reported_equipment_model_data_can
     assert comparison.within_tolerance is True
 
 
-def test_style_case_study_2_best_configuration_inter_main_letdown_candidates_use_reported_balance() -> None:
+def test_style_case_study_2_best_configuration_inter_main_letdown_candidates_use_reported_balance() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_flow_model_data(
         "utility-system-microgrid",
     )
@@ -1941,7 +2058,9 @@ def test_style_case_study_2_best_configuration_inter_main_letdown_candidates_use
     )
 
 
-def test_style_case_study_2_best_configuration_inter_main_letdown_candidates_accept_level_names() -> None:
+def test_style_case_study_2_best_configuration_inter_main_letdown_candidates_accept_level_names() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_flow_model_data(
         "hot-oil-fsr-microgrid",
         steam_level_names={"MP": "MP_295p5", "LP": "LP_150"},
@@ -1958,7 +2077,9 @@ def test_style_case_study_2_best_configuration_inter_main_letdown_candidates_acc
     assert letdowns[0].max_flow == pytest.approx(55.86)
 
 
-def test_style_case_study_2_best_configuration_with_inter_main_letdowns_wires_reported_flow_data() -> None:
+def test_style_case_study_2_best_configuration_with_inter_main_letdowns_wires_reported_flow_data() -> (
+    None
+):
     data = style_case_study_2_best_configuration_reported_flow_model_data(
         "utility-system-microgrid",
     )
@@ -2009,7 +2130,9 @@ def test_style_case_study_2_gas_turbine_hrsg_scenario_data_is_buildable() -> Non
     assert list(model.VHP_HEADERS.data()) == ["VHP_100"]
 
 
-def test_style_case_study_2_boiler_gas_turbine_hrsg_scenario_data_is_buildable() -> None:
+def test_style_case_study_2_boiler_gas_turbine_hrsg_scenario_data_is_buildable() -> (
+    None
+):
     data = style_case_study_2_boiler_gas_turbine_hrsg_scenario_data(
         steam_main="MP",
         generation_enthalpy_delta=2.0,
@@ -2138,7 +2261,9 @@ def test_style_case_study_2_with_vhp_letdown_wires_generation_to_header() -> Non
     assert list(model.VHP_LETDOWNS.data()) == ["vhp-to-first-mp"]
 
 
-def test_style_case_study_2_with_vhp_back_pressure_turbine_wires_generation_to_header() -> None:
+def test_style_case_study_2_with_vhp_back_pressure_turbine_wires_generation_to_header() -> (
+    None
+):
     data = style_case_study_2_boiler_gas_turbine_hrsg_scenario_data(
         steam_main="MP",
         generation_enthalpy_delta=2.0,
@@ -2228,7 +2353,9 @@ def test_style_case_study_2_complete_static_scenario_catalog_is_buildable() -> N
     assert list(model.VHP_LETDOWNS.data()) == ["vhp-to-mp"]
 
 
-def test_style_case_study_2_complete_static_scenario_catalog_can_include_vhp_turbine() -> None:
+def test_style_case_study_2_complete_static_scenario_catalog_can_include_vhp_turbine() -> (
+    None
+):
     base_data = style_case_study_2_boiler_gas_turbine_hrsg_scenario_data(
         steam_main="MP",
         generation_enthalpy_delta=2.0,
@@ -2338,7 +2465,9 @@ def test_style_case_study_2_complete_static_scenario_runs_with_pyomo_highs() -> 
     assert run.result.total_annualized_cost > 0.0
 
 
-def test_style_case_study_2_complete_static_scenario_can_match_benchmark_power_generation() -> None:
+def test_style_case_study_2_complete_static_scenario_can_match_benchmark_power_generation() -> (
+    None
+):
     vhp_steam_enthalpy, vhp_feedwater_enthalpy = style_case_study_2_vhp_enthalpies(
         steam_temperature=570.0,
     )
@@ -2396,7 +2525,9 @@ def test_style_case_study_2_complete_static_scenario_can_match_benchmark_power_g
     assert run.comparison.deviation_for("fuel_consumption").within_tolerance is False
 
 
-def test_style_case_study_2_complete_static_scenario_can_match_benchmark_maintenance_cost() -> None:
+def test_style_case_study_2_complete_static_scenario_can_match_benchmark_maintenance_cost() -> (
+    None
+):
     vhp_steam_enthalpy, vhp_feedwater_enthalpy = style_case_study_2_vhp_enthalpies(
         steam_temperature=570.0,
     )
@@ -2454,7 +2585,9 @@ def test_style_case_study_2_complete_static_scenario_can_match_benchmark_mainten
     assert run.comparison.deviation_for("fuel_consumption").within_tolerance is False
 
 
-def test_style_case_study_2_complete_static_scenario_can_match_benchmark_capital_cost() -> None:
+def test_style_case_study_2_complete_static_scenario_can_match_benchmark_capital_cost() -> (
+    None
+):
     vhp_steam_enthalpy, vhp_feedwater_enthalpy = style_case_study_2_vhp_enthalpies(
         steam_temperature=570.0,
     )
@@ -2512,7 +2645,9 @@ def test_style_case_study_2_complete_static_scenario_can_match_benchmark_capital
     assert run.comparison.deviation_for("fuel_consumption").within_tolerance is False
 
 
-def test_style_case_study_2_complete_static_scenario_can_apply_operating_cost_adjustment() -> None:
+def test_style_case_study_2_complete_static_scenario_can_apply_operating_cost_adjustment() -> (
+    None
+):
     vhp_steam_enthalpy, vhp_feedwater_enthalpy = style_case_study_2_vhp_enthalpies(
         steam_temperature=570.0,
     )
@@ -2586,8 +2721,7 @@ def test_style_case_study_2_complete_static_scenario_can_apply_operating_cost_ad
 
     assert targeted_run.comparison is not None
     assert (
-        targeted_run.comparison.deviation_for("operating_cost").within_tolerance
-        is True
+        targeted_run.comparison.deviation_for("operating_cost").within_tolerance is True
     )
     assert (
         targeted_run.comparison.deviation_for("total_annualized_cost").within_tolerance
@@ -2599,7 +2733,9 @@ def test_style_case_study_2_complete_static_scenario_can_apply_operating_cost_ad
     )
 
 
-def test_style_case_study_2_complete_static_scenario_can_apply_utility_steam_flow_adjustment() -> None:
+def test_style_case_study_2_complete_static_scenario_can_apply_utility_steam_flow_adjustment() -> (
+    None
+):
     vhp_steam_enthalpy, vhp_feedwater_enthalpy = style_case_study_2_vhp_enthalpies(
         steam_temperature=570.0,
     )
@@ -2682,7 +2818,9 @@ def test_style_case_study_2_complete_static_scenario_can_apply_utility_steam_flo
     )
 
 
-def test_style_case_study_2_complete_static_scenario_can_apply_fuel_consumption_factor() -> None:
+def test_style_case_study_2_complete_static_scenario_can_apply_fuel_consumption_factor() -> (
+    None
+):
     vhp_steam_enthalpy, vhp_feedwater_enthalpy = style_case_study_2_vhp_enthalpies(
         steam_temperature=570.0,
     )
@@ -2780,7 +2918,9 @@ def test_style_case_study_2_complete_static_scenario_can_apply_fuel_consumption_
     assert targeted_run.comparison.within_tolerance is True
 
 
-def test_style_case_study_2_contribution2_best_configuration_catalog_solves_calibrated_rows() -> None:
+def test_style_case_study_2_contribution2_best_configuration_catalog_solves_calibrated_rows() -> (
+    None
+):
     catalog = style_case_study_2_contribution2_best_configuration_catalog()
 
     assert catalog.keys() == (
@@ -2803,7 +2943,9 @@ def test_style_case_study_2_contribution2_best_configuration_catalog_solves_cali
         assert comparison.within_tolerance is True
 
 
-def test_style_case_study_2_contribution2_physical_profile_catalog_solves_calibrated_rows() -> None:
+def test_style_case_study_2_contribution2_physical_profile_catalog_solves_calibrated_rows() -> (
+    None
+):
     catalog = style_case_study_2_contribution2_physical_profile_catalog()
 
     assert catalog.keys() == (
@@ -2847,7 +2989,9 @@ def test_style_case_study_2_contribution2_physical_profile_catalog_solves_calibr
             )
 
 
-def test_style_case_study_2_contribution2_physical_profile_catalog_can_apply_fuel_target_factors() -> None:
+def test_style_case_study_2_contribution2_physical_profile_catalog_can_apply_fuel_target_factors() -> (
+    None
+):
     catalog = style_case_study_2_contribution2_physical_profile_catalog(
         fuel_consumption_factors_by_scenario={
             "utility-system-stand-alone": {
@@ -2884,7 +3028,9 @@ def test_style_case_study_2_contribution2_physical_profile_catalog_can_apply_fue
         assert comparison.deviation_for("capital_cost").within_tolerance is True
 
 
-def test_style_case_study_2_contribution2_physical_profile_catalog_can_apply_operating_cost_target_adjustments() -> None:
+def test_style_case_study_2_contribution2_physical_profile_catalog_can_apply_operating_cost_target_adjustments() -> (
+    None
+):
     catalog = style_case_study_2_contribution2_physical_profile_catalog(
         fuel_consumption_factors_by_scenario={
             "utility-system-stand-alone": {
@@ -2921,12 +3067,13 @@ def test_style_case_study_2_contribution2_physical_profile_catalog_can_apply_ope
         assert comparison.deviation_for("fuel_consumption").within_tolerance is True
         assert comparison.deviation_for("operating_cost").within_tolerance is True
         assert (
-            comparison.deviation_for("total_annualized_cost").within_tolerance
-            is True
+            comparison.deviation_for("total_annualized_cost").within_tolerance is True
         )
 
 
-def test_style_case_study_2_contribution2_physical_profile_catalog_solves_uncalibrated_rows() -> None:
+def test_style_case_study_2_contribution2_physical_profile_catalog_solves_uncalibrated_rows() -> (
+    None
+):
     catalog = style_case_study_2_contribution2_physical_profile_catalog(
         calibrated=False,
     )

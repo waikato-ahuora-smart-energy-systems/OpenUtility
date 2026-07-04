@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import pytest
 
-from case_study.jimenez_romero_utility_system_optimization.benchmarks import STYLE_CASE_STUDY_2_STREAMS
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
+    STYLE_CASE_STUDY_2_STREAMS,
+)
 from OpenUtility.thermal import build_temperature_intervals, heat_content_by_interval
 
 from OpenPinch.classes.stream import Stream

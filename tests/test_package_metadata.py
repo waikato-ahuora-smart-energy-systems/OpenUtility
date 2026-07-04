@@ -16,17 +16,43 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 def test_pyproject_declares_cli_entry_point_and_packages_case_study_data() -> None:
     pyproject = tomllib.loads((PROJECT_ROOT / "pyproject.toml").read_text())
 
+    assert pyproject["project"]["requires-python"] == ">=3.14.2"
+    assert pyproject["project"]["license"] == "MIT"
+    assert pyproject["project"]["license-files"] == ["LICENSE"]
     assert "highspy>=1.15.1" in pyproject["project"]["dependencies"]
     assert "OpenPinch>=0.4.5" in pyproject["project"]["dependencies"]
     assert "scipy>=1.11" not in pyproject["project"]["dependencies"]
     assert "openpinch" not in pyproject["project"]["optional-dependencies"]
+    assert "mypy>=1.18" in pyproject["project"]["optional-dependencies"]["dev"]
+    assert "pytest-cov>=7.0" in pyproject["project"]["optional-dependencies"]["dev"]
+    assert "build>=1.3" in pyproject["project"]["optional-dependencies"]["release"]
+    assert "hatchling>=1.26" in pyproject["project"]["optional-dependencies"]["release"]
+    assert "pip-audit>=2.9" in pyproject["project"]["optional-dependencies"]["release"]
+    assert "twine>=6.2" in pyproject["project"]["optional-dependencies"]["release"]
     assert pyproject["project"]["scripts"]["openutility-style-table2-9"] == (
         "case_study.jimenez_romero_utility_system_optimization.cli:main"
+    )
+    assert pyproject["project"]["urls"]["Repository"] == (
+        "https://github.com/waikato-ahuora-smart-energy-systems/OpenUtility"
     )
     assert pyproject["tool"]["hatch"]["build"]["targets"]["wheel"]["packages"] == [
         "OpenUtility",
         "case_study",
     ]
+    assert (
+        "/OpenUtility/py.typed"
+        in pyproject["tool"]["hatch"]["build"]["targets"]["wheel"]["include"]
+    )
+    assert (
+        "/case_study/**/*.csv"
+        in pyproject["tool"]["hatch"]["build"]["targets"]["wheel"]["include"]
+    )
+    assert (
+        "/case_study/**/*.ipynb"
+        in pyproject["tool"]["hatch"]["build"]["targets"]["wheel"]["include"]
+    )
+    assert (PROJECT_ROOT / "OpenUtility" / "py.typed").exists()
+    assert (PROJECT_ROOT / "LICENSE").exists()
     assert callable(main)
 
 
@@ -49,14 +75,10 @@ def test_root_api_does_not_expose_removed_compatibility_names() -> None:
     removed_names = (
         "StyleTableCaseStudyNotebookRun",
         "run_style_table_2_9_case_study",
-        "ThesisTableCaseStudyNotebookRun",
-        "run_thesis_table_2_9_case_study",
         "openpinch_stream_collection_from_stream_records",
         "openpinch_streams_from_stream_records",
         "openpinch_stream_collection_from_case_study_streams",
         "openpinch_streams_from_case_study_streams",
-        "openpinch_stream_collection_from_thesis_streams",
-        "openpinch_streams_from_thesis_streams",
         "scipy_milp_static_style_solver",
         "solve_static_style_model_with_scipy_milp",
         "style_case_study_2_contribution2_physical_profile_catalog",

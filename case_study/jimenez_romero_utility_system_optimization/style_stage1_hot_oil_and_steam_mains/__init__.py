@@ -11,9 +11,7 @@ from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
     get_style_steam_target,
 )
 
-STYLE_STAGE1_HOT_OIL_AND_STEAM_MAIN_DESIGN_RESULTS = (
-    STYLE_CASE_STUDY_1_HOT_OIL_RESULTS
-)
+STYLE_STAGE1_HOT_OIL_AND_STEAM_MAIN_DESIGN_RESULTS = STYLE_CASE_STUDY_1_HOT_OIL_RESULTS
 STYLE_STAGE1_STEAM_SYSTEM_TARGETS = STYLE_CASE_STUDY_1_STEAM_TARGETS
 
 __all__ = (

@@ -21,8 +21,12 @@ def style_model_data_from_heat_profile(
     """Create single-main STYLE data from a shifted heat interval profile."""
 
     intervals = tuple(profile.intervals)
-    source_values = tuple(_profile_value(profile.source_heat, interval.key) for interval in intervals)
-    sink_values = tuple(_profile_value(profile.sink_heat, interval.key) for interval in intervals)
+    source_values = tuple(
+        _profile_value(profile.source_heat, interval.key) for interval in intervals
+    )
+    sink_values = tuple(
+        _profile_value(profile.sink_heat, interval.key) for interval in intervals
+    )
     source_bounds = _prefix_sums(source_values)
     sink_bounds = _suffix_sums(sink_values)
 
@@ -92,9 +96,7 @@ def style_model_data_from_heat_profile_for_steam_mains(
     return StyleModelData(
         steam_mains=steam_mains,
         steam_levels=tuple(
-            level
-            for data in single_main_data
-            for level in data.steam_levels
+            level for data in single_main_data for level in data.steam_levels
         ),
         power_demand=power_demand,
         source_heat_loss_fraction=source_heat_loss_fraction,
@@ -121,7 +123,9 @@ def _zero_heat_profile(profile: HeatIntervalProfile) -> HeatIntervalProfile:
     )
 
 
-def _profile_value(values: dict[tuple[float, float], float], key: tuple[float, float]) -> float:
+def _profile_value(
+    values: dict[tuple[float, float], float], key: tuple[float, float]
+) -> float:
     return float(values.get(key, 0.0))
 
 

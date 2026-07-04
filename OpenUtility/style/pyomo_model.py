@@ -6,6 +6,21 @@ from collections.abc import Mapping
 
 import pyomo.environ as pyo
 
+from ._pyomo_indices import (
+    boilers_by_vhp as _boilers_by_vhp,
+    flash_level_by_name as _flash_level_by_name,
+    flash_route_by_name as _flash_route_by_name,
+    flash_routes_by_source as _flash_routes_by_source,
+    flash_routes_by_target as _flash_routes_by_target,
+    hrsgs_by_vhp as _hrsgs_by_vhp,
+    steam_main_letdowns_by_source as _steam_main_letdowns_by_source,
+    steam_main_letdowns_by_target as _steam_main_letdowns_by_target,
+    steam_main_turbines_by_source as _steam_main_turbines_by_source,
+    steam_main_turbines_by_target as _steam_main_turbines_by_target,
+    vhp_letdowns_by_pair as _vhp_letdowns_by_pair,
+    vhp_sources_by_vhp as _vhp_sources_by_vhp,
+    vhp_turbines_by_pair as _vhp_turbines_by_pair,
+)
 from .data import (
     BoilerCandidate,
     EquipmentCost,
@@ -214,9 +229,7 @@ def _add_parameters(
     )
     model.deaerator_condensate_return_fraction = pyo.Param(
         initialize=(
-            0.0
-            if data.deaerator is None
-            else data.deaerator.condensate_return_fraction
+            0.0 if data.deaerator is None else data.deaerator.condensate_return_fraction
         ),
         mutable=False,
     )
@@ -269,9 +282,7 @@ def _add_parameters(
     )
     model.hot_oil_high_temperature_heat_demand = pyo.Param(
         initialize=(
-            0.0
-            if data.hot_oil is None
-            else data.hot_oil.high_temperature_heat_demand
+            0.0 if data.hot_oil is None else data.hot_oil.high_temperature_heat_demand
         ),
         mutable=False,
     )
@@ -332,19 +343,19 @@ def _add_parameters(
     )
     model.flash_saturated_vapor_enthalpy = pyo.Param(
         model.STEAM_LEVELS,
-        initialize=lambda _, level: flash_level_by_name[
-            level
-        ].saturated_vapor_enthalpy
-        if level in flash_level_by_name
-        else 0.0,
+        initialize=lambda _, level: (
+            flash_level_by_name[level].saturated_vapor_enthalpy
+            if level in flash_level_by_name
+            else 0.0
+        ),
     )
     model.flash_saturated_liquid_enthalpy = pyo.Param(
         model.STEAM_LEVELS,
-        initialize=lambda _, level: flash_level_by_name[
-            level
-        ].saturated_liquid_enthalpy
-        if level in flash_level_by_name
-        else 0.0,
+        initialize=lambda _, level: (
+            flash_level_by_name[level].saturated_liquid_enthalpy
+            if level in flash_level_by_name
+            else 0.0
+        ),
     )
     model.generated_steam_enthalpy = pyo.Param(
         model.STEAM_LEVELS,
@@ -392,15 +403,13 @@ def _add_parameters(
     )
     model.vhp_source_min_load_fraction = pyo.Param(
         model.VHP_SOURCES,
-        initialize=lambda _, source: vhp_source_by_name[
-            source
-        ].minimum_load_fraction,
+        initialize=lambda _, source: vhp_source_by_name[source].minimum_load_fraction,
     )
     model.vhp_source_fuel_consumption_per_steam = pyo.Param(
         model.VHP_SOURCES,
-        initialize=lambda _, source: vhp_source_by_name[
-            source
-        ].fuel_consumption_per_steam,
+        initialize=lambda _, source: (
+            vhp_source_by_name[source].fuel_consumption_per_steam
+        ),
     )
     model.vhp_source_fuel_consumption_factor = pyo.Param(
         model.VHP_SOURCES,
@@ -411,9 +420,7 @@ def _add_parameters(
     )
     model.vhp_source_must_select = pyo.Param(
         model.VHP_SOURCES,
-        initialize=lambda _, source: 1
-        if vhp_source_by_name[source].must_select
-        else 0,
+        initialize=lambda _, source: 1 if vhp_source_by_name[source].must_select else 0,
     )
     model.boiler_size_fuel_coefficient = pyo.Param(
         model.BOILERS,
@@ -445,9 +452,7 @@ def _add_parameters(
     )
     model.boiler_must_select = pyo.Param(
         model.BOILERS,
-        initialize=lambda _, boiler: 1
-        if boiler_by_name[boiler].must_select
-        else 0,
+        initialize=lambda _, boiler: 1 if boiler_by_name[boiler].must_select else 0,
     )
     model.boiler_fuel_consumption_factor = pyo.Param(
         model.BOILERS,
@@ -474,15 +479,11 @@ def _add_parameters(
     )
     model.vhp_turbine_min_load_fraction = pyo.Param(
         model.VHP_TURBINES,
-        initialize=lambda _, turbine: turbine_by_name[
-            turbine
-        ].minimum_load_fraction,
+        initialize=lambda _, turbine: turbine_by_name[turbine].minimum_load_fraction,
     )
     model.vhp_turbine_must_select = pyo.Param(
         model.VHP_TURBINES,
-        initialize=lambda _, turbine: 1
-        if turbine_by_name[turbine].must_select
-        else 0,
+        initialize=lambda _, turbine: 1 if turbine_by_name[turbine].must_select else 0,
     )
     model.vhp_letdown_max_flow = pyo.Param(
         model.VHP_LETDOWNS,
@@ -490,39 +491,33 @@ def _add_parameters(
     )
     model.steam_main_turbine_power_slope = pyo.Param(
         model.STEAM_MAIN_TURBINES,
-        initialize=lambda _, turbine: steam_main_turbine_by_name[
-            turbine
-        ].power_slope,
+        initialize=lambda _, turbine: steam_main_turbine_by_name[turbine].power_slope,
     )
     model.steam_main_turbine_power_intercept = pyo.Param(
         model.STEAM_MAIN_TURBINES,
-        initialize=lambda _, turbine: steam_main_turbine_by_name[
-            turbine
-        ].power_intercept,
+        initialize=lambda _, turbine: (
+            steam_main_turbine_by_name[turbine].power_intercept
+        ),
     )
     model.steam_main_turbine_min_capacity = pyo.Param(
         model.STEAM_MAIN_TURBINES,
-        initialize=lambda _, turbine: steam_main_turbine_by_name[
-            turbine
-        ].min_capacity,
+        initialize=lambda _, turbine: steam_main_turbine_by_name[turbine].min_capacity,
     )
     model.steam_main_turbine_max_capacity = pyo.Param(
         model.STEAM_MAIN_TURBINES,
-        initialize=lambda _, turbine: steam_main_turbine_by_name[
-            turbine
-        ].max_capacity,
+        initialize=lambda _, turbine: steam_main_turbine_by_name[turbine].max_capacity,
     )
     model.steam_main_turbine_min_load_fraction = pyo.Param(
         model.STEAM_MAIN_TURBINES,
-        initialize=lambda _, turbine: steam_main_turbine_by_name[
-            turbine
-        ].minimum_load_fraction,
+        initialize=lambda _, turbine: (
+            steam_main_turbine_by_name[turbine].minimum_load_fraction
+        ),
     )
     model.steam_main_turbine_must_select = pyo.Param(
         model.STEAM_MAIN_TURBINES,
-        initialize=lambda _, turbine: 1
-        if steam_main_turbine_by_name[turbine].must_select
-        else 0,
+        initialize=lambda _, turbine: (
+            1 if steam_main_turbine_by_name[turbine].must_select else 0
+        ),
     )
     model.steam_main_letdown_max_flow = pyo.Param(
         model.STEAM_MAIN_LETDOWNS,
@@ -550,15 +545,15 @@ def _add_parameters(
     )
     model.gas_turbine_min_load_fraction = pyo.Param(
         model.GAS_TURBINES,
-        initialize=lambda _, turbine: gas_turbine_by_name[
-            turbine
-        ].minimum_load_fraction,
+        initialize=lambda _, turbine: (
+            gas_turbine_by_name[turbine].minimum_load_fraction
+        ),
     )
     model.gas_turbine_must_select = pyo.Param(
         model.GAS_TURBINES,
-        initialize=lambda _, turbine: 1
-        if gas_turbine_by_name[turbine].must_select
-        else 0,
+        initialize=lambda _, turbine: (
+            1 if gas_turbine_by_name[turbine].must_select else 0
+        ),
     )
     model.gas_turbine_fuel_consumption_factor = pyo.Param(
         model.GAS_TURBINES,
@@ -581,9 +576,7 @@ def _add_parameters(
     )
     model.hrsg_supplementary_firing_efficiency = pyo.Param(
         model.HRSGS,
-        initialize=lambda _, hrsg: hrsg_by_name[
-            hrsg
-        ].supplementary_firing_efficiency,
+        initialize=lambda _, hrsg: hrsg_by_name[hrsg].supplementary_firing_efficiency,
     )
     model.hrsg_max_supplementary_fuel_flow = pyo.Param(
         model.HRSGS,
@@ -608,8 +601,12 @@ def _add_parameters(
 
 def _add_variables(model: pyo.ConcreteModel) -> None:
     model.level_selected = pyo.Var(model.STEAM_LEVELS, domain=pyo.Binary)
-    model.source_heat_to_steam = pyo.Var(model.STEAM_LEVELS, domain=pyo.NonNegativeReals)
-    model.source_residual_heat = pyo.Var(model.STEAM_LEVELS, domain=pyo.NonNegativeReals)
+    model.source_heat_to_steam = pyo.Var(
+        model.STEAM_LEVELS, domain=pyo.NonNegativeReals
+    )
+    model.source_residual_heat = pyo.Var(
+        model.STEAM_LEVELS, domain=pyo.NonNegativeReals
+    )
     model.source_steam_generated = pyo.Var(
         model.STEAM_LEVELS,
         domain=pyo.NonNegativeReals,
@@ -1086,8 +1083,7 @@ def _add_flash_steam_recovery_constraints(
             for route in outgoing_routes
         )
         inlet_heat = (
-            m.flash_condensate_inlet[level]
-            * m.flash_saturated_liquid_enthalpy[level]
+            m.flash_condensate_inlet[level] * m.flash_saturated_liquid_enthalpy[level]
         )
         return recovered_heat == inlet_heat
 
@@ -1214,14 +1210,11 @@ def _add_steam_main_balance_constraints(
             m.steam_main_letdown_flow[letdown] for letdown in letdowns_by_source[level]
         )
         header_output_heat = (
-            (
-                m.process_steam_to_sink[level]
-                + m.header_steam_export[level]
-                + m.deaerator_steam_from_header[level]
-                + outgoing_transfer_flow
-            )
-            * m.main_steam_enthalpy[level]
-        )
+            m.process_steam_to_sink[level]
+            + m.header_steam_export[level]
+            + m.deaerator_steam_from_header[level]
+            + outgoing_transfer_flow
+        ) * m.main_steam_enthalpy[level]
         return (
             steam_generation_heat
             + utility_import_heat
@@ -1248,8 +1241,7 @@ def _add_vhp_constraints(model: pyo.ConcreteModel, data: StyleModelData) -> None
 
     def vhp_mass_balance_rule(m: pyo.ConcreteModel, vhp: str):
         source_generated = sum(
-            m.vhp_source_steam_generation[source]
-            for source in vhp_sources_by_vhp[vhp]
+            m.vhp_source_steam_generation[source] for source in vhp_sources_by_vhp[vhp]
         )
         boiler_generated = sum(
             m.boiler_steam_generation[boiler] for boiler in boilers_by_vhp[vhp]
@@ -1426,8 +1418,7 @@ def _add_boiler_constraints(model: pyo.ConcreteModel, data: StyleModelData) -> N
         )
         fuel_from_size_and_load = generation_enthalpy_delta * (
             m.boiler_size_fuel_coefficient[boiler] * m.boiler_size[boiler]
-            + m.boiler_load_fuel_coefficient[boiler]
-            * m.boiler_steam_generation[boiler]
+            + m.boiler_load_fuel_coefficient[boiler] * m.boiler_steam_generation[boiler]
         )
         blowdown_fuel = (
             m.boiler_blowdown_fraction[boiler]
@@ -1509,15 +1500,12 @@ def _add_vhp_connection_constraints(
     turbine_vhp = {turbine.name: turbine.vhp_header for turbine in data.vhp_turbines}
     turbine_level = {turbine.name: turbine.steam_level for turbine in data.vhp_turbines}
     letdown_vhp = {letdown.name: letdown.vhp_header for letdown in data.vhp_letdowns}
-    letdown_level = {
-        letdown.name: letdown.steam_level for letdown in data.vhp_letdowns
-    }
+    letdown_level = {letdown.name: letdown.steam_level for letdown in data.vhp_letdowns}
 
     def vhp_turbine_power_equation_rule(m: pyo.ConcreteModel, turbine: str):
         return m.vhp_turbine_power_generation[turbine] == (
             m.vhp_turbine_power_slope[turbine] * m.vhp_turbine_steam_flow[turbine]
-            - m.vhp_turbine_power_intercept[turbine]
-            * m.vhp_turbine_selected[turbine]
+            - m.vhp_turbine_power_intercept[turbine] * m.vhp_turbine_selected[turbine]
         )
 
     def vhp_turbine_flow_lower_bound_rule(m: pyo.ConcreteModel, turbine: str):
@@ -1544,25 +1532,18 @@ def _add_vhp_connection_constraints(
         m: pyo.ConcreteModel,
         turbine: str,
     ):
-        return (
-            m.vhp_turbine_selected[turbine]
-            <= m.vhp_selected[turbine_vhp[turbine]]
-        )
+        return m.vhp_turbine_selected[turbine] <= m.vhp_selected[turbine_vhp[turbine]]
 
     def vhp_turbine_requires_selected_level_rule(
         m: pyo.ConcreteModel,
         turbine: str,
     ):
         return (
-            m.vhp_turbine_selected[turbine]
-            <= m.level_selected[turbine_level[turbine]]
+            m.vhp_turbine_selected[turbine] <= m.level_selected[turbine_level[turbine]]
         )
 
     def vhp_turbine_must_select_rule(m: pyo.ConcreteModel, turbine: str):
-        return (
-            m.vhp_turbine_selected[turbine]
-            >= m.vhp_turbine_must_select[turbine]
-        )
+        return m.vhp_turbine_selected[turbine] >= m.vhp_turbine_must_select[turbine]
 
     def vhp_letdown_requires_selected_vhp_rule(m: pyo.ConcreteModel, letdown: str):
         return (
@@ -1779,8 +1760,7 @@ def _add_gas_turbine_constraints(model: pyo.ConcreteModel) -> None:
     def gas_turbine_power_equation_rule(m: pyo.ConcreteModel, turbine: str):
         return m.gas_turbine_power_generation[turbine] == (
             m.gas_turbine_power_slope[turbine] * m.gas_turbine_fuel_flow[turbine]
-            - m.gas_turbine_power_intercept[turbine]
-            * m.gas_turbine_selected[turbine]
+            - m.gas_turbine_power_intercept[turbine] * m.gas_turbine_selected[turbine]
         )
 
     def gas_turbine_exhaust_heat_equation_rule(
@@ -1794,14 +1774,12 @@ def _add_gas_turbine_constraints(model: pyo.ConcreteModel) -> None:
 
     def gas_turbine_fuel_lower_bound_rule(m: pyo.ConcreteModel, turbine: str):
         return m.gas_turbine_fuel_flow[turbine] >= (
-            m.gas_turbine_min_fuel_flow[turbine]
-            * m.gas_turbine_selected[turbine]
+            m.gas_turbine_min_fuel_flow[turbine] * m.gas_turbine_selected[turbine]
         )
 
     def gas_turbine_fuel_upper_bound_rule(m: pyo.ConcreteModel, turbine: str):
         return m.gas_turbine_fuel_flow[turbine] <= (
-            m.gas_turbine_max_fuel_flow[turbine]
-            * m.gas_turbine_selected[turbine]
+            m.gas_turbine_max_fuel_flow[turbine] * m.gas_turbine_selected[turbine]
         )
 
     def gas_turbine_minimum_load_fraction_rule(
@@ -1874,10 +1852,7 @@ def _add_hrsg_constraints(
 
     def hrsg_heat_from_exhaust_rule(m: pyo.ConcreteModel, hrsg: str):
         turbine = hrsg_gas_turbine[hrsg]
-        return (
-            m.hrsg_exhaust_heat_input[hrsg]
-            <= m.gas_turbine_exhaust_heat[turbine]
-        )
+        return m.hrsg_exhaust_heat_input[hrsg] <= m.gas_turbine_exhaust_heat[turbine]
 
     def hrsg_heat_input_upper_bound_rule(m: pyo.ConcreteModel, hrsg: str):
         return (
@@ -1886,9 +1861,7 @@ def _add_hrsg_constraints(
         )
 
     def hrsg_requires_selected_vhp_rule(m: pyo.ConcreteModel, hrsg: str):
-        return (
-            m.hrsg_selected[hrsg] <= m.vhp_selected[hrsg_vhp[hrsg]]
-        )
+        return m.hrsg_selected[hrsg] <= m.vhp_selected[hrsg_vhp[hrsg]]
 
     def hrsg_requires_selected_gas_turbine_rule(m: pyo.ConcreteModel, hrsg: str):
         turbine = hrsg_gas_turbine[hrsg]
@@ -2011,8 +1984,7 @@ def _add_deaerator_constraints(
 
     def deaerator_condensate_return_equation_rule(m: pyo.ConcreteModel):
         return m.deaerator_condensate_return == (
-            m.deaerator_condensate_return_fraction
-            * m.deaerator_feedwater_requirement
+            m.deaerator_condensate_return_fraction * m.deaerator_feedwater_requirement
         )
 
     def deaerator_makeup_water_equation_rule(m: pyo.ConcreteModel):
@@ -2037,16 +2009,12 @@ def _add_deaerator_constraints(
             m.deaerator_feedwater_requirement * m.deaerator_feedwater_enthalpy
         )
         vent_heat = (
-            m.deaerator_vent_fraction
-            * deaerator_steam
-            * m.deaerator_vent_enthalpy
+            m.deaerator_vent_fraction * deaerator_steam * m.deaerator_vent_enthalpy
         )
         condensate_heat = (
             m.deaerator_condensate_return * m.deaerator_condensate_enthalpy
         )
-        makeup_heat = (
-            m.deaerator_makeup_water * m.deaerator_makeup_water_enthalpy
-        )
+        makeup_heat = m.deaerator_makeup_water * m.deaerator_makeup_water_enthalpy
         return feedwater_heat + vent_heat == (
             condensate_heat + makeup_heat + steam_heat
         )
@@ -2090,15 +2058,13 @@ def _add_power_generation_constraints(
         ):
             return pyo.Constraint.Skip
         turbine_power = sum(
-            m.vhp_turbine_power_generation[turbine]
-            for turbine in m.VHP_TURBINES
+            m.vhp_turbine_power_generation[turbine] for turbine in m.VHP_TURBINES
         ) + sum(
             m.steam_main_turbine_power_generation[turbine]
             for turbine in m.STEAM_MAIN_TURBINES
         )
         gas_turbine_power = sum(
-            m.gas_turbine_power_generation[turbine]
-            for turbine in m.GAS_TURBINES
+            m.gas_turbine_power_generation[turbine] for turbine in m.GAS_TURBINES
         )
         return m.onsite_power_generation == turbine_power + gas_turbine_power
 
@@ -2112,9 +2078,12 @@ def _add_electricity_constraints(
     data: StyleModelData,
 ) -> None:
     def electricity_balance_rule(m: pyo.ConcreteModel):
-        return data.transmission_efficiency * (
-            m.grid_power_import + m.onsite_power_generation - m.grid_power_export
-        ) - m.power_demand == 0.0
+        return (
+            data.transmission_efficiency
+            * (m.grid_power_import + m.onsite_power_generation - m.grid_power_export)
+            - m.power_demand
+            == 0.0
+        )
 
     def grid_import_limit_rule(m: pyo.ConcreteModel):
         if data.grid_import_limit is None:
@@ -2321,7 +2290,8 @@ def _add_operating_cost_expressions(
 def _add_objective(model: pyo.ConcreteModel) -> None:
     model.total_annualized_cost = pyo.Expression(
         expr=sum(
-            model.annualized_level_cost[level] * model.level_selected[level]
+            model.annualized_level_cost[level]
+            * model.level_selected[level]
             * model.cost_scale
             + model.operating_cost_per_heat[level]
             * model.source_heat_to_steam[level]
@@ -2513,150 +2483,3 @@ def _fuel_consumption_expression(
     if cost.equipment_type == "vhp_source":
         return model.vhp_source_fuel_consumption[cost.equipment_name]
     raise ValueError(f"unsupported fuel cost type {cost.equipment_type!r}")
-
-
-def _vhp_sources_by_vhp(data: StyleModelData) -> dict[str, tuple[str, ...]]:
-    return {
-        vhp.name: tuple(
-            source.name
-            for source in data.vhp_sources
-            if source.vhp_header == vhp.name
-        )
-        for vhp in data.vhp_headers
-    }
-
-
-def _boilers_by_vhp(data: StyleModelData) -> dict[str, tuple[str, ...]]:
-    return {
-        vhp.name: tuple(
-            boiler.name for boiler in data.boilers if boiler.vhp_header == vhp.name
-        )
-        for vhp in data.vhp_headers
-    }
-
-
-def _hrsgs_by_vhp(data: StyleModelData) -> dict[str, tuple[str, ...]]:
-    return {
-        vhp.name: tuple(hrsg.name for hrsg in data.hrsgs if hrsg.vhp_header == vhp.name)
-        for vhp in data.vhp_headers
-    }
-
-
-def _flash_level_by_name(
-    data: StyleModelData,
-) -> dict[str, FlashSteamRecoveryLevel]:
-    if data.flash_steam_recovery is None:
-        return {}
-    return {
-        level.steam_level: level
-        for level in data.flash_steam_recovery.levels
-    }
-
-
-def _flash_route_by_name(
-    data: StyleModelData,
-) -> dict[str, FlashSteamRecoveryRoute]:
-    if data.flash_steam_recovery is None:
-        return {}
-    return {
-        route.name: route
-        for route in data.flash_steam_recovery.routes
-    }
-
-
-def _flash_routes_by_source(data: StyleModelData) -> dict[str, tuple[str, ...]]:
-    if data.flash_steam_recovery is None:
-        return {level.name: () for level in data.steam_levels}
-    return {
-        level.name: tuple(
-            route.name
-            for route in data.flash_steam_recovery.routes
-            if route.source_level == level.name
-        )
-        for level in data.steam_levels
-    }
-
-
-def _flash_routes_by_target(data: StyleModelData) -> dict[str, tuple[str, ...]]:
-    if data.flash_steam_recovery is None:
-        return {level.name: () for level in data.steam_levels}
-    return {
-        level.name: tuple(
-            route.name
-            for route in data.flash_steam_recovery.routes
-            if route.target_level == level.name
-        )
-        for level in data.steam_levels
-    }
-
-
-def _vhp_turbines_by_pair(
-    data: StyleModelData,
-) -> dict[tuple[str, str], tuple[str, ...]]:
-    return {
-        (vhp.name, level.name): tuple(
-            turbine.name
-            for turbine in data.vhp_turbines
-            if turbine.vhp_header == vhp.name and turbine.steam_level == level.name
-        )
-        for vhp in data.vhp_headers
-        for level in data.steam_levels
-    }
-
-
-def _vhp_letdowns_by_pair(
-    data: StyleModelData,
-) -> dict[tuple[str, str], tuple[str, ...]]:
-    return {
-        (vhp.name, level.name): tuple(
-            letdown.name
-            for letdown in data.vhp_letdowns
-            if letdown.vhp_header == vhp.name and letdown.steam_level == level.name
-        )
-        for vhp in data.vhp_headers
-        for level in data.steam_levels
-    }
-
-
-def _steam_main_turbines_by_source(data: StyleModelData) -> dict[str, tuple[str, ...]]:
-    return {
-        level.name: tuple(
-            turbine.name
-            for turbine in data.steam_main_turbines
-            if turbine.source_level == level.name
-        )
-        for level in data.steam_levels
-    }
-
-
-def _steam_main_turbines_by_target(data: StyleModelData) -> dict[str, tuple[str, ...]]:
-    return {
-        level.name: tuple(
-            turbine.name
-            for turbine in data.steam_main_turbines
-            if turbine.target_level == level.name
-        )
-        for level in data.steam_levels
-    }
-
-
-def _steam_main_letdowns_by_source(data: StyleModelData) -> dict[str, tuple[str, ...]]:
-    return {
-        level.name: tuple(
-            letdown.name
-            for letdown in data.steam_main_letdowns
-            if letdown.source_level == level.name
-        )
-        for level in data.steam_levels
-    }
-
-
-def _steam_main_letdowns_by_target(data: StyleModelData) -> dict[str, tuple[str, ...]]:
-    return {
-        level.name: tuple(
-            letdown.name
-            for letdown in data.steam_main_letdowns
-            if letdown.target_level == level.name
-        )
-        for level in data.steam_levels
-    }

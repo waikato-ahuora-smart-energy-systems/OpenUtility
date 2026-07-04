@@ -440,10 +440,7 @@ def test_style_master_binary_variables_extracts_canonical_selection_lookup() -> 
         is model.vhp_source_selected["source_1"]
     )
     assert variables["boiler_selected[boiler_1]"] is model.boiler_selected["boiler_1"]
-    assert (
-        variables["gas_turbine_selected[gt_1]"]
-        is model.gas_turbine_selected["gt_1"]
-    )
+    assert variables["gas_turbine_selected[gt_1]"] is model.gas_turbine_selected["gt_1"]
     assert variables["hrsg_selected[hrsg_1]"] is model.hrsg_selected["hrsg_1"]
     assert (
         variables["hrsg_supplementary_firing_selected[hrsg_1]"]
@@ -500,11 +497,7 @@ def test_fix_style_master_integer_assignment_requires_exact_binary_names() -> No
     model = build_static_style_model(_style_master_data())
     variables = style_master_binary_variables(model)
     missing_assignment = BilevelIntegerAssignment.from_mapping(
-        {
-            name: 0
-            for name in variables
-            if name != "level_selected[MP_185]"
-        },
+        {name: 0 for name in variables if name != "level_selected[MP_185]"},
     )
     extra_assignment = BilevelIntegerAssignment.from_mapping(
         dict.fromkeys((*variables, "unknown_binary"), 0),
@@ -577,14 +570,18 @@ def test_build_static_style_binary_selection_master_uses_style_binary_names() ->
 
     master = build_static_style_binary_selection_master(data)
 
-    assert tuple(master.master_choice) == tuple(style_master_binary_variables(full_model))
+    assert tuple(master.master_choice) == tuple(
+        style_master_binary_variables(full_model)
+    )
     assert all(master.master_choice[name].is_binary() for name in master.master_choice)
     assert len(tuple(master.component_data_objects(pyo.Var))) == len(
         style_master_binary_variables(full_model),
     )
 
 
-def test_static_style_binary_selection_decomposition_evaluates_fixed_subproblem() -> None:
+def test_static_style_binary_selection_decomposition_evaluates_fixed_subproblem() -> (
+    None
+):
     scenario = _static_style_subproblem_smoke_scenario()
     assignment = _static_style_assignment(
         scenario,
@@ -605,9 +602,12 @@ def test_static_style_binary_selection_decomposition_evaluates_fixed_subproblem(
     iteration = run.iterations[0]
 
     assert iteration.master_status == "binary-selection-master"
-    assert style_binary_selection_master_assignment_from_model(
-        iteration.master_model,
-    ) == assignment
+    assert (
+        style_binary_selection_master_assignment_from_model(
+            iteration.master_model,
+        )
+        == assignment
+    )
     assert iteration.subproblem.objective_value == pytest.approx(0.0)
     assert tuple(iteration.next_master_model.bilevel_no_good_cuts.keys()) == (0,)
 
@@ -650,7 +650,9 @@ def test_style_binary_selection_candidate_solver_skips_excluded_assignments() ->
     assert style_binary_selection_master_assignment_from_model(cut_master) == second
 
 
-def test_style_binary_selection_candidate_from_scenario_solves_and_extracts_assignment() -> None:
+def test_style_binary_selection_candidate_from_scenario_solves_and_extracts_assignment() -> (
+    None
+):
     scenario = next(iter(style_case_study_2_contribution2_physical_profile_catalog()))
 
     assignment = style_binary_selection_candidate_from_scenario(
@@ -664,7 +666,9 @@ def test_style_binary_selection_candidate_from_scenario_solves_and_extracts_assi
     assert assignment.as_dict()["boiler_selected[reported-boiler]"] == 1
 
 
-def test_style_binary_selection_candidates_from_scenarios_are_unique_and_ordered() -> None:
+def test_style_binary_selection_candidates_from_scenarios_are_unique_and_ordered() -> (
+    None
+):
     scenarios = tuple(
         style_case_study_2_contribution2_physical_profile_catalog(),
     ) + tuple(
@@ -700,8 +704,7 @@ def test_style_binary_selection_candidate_records_preserve_source_labels() -> No
 
     assert len(records) == 4
     assert records[0].source_label == (
-        "contribution-2-case-study-2-physical-profile:"
-        "utility-system-stand-alone"
+        "contribution-2-case-study-2-physical-profile:utility-system-stand-alone"
     )
     assert [len(record.assignment.selected_variables) for record in records] == [
         7,
@@ -752,8 +755,7 @@ def test_compatible_bilevel_integer_assignments_filters_to_target_variables() ->
     assert len(compatible) == 2
     assert [len(candidate.selected_variables) for candidate in compatible] == [45, 24]
     assert all(
-        set(candidate.as_dict()) == set(target_variables)
-        for candidate in compatible
+        set(candidate.as_dict()) == set(target_variables) for candidate in compatible
     )
 
 
@@ -831,12 +833,15 @@ def test_solved_candidate_pool_drives_binary_selection_master_after_cut() -> Non
     second_status = solve_master(cut_master)
 
     assert second_status == "candidate-2"
-    assert style_binary_selection_master_assignment_from_model(cut_master) == (
-        candidates[1]
+    assert (
+        style_binary_selection_master_assignment_from_model(cut_master)
+        == (candidates[1])
     )
 
 
-def test_static_style_binary_selection_candidate_decomposition_skips_failed_candidate() -> None:
+def test_static_style_binary_selection_candidate_decomposition_skips_failed_candidate() -> (
+    None
+):
     calibrated_catalog = style_case_study_2_contribution2_physical_profile_catalog()
     uncalibrated_catalog = style_case_study_2_contribution2_physical_profile_catalog(
         calibrated=False,
@@ -931,7 +936,9 @@ def test_bilevel_decomposition_run_counts_skipped_candidate_diagnostics() -> Non
     assert run.skipped_candidates == (skipped,)
 
 
-def test_static_style_binary_selection_decomposition_advances_after_no_good_cut() -> None:
+def test_static_style_binary_selection_decomposition_advances_after_no_good_cut() -> (
+    None
+):
     scenario = StaticStyleScenario(
         case_study="subproblem-smoke",
         scenario="equipment-alternatives",
@@ -970,7 +977,9 @@ def test_static_style_binary_selection_decomposition_advances_after_no_good_cut(
     assert len(run.solution_pool.incumbents) == 2
 
 
-def test_static_style_fixed_assignment_decomposition_runs_physical_profile_catalog_case() -> None:
+def test_static_style_fixed_assignment_decomposition_runs_physical_profile_catalog_case() -> (
+    None
+):
     scenario = next(iter(style_case_study_2_contribution2_physical_profile_catalog()))
 
     run = run_static_style_fixed_assignment_decomposition(
@@ -983,12 +992,12 @@ def test_static_style_fixed_assignment_decomposition_runs_physical_profile_catal
 
     assert scenario.scenario == "utility-system-stand-alone"
     assert rows == (
-            {
-                "iteration_index": 1,
-                "candidate_source": "",
-                "objective_value": pytest.approx(67.6834),
-                "best_bound": None,
-                "optimality_gap": None,
+        {
+            "iteration_index": 1,
+            "candidate_source": "",
+            "objective_value": pytest.approx(67.6834),
+            "best_bound": None,
+            "optimality_gap": None,
             "elapsed_seconds": None,
             "hit_time_limit": False,
             "selected_binary_count": 7,
@@ -1128,10 +1137,7 @@ def _static_style_assignment(
     model = build_static_style_model(scenario.data)
     selected = set(selected_variables)
     return BilevelIntegerAssignment.from_mapping(
-        {
-            name: int(name in selected)
-            for name in style_master_binary_variables(model)
-        },
+        {name: int(name in selected) for name in style_master_binary_variables(model)},
     )
 
 

@@ -465,7 +465,9 @@ class SteamLevelCandidate:
         _require_non_negative(self.annualized_level_cost, "annualized_level_cost")
         _require_non_negative(self.operating_cost_per_heat, "operating_cost_per_heat")
         if self.source_heat_upper_bound is not None:
-            _require_non_negative(self.source_heat_upper_bound, "source_heat_upper_bound")
+            _require_non_negative(
+                self.source_heat_upper_bound, "source_heat_upper_bound"
+            )
         if self.sink_heat_upper_bound is not None:
             _require_non_negative(self.sink_heat_upper_bound, "sink_heat_upper_bound")
         if self.steam_enthalpy_for_use is not None:

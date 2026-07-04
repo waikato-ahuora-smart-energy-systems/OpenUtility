@@ -155,7 +155,9 @@ def test_pyomo_highs_solver_solves_static_style_runner_smoke() -> None:
     assert run.result.total_annualized_cost == pytest.approx(0.0)
 
 
-def test_pyomo_highs_solver_allows_selected_header_heat_to_cascade_to_lower_sink() -> None:
+def test_pyomo_highs_solver_allows_selected_header_heat_to_cascade_to_lower_sink() -> (
+    None
+):
     scenario = StaticStyleScenario(
         case_study="solver-smoke",
         scenario="selected-header-cascades-sink-heat",

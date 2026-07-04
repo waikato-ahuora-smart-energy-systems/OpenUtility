@@ -8,7 +8,9 @@ from typing import Any
 
 import pandas as pd
 
-from case_study.jimenez_romero_utility_system_optimization.benchmarks import get_contribution2_case_study2_best_configuration
+from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
+    get_contribution2_case_study2_best_configuration,
+)
 from OpenUtility.style import (
     StaticStyleScenarioCatalog,
     best_configuration_comparison_rows,
@@ -272,7 +274,9 @@ def _pyomo_highs_solver(*, solver_time_limit: float):
     )
 
 
-def _rows_to_frame(rows: tuple[dict[str, Any], ...], *, digits: int | None) -> pd.DataFrame:
+def _rows_to_frame(
+    rows: tuple[dict[str, Any], ...], *, digits: int | None
+) -> pd.DataFrame:
     table = pd.DataFrame(rows)
     if digits is None or table.empty:
         return table

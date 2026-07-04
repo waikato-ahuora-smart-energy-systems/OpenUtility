@@ -15,36 +15,81 @@ from OpenUtility.style.properties import (
 
 
 class _ComputationalResultRecord(Protocol):
-    test_number: int
-    scenario: int
-    method: str
-    best_solution_found: float
-    best_possible: float | None
-    computational_time_seconds: float
-    hit_time_limit: bool
+    @property
+    def test_number(self) -> int: ...
+
+    @property
+    def scenario(self) -> int: ...
+
+    @property
+    def method(self) -> str: ...
+
+    @property
+    def best_solution_found(self) -> float: ...
+
+    @property
+    def best_possible(self) -> float | None: ...
+
+    @property
+    def computational_time_seconds(self) -> float: ...
+
+    @property
+    def hit_time_limit(self) -> bool: ...
 
 
 class _ModelStatisticRecord(Protocol):
-    test_number: int
-    reference: str
-    steam_mains: int
-    power_demand: float
-    integrates_hot_oil_and_fsr: bool
-    variable_count: int
-    binary_count: int
-    equation_count: int
+    @property
+    def test_number(self) -> int: ...
+
+    @property
+    def reference(self) -> str: ...
+
+    @property
+    def steam_mains(self) -> int: ...
+
+    @property
+    def power_demand(self) -> float: ...
+
+    @property
+    def integrates_hot_oil_and_fsr(self) -> bool: ...
+
+    @property
+    def variable_count(self) -> int: ...
+
+    @property
+    def binary_count(self) -> int: ...
+
+    @property
+    def equation_count(self) -> int: ...
 
 
 class _SteamPropertyComparisonRecord(Protocol):
-    configuration: str
-    turbine: str
-    inlet_temperature: float | None
-    inlet_pressure: float | None
-    outlet_pressure: float | None
-    real_isentropic_enthalpy_change: float | None
-    iapws_power_generation: float
-    model_isentropic_enthalpy_change: float | None
-    model_power_generation: float
+    @property
+    def configuration(self) -> str: ...
+
+    @property
+    def turbine(self) -> str: ...
+
+    @property
+    def inlet_temperature(self) -> float | None: ...
+
+    @property
+    def inlet_pressure(self) -> float | None: ...
+
+    @property
+    def outlet_pressure(self) -> float | None: ...
+
+    @property
+    def real_isentropic_enthalpy_change(self) -> float | None: ...
+
+    @property
+    def iapws_power_generation(self) -> float: ...
+
+    @property
+    def model_isentropic_enthalpy_change(self) -> float | None: ...
+
+    @property
+    def model_power_generation(self) -> float: ...
 
 
 STEAM_PROPERTY_ROW_FIELDS = (
@@ -136,7 +181,9 @@ def steam_property_comparison_rows(
 ) -> tuple[dict[str, Any], ...]:
     """Return Contribution 2 steam-property comparison rows."""
 
-    return tuple(_steam_property_comparison_row(comparison) for comparison in comparisons)
+    return tuple(
+        _steam_property_comparison_row(comparison) for comparison in comparisons
+    )
 
 
 def model_derived_steam_property_comparison_rows(

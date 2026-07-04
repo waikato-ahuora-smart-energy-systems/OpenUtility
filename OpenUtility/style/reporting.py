@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-import csv
 import json
 from collections.abc import Iterable, Sequence
-from io import StringIO
 from typing import Any, Protocol
 
+from ._row_formatting import format_rows_csv as _format_rows_csv
 from .bilevel import (
     BilevelCandidateAssignment,
     BilevelDecompositionRun,
@@ -25,13 +24,23 @@ from .runner import StaticStyleScenario
 
 
 class _BestConfigurationRecord(Protocol):
-    total_cost: float
-    fuel_consumption: float
-    operating_cost: float
-    fuel_cost: float
-    hot_oil_operating_cost: float | None
-    power_revenue: float | None
+    @property
+    def total_cost(self) -> float: ...
 
+    @property
+    def fuel_consumption(self) -> float: ...
+
+    @property
+    def operating_cost(self) -> float: ...
+
+    @property
+    def fuel_cost(self) -> float: ...
+
+    @property
+    def hot_oil_operating_cost(self) -> float | None: ...
+
+    @property
+    def power_revenue(self) -> float | None: ...
 
 
 COMPARISON_ROW_FIELDS = (
@@ -598,9 +607,7 @@ def bilevel_candidate_source_filter_summary_rows(
     )
     compatible_set = set(compatible_candidates)
     incompatible_candidates = tuple(
-        candidate
-        for candidate in candidate_records
-        if candidate not in compatible_set
+        candidate for candidate in candidate_records if candidate not in compatible_set
     )
     return (
         {
@@ -836,8 +843,7 @@ def format_bilevel_candidate_source_filter_summary_rows(
     if output_format == "json":
         return json.dumps(materialized_rows, indent=2)
     raise ValueError(
-        f"unsupported candidate source-filter summary output format "
-        f"{output_format!r}"
+        f"unsupported candidate source-filter summary output format {output_format!r}"
     )
 
 
@@ -857,8 +863,7 @@ def format_bilevel_candidate_source_filter_detail_rows(
     if output_format == "json":
         return json.dumps(materialized_rows, indent=2)
     raise ValueError(
-        f"unsupported candidate source-filter detail output format "
-        f"{output_format!r}"
+        f"unsupported candidate source-filter detail output format {output_format!r}"
     )
 
 
@@ -878,8 +883,7 @@ def format_bilevel_candidate_source_filter_variable_rows(
     if output_format == "json":
         return json.dumps(materialized_rows, indent=2)
     raise ValueError(
-        f"unsupported candidate source-filter variable output format "
-        f"{output_format!r}"
+        f"unsupported candidate source-filter variable output format {output_format!r}"
     )
 
 
@@ -919,8 +923,7 @@ def format_bilevel_skipped_candidate_delta_summary_rows(
     if output_format == "json":
         return json.dumps(materialized_rows, indent=2)
     raise ValueError(
-        f"unsupported skipped-candidate delta summary output format "
-        f"{output_format!r}"
+        f"unsupported skipped-candidate delta summary output format {output_format!r}"
     )
 
 
@@ -1325,8 +1328,7 @@ def format_style_candidate_selection_delta_summary_rows(
     if output_format == "json":
         return json.dumps(materialized_rows, indent=2)
     raise ValueError(
-        f"unsupported STYLE candidate-selection summary output format "
-        f"{output_format!r}"
+        f"unsupported STYLE candidate-selection summary output format {output_format!r}"
     )
 
 
@@ -1346,8 +1348,7 @@ def format_style_candidate_selection_delta_rows(
     if output_format == "json":
         return json.dumps(materialized_rows, indent=2)
     raise ValueError(
-        f"unsupported STYLE candidate-selection delta output format "
-        f"{output_format!r}"
+        f"unsupported STYLE candidate-selection delta output format {output_format!r}"
     )
 
 
@@ -1383,7 +1384,9 @@ def format_style_candidate_pool_rows(
         return _format_rows_csv(materialized_rows, STYLE_CANDIDATE_POOL_ROW_FIELDS)
     if output_format == "json":
         return json.dumps(materialized_rows, indent=2)
-    raise ValueError(f"unsupported STYLE candidate-pool output format {output_format!r}")
+    raise ValueError(
+        f"unsupported STYLE candidate-pool output format {output_format!r}"
+    )
 
 
 def format_style_decomposition_skipped_candidate_rows(
@@ -1506,9 +1509,7 @@ def format_style_fuel_consumption_family_rows(
         )
     if output_format == "json":
         return json.dumps(materialized_rows, indent=2)
-    raise ValueError(
-        f"unsupported STYLE fuel-family output format {output_format!r}"
-    )
+    raise ValueError(f"unsupported STYLE fuel-family output format {output_format!r}")
 
 
 def style_fuel_consumption_equipment_rows(
@@ -1615,9 +1616,7 @@ def format_style_fuel_consumption_capacity_rows(
         )
     if output_format == "json":
         return json.dumps(materialized_rows, indent=2)
-    raise ValueError(
-        f"unsupported STYLE fuel-capacity output format {output_format!r}"
-    )
+    raise ValueError(f"unsupported STYLE fuel-capacity output format {output_format!r}")
 
 
 def style_fuel_consumption_diagnosis_rows(
@@ -1719,9 +1718,7 @@ def format_style_fuel_calibration_target_rows(
         )
     if output_format == "json":
         return json.dumps(materialized_rows, indent=2)
-    raise ValueError(
-        f"unsupported STYLE fuel-target output format {output_format!r}"
-    )
+    raise ValueError(f"unsupported STYLE fuel-target output format {output_format!r}")
 
 
 def style_fuel_consumption_factor_map_from_calibration_target_rows(
@@ -2023,7 +2020,9 @@ def _bilevel_candidate_selection_delta_rows(
     accepted_values = accepted_assignment.as_dict()
     candidate_values = candidate.assignment.as_dict()
     if accepted_values.keys() != candidate_values.keys():
-        raise ValueError("candidate and accepted assignments must contain same variables")
+        raise ValueError(
+            "candidate and accepted assignments must contain same variables"
+        )
     return tuple(
         _bilevel_candidate_selection_delta_row(
             candidate_index=candidate_index,
@@ -2602,18 +2601,3 @@ def _safe_percent(numerator: float, denominator: float) -> float | None:
 
 def _format_comparison_rows_csv(rows: Sequence[dict[str, Any]]) -> str:
     return _format_rows_csv(rows, COMPARISON_ROW_FIELDS)
-
-
-def _format_rows_csv(
-    rows: Sequence[dict[str, Any]],
-    fieldnames: Sequence[str],
-) -> str:
-    output = StringIO()
-    writer = csv.DictWriter(
-        output,
-        fieldnames=fieldnames,
-        lineterminator="\n",
-    )
-    writer.writeheader()
-    writer.writerows(rows)
-    return output.getvalue()

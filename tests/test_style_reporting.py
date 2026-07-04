@@ -1032,7 +1032,9 @@ def test_style_fuel_consumption_residual_ranking_rows_rank_largest_residuals() -
     assert json.loads(json_output)[0]["scenario"] == "scenario-b"
 
 
-def test_style_fuel_consumption_residual_ranking_rows_allows_zero_denominators() -> None:
+def test_style_fuel_consumption_residual_ranking_rows_allows_zero_denominators() -> (
+    None
+):
     fuel_rows = (
         {
             "catalog": "physical-profile",
@@ -1140,9 +1142,7 @@ def test_contribution2_computational_best_method_rows_are_reportable() -> None:
         CONTRIBUTION2_COMPUTATIONAL_RESULTS,
     )
     test_6_scenario_2 = next(
-        row
-        for row in rows
-        if row["test_number"] == 6 and row["scenario"] == 2
+        row for row in rows if row["test_number"] == 6 and row["scenario"] == 2
     )
     csv_output = format_contribution2_computational_best_method_rows(
         rows[:1],
@@ -1572,8 +1572,7 @@ def test_bilevel_candidate_source_filter_variable_rows_are_reportable() -> None:
         },
     )
     assert csv_output.splitlines()[0] == (
-        "candidate_index,source_catalog,candidate_source,difference_type,"
-        "variable_name"
+        "candidate_index,source_catalog,candidate_source,difference_type,variable_name"
     )
     assert json.loads(json_output)[1]["difference_type"] == "extra-candidate"
 
@@ -2346,7 +2345,9 @@ def test_style_candidate_source_filter_detail_rows_include_scenario_metadata() -
     )
 
 
-def test_style_candidate_source_filter_variable_rows_include_scenario_metadata() -> None:
+def test_style_candidate_source_filter_variable_rows_include_scenario_metadata() -> (
+    None
+):
     candidates = (
         BilevelCandidateAssignment(
             source_label="calibrated:case:source",
@@ -2483,7 +2484,9 @@ def test_style_candidate_selection_delta_rows_include_scenario_metadata() -> Non
     )
 
 
-def test_style_candidate_selection_delta_summary_rows_include_scenario_metadata() -> None:
+def test_style_candidate_selection_delta_summary_rows_include_scenario_metadata() -> (
+    None
+):
     accepted = BilevelIntegerAssignment.from_mapping(
         {
             "level_selected[MP_75]": 1,
@@ -2782,9 +2785,7 @@ def test_contribution2_bilevel_benchmark_trajectory_rows_are_reportable() -> Non
         CONTRIBUTION2_COMPUTATIONAL_RESULTS,
     )
     test_6_scenario_2 = next(
-        row
-        for row in rows
-        if row["test_number"] == 6 and row["scenario"] == 2
+        row for row in rows if row["test_number"] == 6 and row["scenario"] == 2
     )
     csv_output = format_contribution2_bilevel_benchmark_trajectory_rows(
         rows[:1],
