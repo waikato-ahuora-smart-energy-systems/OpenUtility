@@ -117,7 +117,7 @@ def test_pyomo_utility_system_solver_solves_scalar_model() -> None:
     assert pyo.value(model.x) == pytest.approx(2.0)
 
 
-def test_pyomo_highs_solver_solves_static_style_runner_smoke() -> None:
+def test_pyomo_highs_solver_solves_static_utility_system_runner_smoke() -> None:
     scenario = UtilitySystemScenario(
         case_study="solver-smoke",
         scenario="balanced-one-level",

@@ -29,7 +29,7 @@ from OpenUtility.utility_system import (
 )
 
 
-def test_static_style_model_builds_core_source_cascade_components() -> None:
+def test_static_utility_system_model_builds_core_source_cascade_components() -> None:
     data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(

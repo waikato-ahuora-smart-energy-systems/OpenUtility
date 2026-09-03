@@ -447,7 +447,7 @@ def test_run_bilevel_decomposition_stops_on_duplicate_incumbent() -> None:
 def test_utility_system_master_binary_variables_extracts_canonical_selection_lookup() -> (
     None
 ):
-    model = build_utility_system_model(_style_master_data())
+    model = build_utility_system_model(_utility_system_master_data())
 
     variables = utility_system_master_binary_variables(model)
 
@@ -468,8 +468,8 @@ def test_utility_system_master_binary_variables_extracts_canonical_selection_loo
     assert "boiler_size[boiler_1]" not in variables
 
 
-def test_style_master_assignment_reads_current_pyomo_binary_values() -> None:
-    model = build_utility_system_model(_style_master_data())
+def test_utility_system_master_assignment_reads_current_pyomo_binary_values() -> None:
+    model = build_utility_system_model(_utility_system_master_data())
     variables = utility_system_master_binary_variables(model)
     for variable in variables.values():
         variable.value = 0.0
@@ -496,7 +496,7 @@ def test_style_master_assignment_reads_current_pyomo_binary_values() -> None:
 def test_fix_utility_system_master_integer_assignment_fixes_pyomo_binary_values() -> (
     None
 ):
-    model = build_utility_system_model(_style_master_data())
+    model = build_utility_system_model(_utility_system_master_data())
     variables = utility_system_master_binary_variables(model)
     values = {name: 0 for name in variables}
     values["level_selected[MP_185]"] = 1
@@ -516,7 +516,7 @@ def test_fix_utility_system_master_integer_assignment_fixes_pyomo_binary_values(
 def test_fix_utility_system_master_integer_assignment_requires_exact_binary_names() -> (
     None
 ):
-    model = build_utility_system_model(_style_master_data())
+    model = build_utility_system_model(_utility_system_master_data())
     variables = utility_system_master_binary_variables(model)
     missing_assignment = BilevelIntegerAssignment.from_mapping(
         {name: 0 for name in variables if name != "level_selected[MP_185]"},
@@ -531,11 +531,11 @@ def test_fix_utility_system_master_integer_assignment_requires_exact_binary_name
         fix_utility_system_master_integer_assignment(model, extra_assignment)
 
 
-def test_utility_system_fixed_assignment_subproblem_result_solves_static_style_model() -> (
+def test_utility_system_fixed_assignment_subproblem_result_solves_static_utility_system_model() -> (
     None
 ):
-    scenario = _static_style_subproblem_smoke_scenario()
-    assignment = _static_style_assignment(
+    scenario = _static_utility_system_subproblem_smoke_scenario()
+    assignment = _static_utility_system_assignment(
         scenario,
         selected_variables=("level_selected[MP_100]",),
     )
@@ -555,8 +555,8 @@ def test_utility_system_fixed_assignment_subproblem_result_solves_static_style_m
 def test_utility_system_fixed_assignment_subproblem_result_rejects_failed_solve() -> (
     None
 ):
-    scenario = _static_style_subproblem_smoke_scenario()
-    assignment = _static_style_assignment(scenario)
+    scenario = _static_utility_system_subproblem_smoke_scenario()
+    assignment = _static_utility_system_assignment(scenario)
 
     def solve(_model: pyo.ConcreteModel) -> UtilitySystemSolverStatus:
         return UtilitySystemSolverStatus(
@@ -571,8 +571,10 @@ def test_utility_system_fixed_assignment_subproblem_result_rejects_failed_solve(
         )
 
 
-def test_run_utility_system_fixed_assignment_decomposition_uses_style_master() -> None:
-    scenario = _static_style_subproblem_smoke_scenario()
+def test_run_utility_system_fixed_assignment_decomposition_uses_utility_system_master() -> (
+    None
+):
+    scenario = _static_utility_system_subproblem_smoke_scenario()
 
     run = run_utility_system_fixed_assignment_decomposition(
         scenario,
@@ -592,8 +594,10 @@ def test_run_utility_system_fixed_assignment_decomposition_uses_style_master() -
     assert tuple(iteration.next_master_model.bilevel_no_good_cuts.keys()) == (0,)
 
 
-def test_build_utility_system_binary_selection_master_uses_style_binary_names() -> None:
-    data = _style_master_data()
+def test_build_utility_system_binary_selection_master_uses_utility_system_binary_names() -> (
+    None
+):
+    data = _utility_system_master_data()
     full_model = build_utility_system_model(data)
 
     master = build_utility_system_binary_selection_master(data)
@@ -607,11 +611,11 @@ def test_build_utility_system_binary_selection_master_uses_style_binary_names() 
     )
 
 
-def test_static_style_binary_selection_decomposition_evaluates_fixed_subproblem() -> (
+def test_static_utility_system_binary_selection_decomposition_evaluates_fixed_subproblem() -> (
     None
 ):
-    scenario = _static_style_subproblem_smoke_scenario()
-    assignment = _static_style_assignment(
+    scenario = _static_utility_system_subproblem_smoke_scenario()
+    assignment = _static_utility_system_assignment(
         scenario,
         selected_variables=("level_selected[MP_100]",),
     )
@@ -643,7 +647,7 @@ def test_static_style_binary_selection_decomposition_evaluates_fixed_subproblem(
 def test_utility_system_binary_selection_candidate_solver_skips_excluded_assignments() -> (
     None
 ):
-    data = _style_master_data()
+    data = _utility_system_master_data()
     variable_names = tuple(
         build_utility_system_binary_selection_master(data).master_choice,
     )
@@ -701,19 +705,19 @@ def test_bilevel_decomposition_run_counts_skipped_candidate_diagnostics() -> Non
     assert run.skipped_candidates == (skipped,)
 
 
-def test_static_style_binary_selection_decomposition_advances_after_no_good_cut() -> (
+def test_static_utility_system_binary_selection_decomposition_advances_after_no_good_cut() -> (
     None
 ):
     scenario = UtilitySystemScenario(
         case_study="subproblem-smoke",
         scenario="equipment-alternatives",
-        data=_style_master_data(),
+        data=_utility_system_master_data(),
     )
-    first = _static_style_assignment(
+    first = _static_utility_system_assignment(
         scenario,
         selected_variables=("level_selected[MP_185]", "vhp_selected[VHP_90]"),
     )
-    second = _static_style_assignment(
+    second = _static_utility_system_assignment(
         scenario,
         selected_variables=(
             "level_selected[MP_185]",
@@ -742,8 +746,8 @@ def test_static_style_binary_selection_decomposition_advances_after_no_good_cut(
     assert len(run.solution_pool.incumbents) == 2
 
 
-def test_style_master_assignment_requires_solved_binary_values() -> None:
-    model = build_utility_system_model(_style_master_data())
+def test_utility_system_master_assignment_requires_solved_binary_values() -> None:
+    model = build_utility_system_model(_utility_system_master_data())
 
     with pytest.raises(ValueError, match="has no value"):
         utility_system_master_integer_assignment_from_model(model)
@@ -843,7 +847,7 @@ def _cut_count(model: pyo.ConcreteModel) -> int:
     return len(constraints)
 
 
-def _static_style_assignment(
+def _static_utility_system_assignment(
     scenario: UtilitySystemScenario,
     *,
     selected_variables: tuple[str, ...] = (),
@@ -858,7 +862,7 @@ def _static_style_assignment(
     )
 
 
-def _static_style_subproblem_smoke_scenario() -> UtilitySystemScenario:
+def _static_utility_system_subproblem_smoke_scenario() -> UtilitySystemScenario:
     return UtilitySystemScenario(
         case_study="subproblem-smoke",
         scenario="one-level",
@@ -884,7 +888,7 @@ def _static_style_subproblem_smoke_scenario() -> UtilitySystemScenario:
     )
 
 
-def _style_master_data() -> UtilitySystemModelData:
+def _utility_system_master_data() -> UtilitySystemModelData:
     return UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(

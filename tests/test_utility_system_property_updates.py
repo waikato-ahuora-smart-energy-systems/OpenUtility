@@ -41,7 +41,7 @@ class FakeSteamProperties:
 
 
 def test_apply_steam_property_update_replaces_pseudo_parameters_immutably() -> None:
-    data = _style_data()
+    data = _utility_system_data()
     spec = _property_spec(180.0)
 
     update = apply_steam_property_update(data, spec, FakeSteamProperties())
@@ -100,7 +100,7 @@ def test_apply_steam_property_update_rejects_unknown_targets() -> None:
     )
 
     with pytest.raises(ValueError, match="unknown steam level"):
-        apply_steam_property_update(_style_data(), spec, FakeSteamProperties())
+        apply_steam_property_update(_utility_system_data(), spec, FakeSteamProperties())
 
 
 def test_successive_milp_property_updates_stop_when_temperatures_converge() -> None:
@@ -114,7 +114,7 @@ def test_successive_milp_property_updates_stop_when_temperatures_converge() -> N
         return _property_spec(next(temperatures))
 
     run = run_successive_milp_property_updates(
-        _style_data(),
+        _utility_system_data(),
         initial_spec=_property_spec(180.0),
         solve=solve,
         properties=FakeSteamProperties(),
@@ -145,7 +145,7 @@ def test_successive_milp_property_updates_report_nonconvergence() -> None:
         return _property_spec(next(temperatures))
 
     run = run_successive_milp_property_updates(
-        _style_data(),
+        _utility_system_data(),
         initial_spec=_property_spec(180.0),
         solve=solve,
         properties=FakeSteamProperties(),
@@ -159,7 +159,7 @@ def test_successive_milp_property_updates_report_nonconvergence() -> None:
 
 
 def test_steam_property_update_spec_from_model_uses_selected_pyomo_options() -> None:
-    data = _style_data_with_two_levels()
+    data = _utility_system_data_with_two_levels()
     model = build_utility_system_model(data)
     model.level_selected["HP_12"].fix(0.0)
     model.level_selected["MP_3"].fix(1.0)
@@ -225,7 +225,7 @@ def test_steam_property_update_spec_from_model_uses_selected_pyomo_options() -> 
 
 
 def test_steam_property_update_spec_from_model_rejects_missing_level_target() -> None:
-    data = _style_data_with_two_levels()
+    data = _utility_system_data_with_two_levels()
     model = build_utility_system_model(data)
     model.level_selected["HP_12"].fix(0.0)
     model.level_selected["MP_3"].fix(1.0)
@@ -249,7 +249,7 @@ def test_steam_property_update_spec_from_model_rejects_missing_level_target() ->
 
 
 def test_steam_main_superheating_balances_from_solved_model_flows() -> None:
-    data = _stage4_style_data()
+    data = _stage4_utility_system_data()
     model = build_utility_system_model(data)
     _fix_stage4_solution(model)
 
@@ -291,7 +291,7 @@ def test_steam_main_superheating_balances_from_solved_model_flows() -> None:
 
 
 def test_stage4_model_spec_uses_calculated_superheating_temperatures() -> None:
-    data = _stage4_style_data()
+    data = _stage4_utility_system_data()
     model = build_utility_system_model(data)
     _fix_stage4_solution(model)
 
@@ -346,7 +346,7 @@ def test_stage4_model_spec_uses_calculated_superheating_temperatures() -> None:
 
 
 def test_stage4_superheating_balance_includes_inter_header_connections() -> None:
-    data = _stage4_inter_header_style_data()
+    data = _stage4_inter_header_utility_system_data()
     model = build_utility_system_model(data)
     _fix_stage4_inter_header_solution(model)
 
@@ -386,7 +386,7 @@ def test_stage4_superheating_balance_includes_inter_header_connections() -> None
     assert mp_balance.minimum_temperature_satisfied is True
 
 
-def _style_data() -> UtilitySystemModelData:
+def _utility_system_data() -> UtilitySystemModelData:
     return UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
@@ -412,7 +412,7 @@ def _style_data() -> UtilitySystemModelData:
     )
 
 
-def _stage4_inter_header_style_data() -> UtilitySystemModelData:
+def _stage4_inter_header_utility_system_data() -> UtilitySystemModelData:
     return UtilitySystemModelData(
         steam_mains=("HP", "MP"),
         steam_levels=(
@@ -479,7 +479,7 @@ def _fix_stage4_inter_header_solution(model) -> None:
     model.steam_main_letdown_flow["HP_to_MP_LD"].fix(1.0)
 
 
-def _stage4_style_data() -> UtilitySystemModelData:
+def _stage4_utility_system_data() -> UtilitySystemModelData:
     return UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
@@ -532,7 +532,7 @@ def _fix_stage4_solution(model) -> None:
     model.vhp_turbine_power_generation["VHP_to_MP"].fix(10.0)
 
 
-def _style_data_with_two_levels() -> UtilitySystemModelData:
+def _utility_system_data_with_two_levels() -> UtilitySystemModelData:
     return UtilitySystemModelData(
         steam_mains=("HP", "MP"),
         steam_levels=(

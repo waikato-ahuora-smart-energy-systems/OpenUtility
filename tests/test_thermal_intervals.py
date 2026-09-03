@@ -70,7 +70,7 @@ def test_build_temperature_intervals_uses_openpinch_shifted_kinks() -> None:
     ]
 
 
-def test_heat_content_by_interval_matches_style_interval_formula() -> None:
+def test_heat_content_by_interval_matches_utility_system_interval_formula() -> None:
     hot_stream = _hot_stream()
     cold_stream = _cold_stream()
     intervals = build_temperature_intervals([hot_stream, cold_stream])

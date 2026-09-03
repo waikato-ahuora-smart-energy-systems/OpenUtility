@@ -54,9 +54,8 @@ Robin Smith:
 - Julia Jimenez Romero, "Reduction of Industrial Energy Demand through
   Sustainable Integration of Distributed Energy Hubs," PhD thesis, The
   University of Manchester, 2022.
-- Jimenez Romero, J., Azapagic, A., and Smith, R., "STYLE: A new optimization
-  model for Synthesis of uTility sYstems with steam LEvel placement,"
-  Computers and Chemical Engineering, 170, Article 108060, 2023.
+- Jimenez Romero, J., Azapagic, A., and Smith, R., Computers and Chemical
+  Engineering, 170, Article 108060, 2023.
   https://doi.org/10.1016/j.compchemeng.2022.108060
 - Jimenez Romero, J., Azapagic, A., and Smith, R., "BEELINE: BilevEl
   dEcomposition aLgorithm for synthesis of Industrial eNergy systEms,"

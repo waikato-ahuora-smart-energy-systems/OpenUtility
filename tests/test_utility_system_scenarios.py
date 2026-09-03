@@ -11,7 +11,7 @@ from OpenUtility.utility_system import (
 from minimal_utility_system import minimal_utility_benchmark
 
 
-def test_static_style_scenario_catalog_returns_registered_scenarios() -> None:
+def test_static_utility_system_scenario_catalog_returns_registered_scenarios() -> None:
     scenario = UtilitySystemScenario(
         case_study="example-site",
         scenario="gas-turbine-with-steam-turbine",
@@ -24,7 +24,7 @@ def test_static_style_scenario_catalog_returns_registered_scenarios() -> None:
     assert catalog.get("example-site", "gas-turbine-with-steam-turbine") == scenario
 
 
-def test_static_style_scenario_catalog_rejects_duplicate_keys() -> None:
+def test_static_utility_system_scenario_catalog_rejects_duplicate_keys() -> None:
     scenario = UtilitySystemScenario(
         case_study="example-site",
         scenario="gas-turbine-with-steam-turbine",
@@ -35,7 +35,7 @@ def test_static_style_scenario_catalog_rejects_duplicate_keys() -> None:
         UtilitySystemScenarioCatalog((scenario, scenario))
 
 
-def test_static_style_scenario_catalog_reports_missing_key() -> None:
+def test_static_utility_system_scenario_catalog_reports_missing_key() -> None:
     catalog = UtilitySystemScenarioCatalog(())
 
     with pytest.raises(KeyError, match="No static utility-system scenario"):

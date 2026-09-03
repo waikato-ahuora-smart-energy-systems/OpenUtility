@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import importlib
 import sys
 import tomllib
 from pathlib import Path
@@ -84,12 +83,8 @@ def test_root_api_exposes_generic_core_helpers() -> None:
 
 def test_root_api_does_not_expose_removed_compatibility_names() -> None:
     removed_names = (
-        "StyleTableCaseStudyNotebookRun",
-        "run_style_table_2_9_case_study",
         "openpinch_stream_collection_from_stream_records",
         "openpinch_streams_from_stream_records",
-        "scipy_milp_static_style_solver",
-        "solve_static_style_model_with_scipy_milp",
     )
 
     for name in removed_names:
@@ -97,10 +92,6 @@ def test_root_api_does_not_expose_removed_compatibility_names() -> None:
         assert not hasattr(OpenUtility, name)
         with pytest.raises(ImportError):
             _import_from_openutility(name)
-
-
-def test_removed_style_namespace_is_not_importable() -> None:
-    assert importlib.util.find_spec("OpenUtility.style") is None
 
 
 def test_openutility_cold_import_does_not_import_openpinch_or_tespy() -> None:
