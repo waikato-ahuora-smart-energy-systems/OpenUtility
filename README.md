@@ -1,19 +1,49 @@
 # OpenUtility
 
-OpenUtility is a Python package for Pyomo-based utility-system optimization,
-reporting, bilevel decomposition utilities, thermal profile handling, and HPR
-investment/dispatch optimization. HPR is used as the umbrella term for heat
-pump and refrigeration assets.
+OpenUtility is an alpha-stage Python package for Pyomo-based utility-system
+optimization. It focuses on investment selection, dispatch, thermal and
+electric balances, operating-cost reporting, and solver orchestration for
+industrial utility systems.
+
+The package is intended to sit beside process-integration and thermodynamic
+tools rather than replace them. OpenPinch, TESPy workflows, manufacturer data,
+or other upstream tools can generate plain input data; OpenUtility consumes that
+data without importing those packages at runtime.
+
+## Package Scope
+
+OpenUtility currently includes:
+
+- typed input data classes for utility-system candidates, costs, thermal nodes,
+  operating periods, and HPR performance maps;
+- Pyomo MILP model construction for utility investment and dispatch decisions;
+- HiGHS solving through Pyomo `SolverFactory("appsi_highs")` and the required
+  `highspy` package;
+- HPR investment and dispatch modeling, where HPR means heat pump and
+  refrigeration;
+- generic reporting helpers for model results, benchmarks, operating costs, and
+  fuel consumption;
+- generic bilevel decomposition bookkeeping, no-good cut helpers, and
+  utility-system decomposition wrappers;
+- thermal interval helpers for stream-like plain Python objects.
+
+OpenUtility does not currently include:
+
+- OpenPinch or TESPy as runtime dependencies;
+- HPR thermodynamic cycle design, refrigerant screening, or performance-map
+  generation;
+- continuous HPR sizing; first-release HPR sizing is represented by selecting
+  among fixed-capacity candidates;
+- global interpolation across unrelated HPR temperature points;
+- a full public case-study replication package in the distributed wheel;
+- a public API named `BEELINE`, although generic bilevel decomposition utilities
+  are included.
 
 `OpenUtility/` is the reusable public package. Private replication workflows and
 large study-specific artifacts are intentionally outside the package boundary
 and are not included in release tests or built wheels.
 
-OpenUtility targets Python `>=3.14.2`. MILP solves use Pyomo
-`SolverFactory("appsi_highs")` through the required `highspy` package.
-OpenPinch is not a runtime dependency. OpenUtility consumes plain Python data
-that can be exported from OpenPinch, TESPy workflows, manufacturer data, or
-other upstream tools.
+OpenUtility targets Python `>=3.14.2`.
 
 ## Academic Basis
 
@@ -37,7 +67,9 @@ The package has since been generalized beyond the original replication
 workflows and extended with HPR optimization. In OpenUtility, HPR means heat
 pump and refrigeration: fixed-capacity HPR candidates can be selected and
 dispatched against multi-period thermal-node and electricity balances using
-versioned plain performance maps.
+versioned plain performance maps. The current HPR implementation is an
+optimization-layer model; thermodynamic map generation remains outside
+OpenUtility.
 
 ## Install
 
