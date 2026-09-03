@@ -45,8 +45,12 @@ Production publishing is tag based. A tag must use the exact form ``vX.Y.Z`` and
 must match the version in ``pyproject.toml``. The release workflow validates the
 tag before running the release gate or publishing.
 
-The PyPI upload job uses GitHub OpenID Connect trusted publishing and is bound
-to the protected ``pypi`` environment:
+The tag workflow separates validation from publication. The ``validate`` job
+runs the full release gate first and uploads only the verified distributions as
+a GitHub Actions artifact. The ``publish`` job depends on ``validate``, downloads
+that artifact, and is the only job bound to the protected ``pypi`` environment.
+
+The PyPI upload job uses GitHub OpenID Connect trusted publishing:
 
 .. code-block:: text
 
