@@ -25,3 +25,4 @@ are not part of the release test boundary.
    :caption: Development
 
    developer_checklist
+   release_strategy

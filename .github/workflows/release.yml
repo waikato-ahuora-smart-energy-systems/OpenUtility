@@ -7,21 +7,35 @@ on:
 
 permissions:
   contents: read
-  id-token: write
+
+env:
+  PYTHON_VERSION: "3.14.2"
+  UV_VERSION: "0.11.29"
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/OpenUtility/
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v7
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.14"
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: Install dependencies
-        run: uv sync --extra dev --extra docs --extra notebook --extra release
+        run: uv sync --frozen --extra dev --extra docs --extra notebook --extra release
+      - name: Validate release tag
+        run: uv run --no-sync python scripts/check_release_tag.py "${GITHUB_REF_NAME}"
       - name: Run release gate
-        run: uv run python tools/release_check.py
+        run: uv run --no-sync python tools/release_check.py
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@release/v1

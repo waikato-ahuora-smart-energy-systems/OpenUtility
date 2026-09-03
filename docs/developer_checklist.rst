@@ -18,6 +18,14 @@ Run the full verification suite:
    python -m sphinx -W -b html docs /tmp/openutility-docs-html
    python -m build --no-isolation
 
+Validate release metadata:
+
+.. code-block:: bash
+
+   python scripts/check_lockfile_version.py
+   python scripts/check_release_version.py
+   python scripts/check_release_tag.py v0.1.0
+
 Run the single release gate:
 
 .. code-block:: bash

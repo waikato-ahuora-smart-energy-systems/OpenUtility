@@ -73,12 +73,14 @@ release = [
 
 [tool.hatch.build.targets.sdist]
 include = [
+  "/.bumpversion.toml",
   "/CHANGELOG.md",
   "/LICENSE",
   "/OpenUtility",
   "/README.md",
   "/docs",
   "/pyproject.toml",
+  "/scripts",
   "/tests",
   "/uv.lock",
 ]

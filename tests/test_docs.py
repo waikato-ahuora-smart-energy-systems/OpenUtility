@@ -10,6 +10,7 @@ def test_readthedocs_config_builds_sphinx_docs() -> None:
     config = (PROJECT_ROOT / ".readthedocs.yaml").read_text()
 
     assert "configuration: docs/conf.py" in config
+    assert "fail_on_warning: true" in config
     assert 'python: "3.14"' in config
     assert "extra_requirements:" in config
     assert "- docs" in config
@@ -20,6 +21,17 @@ def test_docs_index_prioritizes_reusable_package_api() -> None:
 
     assert "reusable package" in index
     assert "api" in index
+    assert "release_strategy" in index
+
+
+def test_release_strategy_docs_describe_versioning_and_pypi_environment() -> None:
+    docs = (PROJECT_ROOT / "docs" / "release_strategy.rst").read_text()
+
+    assert "OpenPinch workflow model" in docs
+    assert "major" in docs
+    assert "minor" in docs
+    assert "patch" in docs
+    assert "environment: pypi" in docs
 
 
 def test_notebook_workflow_docs_describe_package_local_examples() -> None:
