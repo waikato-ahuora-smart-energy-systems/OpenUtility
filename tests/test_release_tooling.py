@@ -54,6 +54,9 @@ def test_github_workflows_run_release_gate_and_publish_with_trusted_publishing()
     assert "contents: write" in ci
     assert "scripts/check_lockfile_version.py" in ci
     assert "scripts/check_release_version.py" in ci
+    assert "actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8" in ci
+    assert "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405" in ci
+    assert "astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d" in ci
 
     assert 'PYTHON_VERSION: "3.14.2"' in release
     assert "python tools/release_check.py" in release
@@ -66,7 +69,14 @@ def test_github_workflows_run_release_gate_and_publish_with_trusted_publishing()
     assert "name: pypi" in release
     assert "url: https://pypi.org/project/OpenUtility/" in release
     assert "id-token: write" in release
-    assert "pypa/gh-action-pypi-publish@release/v1" in release
+    assert "actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8" in release
+    assert "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405" in release
+    assert "astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d" in release
+    assert (
+        "pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33"
+        in release
+    )
+    assert "skip-existing: true" in release
 
 
 def test_version_bump_configuration_tracks_project_and_lockfile() -> None:
