@@ -15,6 +15,30 @@ OpenPinch is not a runtime dependency. OpenUtility consumes plain Python data
 that can be exported from OpenPinch, TESPy workflows, manufacturer data, or
 other upstream tools.
 
+## Academic Basis
+
+OpenUtility began as a Python/Pyomo implementation of utility-system
+optimization methods developed by Julia Jimenez Romero, Adisa Azapagic, and
+Robin Smith:
+
+- Julia Jimenez Romero, "Reduction of Industrial Energy Demand through
+  Sustainable Integration of Distributed Energy Hubs," PhD thesis, The
+  University of Manchester, 2022.
+- Jimenez Romero, J., Azapagic, A., and Smith, R., "STYLE: A new optimization
+  model for Synthesis of uTility sYstems with steam LEvel placement,"
+  Computers and Chemical Engineering, 170, Article 108060, 2023.
+  https://doi.org/10.1016/j.compchemeng.2022.108060
+- Jimenez Romero, J., Azapagic, A., and Smith, R., "BEELINE: BilevEl
+  dEcomposition aLgorithm for synthesis of Industrial eNergy systEms,"
+  Computers and Chemical Engineering, 180, Article 108406, 2024.
+  https://doi.org/10.1016/j.compchemeng.2023.108406
+
+The package has since been generalized beyond the original replication
+workflows and extended with HPR optimization. In OpenUtility, HPR means heat
+pump and refrigeration: fixed-capacity HPR candidates can be selected and
+dispatched against multi-period thermal-node and electricity balances using
+versioned plain performance maps.
+
 ## Install
 
 From a checkout:
