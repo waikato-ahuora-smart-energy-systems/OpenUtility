@@ -40,6 +40,9 @@ def test_github_workflows_run_release_gate_and_publish_with_trusted_publishing()
     release = (PROJECT_ROOT / ".github" / "workflows" / "release.yml").read_text()
 
     assert 'PYTHON_VERSION: "3.14.2"' in ci
+    assert "all-tests:" in ci
+    assert "needs: all-tests" in ci
+    assert "Run all tests with coverage" in ci
     assert "python tools/release_check.py" in ci
     assert (
         "uv sync --frozen --extra dev --extra docs --extra notebook --extra release"
@@ -52,6 +55,8 @@ def test_github_workflows_run_release_gate_and_publish_with_trusted_publishing()
     assert "minor" in ci
     assert "patch" in ci
     assert "contents: write" in ci
+    assert "GH_TOKEN: ${{ github.token }}" in ci
+    assert "AUTHORIZATION: bearer ${GH_TOKEN}" in ci
     assert "scripts/check_lockfile_version.py" in ci
     assert "scripts/check_release_version.py" in ci
     assert "actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8" in ci

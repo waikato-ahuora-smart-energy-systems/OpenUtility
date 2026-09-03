@@ -21,6 +21,10 @@ Pull requests run the full release gate on Python 3.14.2. The gate checks:
 * dependency audit;
 * fresh wheel-install smoke tests with HiGHS solves.
 
+CI also exposes an explicit ``all-tests`` job for GitHub branch protection. That
+job runs the complete pytest suite with the package coverage threshold, and the
+broader ``release-gate`` job depends on it.
+
 For same-repository pull requests targeting ``main``, CI also maintains the
 candidate release version. The version bump is selected from labels named
 ``major``, ``minor``, or ``patch``. If no label is present, CI also accepts
