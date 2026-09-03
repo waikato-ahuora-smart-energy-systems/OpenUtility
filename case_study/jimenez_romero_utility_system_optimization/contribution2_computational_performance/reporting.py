@@ -8,7 +8,7 @@ from collections.abc import Iterable, Sequence
 from io import StringIO
 from typing import Any, Protocol
 
-from OpenUtility.style.properties import (
+from OpenUtility.utility_system.properties import (
     CoolPropSteamPropertyProvider,
     SteamPropertyProvider,
 )

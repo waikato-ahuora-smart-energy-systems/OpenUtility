@@ -26,11 +26,11 @@ from OpenUtility.thermal import (
     heat_content_by_interval,
 )
 
-from OpenUtility.style.adapters import (
-    style_model_data_from_heat_profile,
-    style_model_data_from_heat_profile_for_steam_mains,
+from OpenUtility.utility_system.adapters import (
+    utility_system_model_data_from_heat_profile,
+    utility_system_model_data_from_heat_profile_for_steam_mains,
 )
-from OpenUtility.style.data import (
+from OpenUtility.utility_system.data import (
     BoilerCandidate,
     CoolingWaterConfig,
     ElectricityCost,
@@ -47,14 +47,14 @@ from OpenUtility.style.data import (
     SteamMainBackPressureTurbineCandidate,
     SteamMainLetdownStationCandidate,
     SteamLevelCandidate,
-    StyleModelData,
+    UtilitySystemModelData,
     VhpBackPressureTurbineCandidate,
     VhpLetdownStationCandidate,
     VhpSteamCandidate,
     VhpSteamSourceCandidate,
     WaterCost,
 )
-from OpenUtility.style.properties import (
+from OpenUtility.utility_system.properties import (
     CoolPropSteamPropertyProvider,
     SteamLevelPropertyTarget,
     SteamPropertyProvider,
@@ -62,8 +62,8 @@ from OpenUtility.style.properties import (
     VhpHeaderPropertyTarget,
     apply_steam_property_update,
 )
-from OpenUtility.style.runner import StaticStyleScenario
-from OpenUtility.style.scenarios import StaticStyleScenarioCatalog
+from OpenUtility.utility_system.runner import UtilitySystemScenario
+from OpenUtility.utility_system.scenarios import UtilitySystemScenarioCatalog
 
 
 class _PhysicalProfileCalibrationKwargs(TypedDict, total=False):
@@ -108,11 +108,11 @@ def style_case_study_2_base_model_data(
     use_enthalpy_delta: float,
     steam_enthalpy_for_use: float | None = None,
     feedwater_enthalpy: float = 0.0,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     """Create base STYLE model data from case-study 2 stream and site fixtures."""
 
     profile = style_case_study_2_heat_interval_profile()
-    base_data = style_model_data_from_heat_profile(
+    base_data = utility_system_model_data_from_heat_profile(
         profile,
         steam_main=steam_main,
         power_demand=STYLE_CASE_STUDY_2_SITE_CONFIG.power_demand,
@@ -141,10 +141,10 @@ def style_case_study_2_static_scenario(
     steam_enthalpy_for_use: float | None = None,
     feedwater_enthalpy: float = 0.0,
     absolute_tolerance: float = 1e-6,
-) -> StaticStyleScenario:
+) -> UtilitySystemScenario:
     """Create an explicitly parameterized static STYLE case-study 2 scenario."""
 
-    return StaticStyleScenario(
+    return UtilitySystemScenario(
         case_study="case-study-2",
         scenario=scenario,
         data=style_case_study_2_base_model_data(
@@ -172,7 +172,7 @@ def style_case_study_2_gas_turbine_scenario_data(
     ambient_temperature: float = 15.0,
     steam_enthalpy_for_use: float | None = None,
     feedwater_enthalpy: float = 0.0,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     """Return case-study 2 base data with one derived gas-turbine option."""
 
     base_data = style_case_study_2_base_model_data(
@@ -316,7 +316,7 @@ def style_case_study_2_best_configuration_reported_flow_model_data(
     generation_enthalpy_delta: float | None = 1.0,
     use_enthalpy_delta: float | None = 1.0,
     properties: SteamPropertyProvider | None = None,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     """Create a buildable multi-main model skeleton from reported source flows."""
 
     configuration = get_contribution2_case_study2_best_configuration(scenario)
@@ -354,7 +354,7 @@ def style_case_study_2_best_configuration_reported_flow_model_data(
         pressure=configuration.vhp_pressure,
         properties=provider,
     )
-    return StyleModelData(
+    return UtilitySystemModelData(
         steam_mains=configuration.steam_mains,
         steam_levels=levels,
         vhp_headers=(
@@ -413,7 +413,7 @@ def style_case_study_2_best_configuration_physical_profile_model_data(
     fuel_consumption_factors: Mapping[tuple[str, str], float] | None = None,
     operating_cost_adjustments: Mapping[str, float] | None = None,
     properties: SteamPropertyProvider | None = None,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     """Create physical heat-profile data with reported equipment targets."""
 
     if match_reported_fuel_cost and not fix_reported_loads:
@@ -432,8 +432,8 @@ def style_case_study_2_best_configuration_physical_profile_model_data(
 
     def base_profile_data(
         heat_load_steam_main: str | None = None,
-    ) -> StyleModelData:
-        return style_model_data_from_heat_profile_for_steam_mains(
+    ) -> UtilitySystemModelData:
+        return utility_system_model_data_from_heat_profile_for_steam_mains(
             profile,
             steam_mains=resolved_steam_mains,
             power_demand=STYLE_CASE_STUDY_2_SITE_CONFIG.power_demand,
@@ -678,7 +678,7 @@ def style_case_study_2_best_configuration_boiler_candidate(
 
 
 def style_case_study_2_best_configuration_with_boiler(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     scenario: str,
     *,
     name: str,
@@ -690,7 +690,7 @@ def style_case_study_2_best_configuration_with_boiler(
     minimum_load_fraction: float = 0.0,
     variable_maintenance_cost: float = 0.0,
     fixed_maintenance_cost: float = 0.0,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     """Return data with one boiler derived from a best-configuration row."""
 
     selected_vhp = _single_or_named_vhp_header(data, vhp_header)
@@ -852,7 +852,7 @@ def style_case_study_2_best_configuration_hot_oil_thermal_efficiency_for_reporte
 
 
 def _physical_profile_hot_oil_thermal_efficiency_for_reported_operating_cost(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     configuration,
     *,
     fuel: str,
@@ -890,7 +890,7 @@ def _physical_profile_hot_oil_thermal_efficiency_for_reported_operating_cost(
 
 
 def _physical_profile_hot_oil_sink_heat_load(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     *,
     selected_steam_levels: tuple[str, ...],
     supply_temperature: float | None,
@@ -912,7 +912,7 @@ def _hot_oil_can_supply_level(
 
 
 def style_case_study_2_best_configuration_flash_steam_recovery_config(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     scenario: str,
     *,
     steam_level_names: Mapping[str, str] | None = None,
@@ -995,7 +995,7 @@ def style_case_study_2_best_configuration_flash_steam_recovery_config(
 
 
 def style_case_study_2_best_configuration_with_gas_turbine_hrsg(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     scenario: str,
     *,
     gas_turbine_name: str,
@@ -1012,7 +1012,7 @@ def style_case_study_2_best_configuration_with_gas_turbine_hrsg(
     gas_turbine_fixed_maintenance_cost: float = 0.0,
     hrsg_variable_maintenance_cost: float = 0.0,
     hrsg_fixed_maintenance_cost: float = 0.0,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     """Return data with reported gas-turbine and HRSG candidates."""
 
     selected_vhp = _single_or_named_vhp_header(data, vhp_header)
@@ -1243,7 +1243,7 @@ def style_case_study_2_gas_turbine_hrsg_scenario_data(
     ambient_temperature: float = 15.0,
     steam_enthalpy_for_use: float | None = None,
     feedwater_enthalpy: float = 0.0,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     """Return case-study 2 data with derived gas-turbine and HRSG options."""
 
     data = style_case_study_2_gas_turbine_scenario_data(
@@ -1315,7 +1315,7 @@ def style_case_study_2_boiler_gas_turbine_hrsg_scenario_data(
     boiler_minimum_load_fraction: float = 0.0,
     steam_enthalpy_for_use: float | None = None,
     feedwater_enthalpy: float = 0.0,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     """Return case-study 2 data with boiler and gas-turbine/HRSG VHP options."""
 
     data = style_case_study_2_gas_turbine_hrsg_scenario_data(
@@ -1471,7 +1471,7 @@ def style_case_study_2_best_configuration_vhp_turbine_candidate(
 
 
 def style_case_study_2_best_configuration_with_vhp_turbine(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     scenario: str,
     *,
     name: str,
@@ -1483,7 +1483,7 @@ def style_case_study_2_best_configuration_with_vhp_turbine(
     power_intercept: float = 0.0,
     variable_maintenance_cost: float = 0.0,
     fixed_maintenance_cost: float = 0.0,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     """Return data with one VHP turbine derived from a best-configuration row."""
 
     selected_vhp = _single_or_named_vhp_header(data, vhp_header)
@@ -1545,7 +1545,7 @@ def style_case_study_2_best_configuration_auxiliary_vhp_source_candidate(
 
 
 def style_case_study_2_best_configuration_with_auxiliary_vhp_source(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     scenario: str,
     *,
     name: str,
@@ -1555,7 +1555,7 @@ def style_case_study_2_best_configuration_with_auxiliary_vhp_source(
     minimum_load_fraction: float = 0.0,
     fuel_consumption_per_steam: float = 0.0,
     must_select: bool = False,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     """Return data with an auxiliary source for unassigned VHP steam generation."""
 
     selected_vhp = _single_or_named_vhp_header(data, vhp_header)
@@ -1573,7 +1573,7 @@ def style_case_study_2_best_configuration_with_auxiliary_vhp_source(
 
 
 def style_case_study_2_best_configuration_inter_main_letdown_candidates(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     scenario: str,
     *,
     name_template: str = "{source}-to-{target}-LD",
@@ -1612,12 +1612,12 @@ def style_case_study_2_best_configuration_inter_main_letdown_candidates(
 
 
 def style_case_study_2_best_configuration_with_inter_main_letdowns(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     scenario: str,
     *,
     name_template: str = "{source}-to-{target}-LD",
     tolerance: float = 1e-9,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     """Return data with adjacent reported steam-main let-down connections."""
 
     letdowns = style_case_study_2_best_configuration_inter_main_letdown_candidates(
@@ -1670,7 +1670,7 @@ def style_case_study_2_best_configuration_reported_equipment_model_data(
     reported_capital_cost: float | None = None,
     match_reported_economics: bool = False,
     properties: SteamPropertyProvider | None = None,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     """Create reported best-configuration flow data with reported equipment."""
 
     configuration = get_contribution2_case_study2_best_configuration(scenario)
@@ -1850,13 +1850,13 @@ def style_case_study_2_best_configuration_reported_equipment_model_data(
 
 
 def style_case_study_2_with_vhp_letdown(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     *,
     name: str,
     steam_level: str,
     vhp_header: str | None = None,
     max_flow: float | None = None,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     """Return case-study 2 data with one additional VHP let-down connection."""
 
     selected_vhp = _single_or_named_vhp_header(data, vhp_header)
@@ -1879,7 +1879,7 @@ def style_case_study_2_with_vhp_letdown(
 
 
 def style_case_study_2_with_vhp_back_pressure_turbine(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     *,
     name: str,
     steam_level: str,
@@ -1891,7 +1891,7 @@ def style_case_study_2_with_vhp_back_pressure_turbine(
     minimum_load_fraction: float = 0.0,
     variable_maintenance_cost: float = 0.0,
     fixed_maintenance_cost: float = 0.0,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     """Return case-study 2 data with one additional VHP turbine connection."""
 
     selected_vhp = _single_or_named_vhp_header(data, vhp_header)
@@ -1930,11 +1930,11 @@ def style_case_study_2_contribution2_best_configuration_catalog(
     hrsg_supplementary_fuel: str = "natural-gas",
     hot_oil_fuel: str = "natural-gas",
     match_reported_economics: bool = True,
-) -> StaticStyleScenarioCatalog:
+) -> UtilitySystemScenarioCatalog:
     """Return calibrated Contribution 2 case-study 2 best-configuration rows."""
 
     scenarios = tuple(
-        StaticStyleScenario(
+        UtilitySystemScenario(
             case_study="contribution-2-case-study-2",
             scenario=configuration.scenario,
             data=style_case_study_2_best_configuration_reported_equipment_model_data(
@@ -1971,7 +1971,7 @@ def style_case_study_2_contribution2_best_configuration_catalog(
         )
         for configuration in CONTRIBUTION2_CASE_STUDY_2_BEST_CONFIGURATIONS
     )
-    return StaticStyleScenarioCatalog(scenarios)
+    return UtilitySystemScenarioCatalog(scenarios)
 
 
 def style_case_study_2_contribution2_physical_profile_catalog(
@@ -1996,11 +1996,11 @@ def style_case_study_2_contribution2_physical_profile_catalog(
         Mapping[str, float],
     ]
     | None = None,
-) -> StaticStyleScenarioCatalog:
+) -> UtilitySystemScenarioCatalog:
     """Return physical-profile Contribution 2 case-study 2 rows."""
 
     scenarios = tuple(
-        StaticStyleScenario(
+        UtilitySystemScenario(
             case_study="contribution-2-case-study-2-physical-profile",
             scenario=configuration.scenario,
             data=style_case_study_2_best_configuration_physical_profile_model_data(
@@ -2053,7 +2053,7 @@ def style_case_study_2_contribution2_physical_profile_catalog(
         )
         for configuration in CONTRIBUTION2_CASE_STUDY_2_BEST_CONFIGURATIONS
     )
-    return StaticStyleScenarioCatalog(scenarios)
+    return UtilitySystemScenarioCatalog(scenarios)
 
 
 def style_case_study_2_scenario_catalog(
@@ -2071,12 +2071,12 @@ def style_case_study_2_scenario_catalog(
     steam_enthalpy_for_use: float | None = None,
     feedwater_enthalpy: float = 0.0,
     absolute_tolerance: float = 1e-6,
-) -> StaticStyleScenarioCatalog:
+) -> UtilitySystemScenarioCatalog:
     """Return a one-scenario catalog with derived gas-turbine case-study data."""
 
-    return StaticStyleScenarioCatalog(
+    return UtilitySystemScenarioCatalog(
         (
-            StaticStyleScenario(
+            UtilitySystemScenario(
                 case_study="case-study-2",
                 scenario=scenario,
                 data=style_case_study_2_gas_turbine_scenario_data(
@@ -2137,7 +2137,7 @@ def style_case_study_2_complete_static_scenario_catalog(
     fuel_consumption_factors: Mapping[tuple[str, str], float] | None = None,
     operating_cost_adjustments: Mapping[str, float] | None = None,
     absolute_tolerance: float = 1e-6,
-) -> StaticStyleScenarioCatalog:
+) -> UtilitySystemScenarioCatalog:
     """Return a catalog with one buildable assembled case-study 2 scenario."""
 
     benchmark = get_style_result("case-study-2", scenario)
@@ -2224,9 +2224,9 @@ def style_case_study_2_complete_static_scenario_catalog(
             connected_data,
             fuel_consumption_factors,
         )
-    return StaticStyleScenarioCatalog(
+    return UtilitySystemScenarioCatalog(
         (
-            StaticStyleScenario(
+            UtilitySystemScenario(
                 case_study="case-study-2",
                 scenario=scenario,
                 data=connected_data,
@@ -2420,7 +2420,7 @@ def _model_equipment_type(
 
 
 def _single_or_named_vhp_header(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     vhp_header: str | None,
 ) -> VhpSteamCandidate:
     if vhp_header is not None:
@@ -2433,7 +2433,7 @@ def _single_or_named_vhp_header(
     return data.vhp_headers[0]
 
 
-def _single_level_name_for_steam_main(data: StyleModelData, steam_main: str) -> str:
+def _single_level_name_for_steam_main(data: UtilitySystemModelData, steam_main: str) -> str:
     matches = tuple(
         level.name for level in data.steam_levels if level.steam_main == steam_main
     )
@@ -2446,7 +2446,7 @@ def _single_level_name_for_steam_main(data: StyleModelData, steam_main: str) -> 
 
 
 def _flash_steam_level_name(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     steam_main: str,
     steam_level_names: Mapping[str, str] | None,
 ) -> str:
@@ -2573,7 +2573,7 @@ def _reported_auxiliary_operating_cost(configuration) -> float:
     return max(0.0, auxiliary_cost)
 
 
-def _with_unpaid_power_export(data: StyleModelData, configuration) -> StyleModelData:
+def _with_unpaid_power_export(data: UtilitySystemModelData, configuration) -> UtilitySystemModelData:
     reported_export_power = max(0.0, configuration.power_generation - data.power_demand)
     export_limit = max(data.grid_export_limit or 0.0, reported_export_power)
     electricity_cost = data.electricity_cost
@@ -2587,10 +2587,10 @@ def _with_unpaid_power_export(data: StyleModelData, configuration) -> StyleModel
 
 
 def _with_reported_power_revenue(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     configuration,
     reported_power_revenue: float,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     reported_export_power = configuration.power_generation - data.power_demand
     if reported_export_power <= 0.0:
         raise ValueError("reported power revenue requires positive power export")
@@ -2609,9 +2609,9 @@ def _with_reported_power_revenue(
 
 
 def _with_benchmark_power_generation_export_limit(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     benchmark,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     reported_export = benchmark.power_generation - data.power_demand
     if reported_export < -1e-9:
         raise ValueError(
@@ -2621,11 +2621,11 @@ def _with_benchmark_power_generation_export_limit(
 
 
 def _with_benchmark_fixed_capital_cost(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     benchmark,
     *,
     equipment_name: str,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     target_cost = _equipment_cost_by_equipment_name(data, equipment_name)
     fixed_capital_cost = benchmark.capital_cost / (
         target_cost.annualization_factor
@@ -2654,9 +2654,9 @@ def _with_benchmark_fixed_capital_cost(
 
 
 def _with_reported_auxiliary_operating_cost(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     reported_auxiliary_operating_cost: float,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     if data.cooling_water is None:
         raise ValueError(
             "reported auxiliary operating cost requires cooling water data"
@@ -2676,9 +2676,9 @@ def _with_reported_auxiliary_operating_cost(
 
 
 def _with_reported_fuel_cost(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     configuration,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     if not data.fuel_costs:
         raise ValueError("reported fuel cost requires at least one fuel-cost input")
     if configuration.fuel_consumption <= 0.0:
@@ -2695,9 +2695,9 @@ def _with_reported_fuel_cost(
 
 
 def _with_reported_fuel_cost_on_physical_basis(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     configuration,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     if not data.fuel_costs:
         raise ValueError("reported fuel cost requires at least one fuel-cost input")
     physical_fuel_consumption = _fixed_load_physical_fuel_consumption(data)
@@ -2715,9 +2715,9 @@ def _with_reported_fuel_cost_on_physical_basis(
 
 
 def _with_fuel_consumption_accounting_factors(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     factors: Mapping[tuple[str, str], float],
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     return replace(
         data,
         fuel_consumption_factors=tuple(
@@ -2732,9 +2732,9 @@ def _with_fuel_consumption_accounting_factors(
 
 
 def _with_operating_cost_accounting_adjustments(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     adjustments: Mapping[str, float],
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     return replace(
         data,
         operating_cost_adjustments=tuple(
@@ -2747,7 +2747,7 @@ def _with_operating_cost_accounting_adjustments(
     )
 
 
-def _fixed_load_physical_fuel_consumption(data: StyleModelData) -> float:
+def _fixed_load_physical_fuel_consumption(data: UtilitySystemModelData) -> float:
     return (
         sum(
             _fixed_load_boiler_fuel_consumption(data, boiler) for boiler in data.boilers
@@ -2770,7 +2770,7 @@ def _fixed_load_physical_fuel_consumption(data: StyleModelData) -> float:
 
 
 def _fixed_load_boiler_fuel_consumption(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     boiler: BoilerCandidate,
 ) -> float:
     if not boiler.must_select:
@@ -2788,9 +2788,9 @@ def _fixed_load_boiler_fuel_consumption(
 
 
 def _with_reported_capital_cost(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     reported_capital_cost: float,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     current_capital_cost = _reported_design_capital_cost(data)
     if current_capital_cost <= 0.0:
         raise ValueError("reported capital cost requires positive equipment capital")
@@ -2809,13 +2809,13 @@ def _with_reported_capital_cost(
 
 
 def _with_required_reported_equipment(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     *,
     boiler_name: str | None,
     gas_turbine_name: str,
     hrsg_name: str,
     vhp_turbine_name: str,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     return replace(
         data,
         boilers=tuple(
@@ -2842,10 +2842,10 @@ def _with_required_reported_equipment(
 
 
 def _with_flash_steam_recovery_use_basis(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     configuration,
     flash_steam_recovery: FlashSteamRecoveryConfig,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     target_enthalpy_by_level = {
         route.target_level: _flash_level_by_name(
             flash_steam_recovery,
@@ -2894,7 +2894,7 @@ def _flash_level_by_name(
     raise KeyError(f"No flash recovery level {steam_level!r}.")
 
 
-def _reported_design_capital_cost(data: StyleModelData) -> float:
+def _reported_design_capital_cost(data: UtilitySystemModelData) -> float:
     return sum(
         (
             cost.annualization_factor
@@ -2909,7 +2909,7 @@ def _reported_design_capital_cost(data: StyleModelData) -> float:
     )
 
 
-def _reported_equipment_design_size(data: StyleModelData, cost: EquipmentCost) -> float:
+def _reported_equipment_design_size(data: UtilitySystemModelData, cost: EquipmentCost) -> float:
     if cost.equipment_type == "boiler":
         return _boiler_by_name(data, cost.equipment_name).max_capacity
     if cost.equipment_type == "gas_turbine":
@@ -2936,7 +2936,7 @@ def _reported_equipment_design_size(data: StyleModelData, cost: EquipmentCost) -
 
 
 def _equipment_cost_by_equipment_name(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     equipment_name: str,
 ) -> EquipmentCost:
     for cost in data.equipment_costs:
@@ -2945,28 +2945,28 @@ def _equipment_cost_by_equipment_name(
     raise KeyError(f"No equipment cost for equipment {equipment_name!r}.")
 
 
-def _boiler_by_name(data: StyleModelData, name: str) -> BoilerCandidate:
+def _boiler_by_name(data: UtilitySystemModelData, name: str) -> BoilerCandidate:
     for boiler in data.boilers:
         if boiler.name == name:
             return boiler
     raise KeyError(f"No boiler {name!r} in STYLE model data.")
 
 
-def _gas_turbine_by_name(data: StyleModelData, name: str) -> GasTurbineCandidate:
+def _gas_turbine_by_name(data: UtilitySystemModelData, name: str) -> GasTurbineCandidate:
     for turbine in data.gas_turbines:
         if turbine.name == name:
             return turbine
     raise KeyError(f"No gas turbine {name!r} in STYLE model data.")
 
 
-def _hrsg_by_name(data: StyleModelData, name: str) -> HrsgCandidate:
+def _hrsg_by_name(data: UtilitySystemModelData, name: str) -> HrsgCandidate:
     for hrsg in data.hrsgs:
         if hrsg.name == name:
             return hrsg
     raise KeyError(f"No HRSG {name!r} in STYLE model data.")
 
 
-def _vhp_header_by_name(data: StyleModelData, name: str) -> VhpSteamCandidate:
+def _vhp_header_by_name(data: UtilitySystemModelData, name: str) -> VhpSteamCandidate:
     for header in data.vhp_headers:
         if header.name == name:
             return header
@@ -2974,7 +2974,7 @@ def _vhp_header_by_name(data: StyleModelData, name: str) -> VhpSteamCandidate:
 
 
 def _vhp_turbine_by_name(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     name: str,
 ) -> VhpBackPressureTurbineCandidate:
     for turbine in data.vhp_turbines:
@@ -2984,7 +2984,7 @@ def _vhp_turbine_by_name(
 
 
 def _steam_main_turbine_by_name(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     name: str,
 ) -> SteamMainBackPressureTurbineCandidate:
     for turbine in data.steam_main_turbines:
@@ -3035,7 +3035,7 @@ def _physical_profile_steam_mains(
 
 def _reported_steam_level_property_targets(
     configuration,
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     steam_mains: tuple[str, ...],
     steam_level_names: Mapping[str, str],
 ) -> tuple[SteamLevelPropertyTarget, ...]:
@@ -3050,7 +3050,7 @@ def _reported_steam_level_property_targets(
 
 
 def _reported_steam_level_names_by_main(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     steam_mains: tuple[str, ...],
     target_steam_level: str,
 ) -> dict[str, str]:
@@ -3066,7 +3066,7 @@ def _reported_steam_level_names_by_main(
     return first_level_by_main
 
 
-def _steam_level_by_name(data: StyleModelData, name: str) -> SteamLevelCandidate:
+def _steam_level_by_name(data: UtilitySystemModelData, name: str) -> SteamLevelCandidate:
     for level in data.steam_levels:
         if level.name == name:
             return level
@@ -3074,9 +3074,9 @@ def _steam_level_by_name(data: StyleModelData, name: str) -> SteamLevelCandidate
 
 
 def _with_enthalpy_basis_for_steam_level(
-    data: StyleModelData,
+    data: UtilitySystemModelData,
     steam_level: str,
-) -> StyleModelData:
+) -> UtilitySystemModelData:
     updated_levels = []
     for level in data.steam_levels:
         if level.name != steam_level:

@@ -1,71 +1,42 @@
 Notebook Workflow
 =================
 
-OpenUtility is intended to be driven from small Jupyter notebooks. The public
-workflow helper hides the catalog construction, calibration target application,
-solver setup, and benchmark comparison plumbing.
-
-Checked example
----------------
-
-The runnable example notebook is checked in at:
-
-``case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/notebooks/replication.ipynb``
-
-Download it from the documentation build:
-
-:download:`style_table_2_9_case_study.ipynb <../case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/notebooks/replication.ipynb>`
+OpenUtility is designed to work cleanly from a small notebook or script. The
+public package does not ship replication notebooks; test coverage uses a
+minimal reproducible example that builds package-owned model data directly.
 
 Minimal notebook
 ----------------
 
 .. code-block:: python
 
-   from case_study.jimenez_romero_utility_system_optimization.contribution2_integrated_hot_oil_fsr import run_contribution2_table_2_9_case_study
-
-   case_study = run_contribution2_table_2_9_case_study(
-       catalog="physical-profile",
-       apply_fuel_targets=True,
-       apply_operating_targets=True,
-       solver_time_limit=20.0,
+   from OpenUtility import (
+       SteamLevelCandidate,
+       UtilitySystemModelData,
+       build_utility_system_model,
+       pyomo_utility_system_solver,
    )
 
-   summary = case_study.summary_table()
-   comparison = case_study.comparison_table()
+   data = UtilitySystemModelData(
+       steam_mains=("MP",),
+       steam_levels=(
+           SteamLevelCandidate(
+               name="MP_100",
+               steam_main="MP",
+               temperature=100.0,
+               source_heat_available=5.0,
+               sink_heat_demand=5.0,
+               generation_enthalpy_delta=1.0,
+               use_enthalpy_delta=1.0,
+               source_heat_upper_bound=5.0,
+               sink_heat_upper_bound=5.0,
+           ),
+       ),
+       power_demand=0.0,
+       grid_import_limit=0.0,
+       grid_export_limit=0.0,
+   )
+   model = build_utility_system_model(data)
+   status = pyomo_utility_system_solver("appsi_highs")(model)
 
-The summary table contains one row per STYLE scenario and reports whether all
-comparison fields are within tolerance. The comparison table contains one row
-per scenario and output field.
-
-Tables
-------
-
-.. code-block:: python
-
-   summary
-
-.. code-block:: python
-
-   comparison
-
-.. code-block:: python
-
-   case_study.field_table("total_annualized_cost")
-
-Graphs
-------
-
-.. code-block:: python
-
-   axes = case_study.plot_field_comparison("total_annualized_cost")
-   axes.figure.tight_layout()
-   axes.figure
-
-.. code-block:: python
-
-   axes = case_study.plot_summary_deviations()
-   axes.figure.tight_layout()
-   axes.figure
-
-The plotting methods return matplotlib axes so the notebook author can keep
-customizing labels, limits, colours, and export settings.
+   status.termination_condition

@@ -8,15 +8,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 from case_study.jimenez_romero_utility_system_optimization.style_model_builders import (
     style_case_study_2_contribution2_physical_profile_catalog,
 )
-from OpenUtility.style import (
-    build_static_style_model,
+from OpenUtility.utility_system import (
+    build_utility_system_model,
     compatible_bilevel_candidate_assignments,
-    format_style_decomposition_trajectory_rows,
-    pyomo_static_style_solver,
-    run_static_style_binary_selection_candidate_decomposition,
-    style_binary_selection_candidate_records_from_scenarios,
-    style_decomposition_trajectory_rows,
-    style_master_binary_variables,
+    format_utility_system_decomposition_trajectory_rows,
+    pyomo_utility_system_solver,
+    run_utility_system_binary_selection_candidate_decomposition,
+    utility_system_binary_selection_candidate_records_from_scenarios,
+    utility_system_decomposition_trajectory_rows,
+    utility_system_master_binary_variables,
 )
 
 
@@ -31,22 +31,22 @@ def trajectory_rows() -> tuple[dict[str, object], ...]:
         "contribution-2-case-study-2-physical-profile",
         "hot-oil-fsr-microgrid",
     )
-    target_model = build_static_style_model(target.data)
+    target_model = build_utility_system_model(target.data)
     candidates = compatible_bilevel_candidate_assignments(
-        style_binary_selection_candidate_records_from_scenarios(
+        utility_system_binary_selection_candidate_records_from_scenarios(
             calibrated_scenarios + uncalibrated_scenarios,
-            solve=pyomo_static_style_solver("appsi_highs"),
+            solve=pyomo_utility_system_solver("appsi_highs"),
             source_label_factory=_source_label_factory(calibrated_scenarios),
         ),
-        variable_names=style_master_binary_variables(target_model),
+        variable_names=utility_system_master_binary_variables(target_model),
     )
-    run = run_static_style_binary_selection_candidate_decomposition(
+    run = run_utility_system_binary_selection_candidate_decomposition(
         target,
         candidates=candidates,
-        solve_subproblem=pyomo_static_style_solver("appsi_highs"),
+        solve_subproblem=pyomo_utility_system_solver("appsi_highs"),
         max_iterations=2,
     )
-    return style_decomposition_trajectory_rows(
+    return utility_system_decomposition_trajectory_rows(
         catalog="physical-profile-candidates",
         scenario=target,
         run=run,
@@ -66,7 +66,7 @@ def _source_label_factory(calibrated_scenarios: tuple[object, ...]):
 
 
 def trajectory_csv() -> str:
-    return format_style_decomposition_trajectory_rows(
+    return format_utility_system_decomposition_trajectory_rows(
         trajectory_rows(),
         output_format="csv",
     )

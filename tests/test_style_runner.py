@@ -2,42 +2,40 @@ from __future__ import annotations
 
 import pytest
 
-from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
-    get_style_result,
-)
-from OpenUtility.style import (
+from OpenUtility.utility_system import (
     EquipmentCost,
     FuelCost,
     GasTurbineCandidate,
-    StaticStyleScenario,
-    StaticStyleSolverStatus,
+    UtilitySystemScenario,
+    UtilitySystemSolverStatus,
     SteamLevelCandidate,
-    StyleModelData,
+    UtilitySystemModelData,
     VhpBackPressureTurbineCandidate,
     VhpSteamCandidate,
-    run_static_style_scenario,
+    run_utility_system_scenario,
 )
+from minimal_utility_system import minimal_utility_benchmark
 
 
-def test_run_static_style_scenario_builds_solves_extracts_and_compares() -> None:
-    scenario = StaticStyleScenario(
-        case_study="case-study-2",
-        scenario="proposed-without-hot-oil",
+def test_run_utility_system_scenario_builds_solves_extracts_and_compares() -> None:
+    scenario = UtilitySystemScenario(
+        case_study="example-site",
+        scenario="gas-turbine-with-steam-turbine",
         data=_result_extraction_data(),
-        benchmark=get_style_result("case-study-2", "proposed-without-hot-oil"),
+        benchmark=minimal_utility_benchmark(),
     )
     solved_models = []
 
     def solve(model):
         solved_models.append(model)
         _fix_result_solution(model)
-        return StaticStyleSolverStatus(
+        return UtilitySystemSolverStatus(
             status="ok",
             termination_condition="optimal",
             message="fixed test solution",
         )
 
-    run = run_static_style_scenario(scenario, solve=solve)
+    run = run_utility_system_scenario(scenario, solve=solve)
 
     assert solved_models == [run.model]
     assert run.scenario == scenario
@@ -49,9 +47,9 @@ def test_run_static_style_scenario_builds_solves_extracts_and_compares() -> None
     assert run.comparison.within_tolerance is True
 
 
-def test_run_static_style_scenario_allows_no_benchmark() -> None:
-    scenario = StaticStyleScenario(
-        case_study="case-study-2",
+def test_run_utility_system_scenario_allows_no_benchmark() -> None:
+    scenario = UtilitySystemScenario(
+        case_study="example-site",
         scenario="scratch",
         data=_result_extraction_data(),
     )
@@ -60,33 +58,35 @@ def test_run_static_style_scenario_allows_no_benchmark() -> None:
         _fix_result_solution(model)
         return None
 
-    run = run_static_style_scenario(scenario, solve=solve)
+    run = run_utility_system_scenario(scenario, solve=solve)
 
     assert run.result.scenario == "scratch"
     assert run.solver.status == "unknown"
     assert run.comparison is None
 
 
-def test_run_static_style_scenario_stops_before_extracting_failed_solve() -> None:
-    scenario = StaticStyleScenario(
-        case_study="case-study-2",
+def test_run_utility_system_scenario_stops_before_extracting_failed_solve() -> None:
+    scenario = UtilitySystemScenario(
+        case_study="example-site",
         scenario="scratch",
         data=_result_extraction_data(),
     )
 
     def solve(model):
-        return StaticStyleSolverStatus(
+        return UtilitySystemSolverStatus(
             status="warning",
             termination_condition="infeasible",
             message="test infeasible model",
         )
 
-    with pytest.raises(RuntimeError, match="Static STYLE solve did not produce"):
-        run_static_style_scenario(scenario, solve=solve)
+    with pytest.raises(
+        RuntimeError, match="Static utility-system solve did not produce"
+    ):
+        run_utility_system_scenario(scenario, solve=solve)
 
 
-def _result_extraction_data() -> StyleModelData:
-    return StyleModelData(
+def _result_extraction_data() -> UtilitySystemModelData:
+    return UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(

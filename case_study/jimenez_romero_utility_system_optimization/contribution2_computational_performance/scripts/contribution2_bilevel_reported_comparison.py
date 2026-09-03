@@ -14,7 +14,7 @@ from case_study.jimenez_romero_utility_system_optimization.contribution2_computa
     contribution2_synthetic_bilevel_decomposition_run,
     format_contribution2_bilevel_trajectory_comparison_rows,
 )
-from OpenUtility.style import bilevel_decomposition_run_rows
+from OpenUtility.utility_system import bilevel_decomposition_run_rows
 
 
 def comparison_rows() -> tuple[dict[str, object], ...]:

@@ -2,18 +2,18 @@ from __future__ import annotations
 
 import pytest
 
-from OpenUtility.style import (
+from OpenUtility.utility_system import (
     CoolPropSteamPropertyProvider,
     SteamLevelCandidate,
     SteamLevelPropertyTarget,
     SteamPropertyUpdateSpec,
     SteamTurbinePropertyTarget,
-    StyleModelData,
+    UtilitySystemModelData,
     VhpBackPressureTurbineCandidate,
     VhpHeaderPropertyTarget,
     VhpSteamCandidate,
     apply_steam_property_update,
-    build_static_style_model,
+    build_utility_system_model,
     run_successive_milp_property_updates,
     SteamMainBackPressureTurbineCandidate,
     SteamMainLetdownStationCandidate,
@@ -107,7 +107,7 @@ def test_successive_milp_property_updates_stop_when_temperatures_converge() -> N
     seen_main_enthalpies = []
     temperatures = iter((182.0, 183.0, 183.05))
 
-    def solve(data: StyleModelData, iteration: int) -> SteamPropertyUpdateSpec:
+    def solve(data: UtilitySystemModelData, iteration: int) -> SteamPropertyUpdateSpec:
         seen_main_enthalpies.append(
             (iteration, data.steam_levels[0].main_steam_enthalpy)
         )
@@ -141,7 +141,7 @@ def test_successive_milp_property_updates_stop_when_temperatures_converge() -> N
 def test_successive_milp_property_updates_report_nonconvergence() -> None:
     temperatures = iter((182.0, 184.0))
 
-    def solve(_: StyleModelData, __: int) -> SteamPropertyUpdateSpec:
+    def solve(_: UtilitySystemModelData, __: int) -> SteamPropertyUpdateSpec:
         return _property_spec(next(temperatures))
 
     run = run_successive_milp_property_updates(
@@ -160,7 +160,7 @@ def test_successive_milp_property_updates_report_nonconvergence() -> None:
 
 def test_steam_property_update_spec_from_model_uses_selected_pyomo_options() -> None:
     data = _style_data_with_two_levels()
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
     model.level_selected["HP_12"].fix(0.0)
     model.level_selected["MP_3"].fix(1.0)
     model.vhp_selected["VHP_90"].fix(1.0)
@@ -226,7 +226,7 @@ def test_steam_property_update_spec_from_model_uses_selected_pyomo_options() -> 
 
 def test_steam_property_update_spec_from_model_rejects_missing_level_target() -> None:
     data = _style_data_with_two_levels()
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
     model.level_selected["HP_12"].fix(0.0)
     model.level_selected["MP_3"].fix(1.0)
     model.vhp_selected["VHP_90"].fix(1.0)
@@ -250,7 +250,7 @@ def test_steam_property_update_spec_from_model_rejects_missing_level_target() ->
 
 def test_steam_main_superheating_balances_from_solved_model_flows() -> None:
     data = _stage4_style_data()
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
     _fix_stage4_solution(model)
 
     balances = steam_main_superheating_balances_from_model(
@@ -292,7 +292,7 @@ def test_steam_main_superheating_balances_from_solved_model_flows() -> None:
 
 def test_stage4_model_spec_uses_calculated_superheating_temperatures() -> None:
     data = _stage4_style_data()
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
     _fix_stage4_solution(model)
 
     spec = steam_property_update_spec_from_stage4_model(
@@ -347,7 +347,7 @@ def test_stage4_model_spec_uses_calculated_superheating_temperatures() -> None:
 
 def test_stage4_superheating_balance_includes_inter_header_connections() -> None:
     data = _stage4_inter_header_style_data()
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
     _fix_stage4_inter_header_solution(model)
 
     balances = steam_main_superheating_balances_from_model(
@@ -386,8 +386,8 @@ def test_stage4_superheating_balance_includes_inter_header_connections() -> None
     assert mp_balance.minimum_temperature_satisfied is True
 
 
-def _style_data() -> StyleModelData:
-    return StyleModelData(
+def _style_data() -> UtilitySystemModelData:
+    return UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -412,8 +412,8 @@ def _style_data() -> StyleModelData:
     )
 
 
-def _stage4_inter_header_style_data() -> StyleModelData:
-    return StyleModelData(
+def _stage4_inter_header_style_data() -> UtilitySystemModelData:
+    return UtilitySystemModelData(
         steam_mains=("HP", "MP"),
         steam_levels=(
             SteamLevelCandidate(
@@ -479,8 +479,8 @@ def _fix_stage4_inter_header_solution(model) -> None:
     model.steam_main_letdown_flow["HP_to_MP_LD"].fix(1.0)
 
 
-def _stage4_style_data() -> StyleModelData:
-    return StyleModelData(
+def _stage4_style_data() -> UtilitySystemModelData:
+    return UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -532,8 +532,8 @@ def _fix_stage4_solution(model) -> None:
     model.vhp_turbine_power_generation["VHP_to_MP"].fix(10.0)
 
 
-def _style_data_with_two_levels() -> StyleModelData:
-    return StyleModelData(
+def _style_data_with_two_levels() -> UtilitySystemModelData:
+    return UtilitySystemModelData(
         steam_mains=("HP", "MP"),
         steam_levels=(
             SteamLevelCandidate(

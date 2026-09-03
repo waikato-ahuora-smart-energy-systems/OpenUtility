@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 import pyomo.environ as pyomo
 
-from OpenUtility.style import (
+from OpenUtility.utility_system import (
     BoilerCandidate,
     CoolingWaterConfig,
     DeaeratorConfig,
@@ -19,18 +19,18 @@ from OpenUtility.style import (
     SteamMainBackPressureTurbineCandidate,
     SteamMainLetdownStationCandidate,
     SteamLevelCandidate,
-    StyleModelData,
+    UtilitySystemModelData,
     VhpBackPressureTurbineCandidate,
     VhpLetdownStationCandidate,
     VhpSteamCandidate,
     VhpSteamSourceCandidate,
     WaterCost,
-    build_static_style_model,
+    build_utility_system_model,
 )
 
 
 def test_static_style_model_builds_core_source_cascade_components() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -57,7 +57,7 @@ def test_static_style_model_builds_core_source_cascade_components() -> None:
         power_demand=25.0,
     )
 
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     assert list(model.STEAM_LEVELS.data()) == ["MP_185", "MP_95"]
     assert list(model.STEAM_MAINS.data()) == ["MP"]
@@ -75,7 +75,7 @@ def test_static_style_model_builds_core_source_cascade_components() -> None:
 
 
 def test_inter_header_connections_conserve_mass_and_energy() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("HP", "MP"),
         steam_levels=(
             SteamLevelCandidate(
@@ -126,7 +126,7 @@ def test_inter_header_connections_conserve_mass_and_energy() -> None:
         ),
         power_demand=0.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     assert list(model.STEAM_MAIN_TURBINES.data()) == ["HP_to_MP_ST"]
     assert list(model.STEAM_MAIN_LETDOWNS.data()) == ["HP_to_MP_LD"]
@@ -166,7 +166,7 @@ def test_inter_header_connections_conserve_mass_and_energy() -> None:
 
 
 def test_source_generation_equation_uses_pseudo_enthalpy_delta() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -183,7 +183,7 @@ def test_source_generation_equation_uses_pseudo_enthalpy_delta() -> None:
         power_demand=25.0,
         source_heat_loss_fraction=0.1,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.source_heat_to_steam["MP_185"].fix(100.0)
     model.source_steam_generated["MP_185"].fix(45.0)
@@ -194,7 +194,7 @@ def test_source_generation_equation_uses_pseudo_enthalpy_delta() -> None:
 
 
 def test_sink_cascade_balance_moves_residual_heat_down_temperature_levels() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -220,7 +220,7 @@ def test_sink_cascade_balance_moves_residual_heat_down_temperature_levels() -> N
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.sink_heat_from_steam["MP_185"].fix(5.0)
     model.sink_residual_heat["MP_185"].fix(3.0)
@@ -232,7 +232,7 @@ def test_sink_cascade_balance_moves_residual_heat_down_temperature_levels() -> N
 
 
 def test_sink_steam_use_includes_desuperheating_mass_and_energy_balance() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -250,7 +250,7 @@ def test_sink_steam_use_includes_desuperheating_mass_and_energy_balance() -> Non
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.process_steam_to_sink["MP_185"].fix(1.0)
     model.feedwater_to_desuperheat["MP_185"].fix(0.5)
@@ -267,7 +267,7 @@ def test_sink_steam_use_includes_desuperheating_mass_and_energy_balance() -> Non
 
 
 def test_flash_steam_recovery_contributes_to_sink_heating() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP", "LP"),
         steam_levels=(
             SteamLevelCandidate(
@@ -316,7 +316,7 @@ def test_flash_steam_recovery_contributes_to_sink_heating() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.process_steam_to_sink["LP_120"].fix(1.0)
     model.feedwater_to_desuperheat["LP_120"].fix(0.0)
@@ -334,7 +334,7 @@ def test_flash_steam_recovery_contributes_to_sink_heating() -> None:
 
 
 def test_flash_steam_recovery_route_conserves_mass_and_energy() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP", "LP"),
         steam_levels=(
             SteamLevelCandidate(
@@ -381,7 +381,7 @@ def test_flash_steam_recovery_route_conserves_mass_and_energy() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.sink_steam_used["MP_185"].fix(4.0)
     model.flash_condensate_inlet["MP_185"].fix(2.0)
@@ -404,7 +404,7 @@ def test_flash_steam_recovery_route_conserves_mass_and_energy() -> None:
 
 
 def test_steam_main_balance_tracks_header_mass_and_energy() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -424,7 +424,7 @@ def test_steam_main_balance_tracks_header_mass_and_energy() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.source_steam_generated["MP_185"].fix(1.0)
     model.utility_steam_to_header["MP_185"].fix(2.0)
@@ -441,7 +441,7 @@ def test_steam_main_balance_tracks_header_mass_and_energy() -> None:
 
 
 def test_steam_main_balance_includes_deaerator_steam_use() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("LP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -467,7 +467,7 @@ def test_steam_main_balance_includes_deaerator_steam_use() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.source_steam_generated["LP_120"].fix(2.0)
     model.utility_steam_to_header["LP_120"].fix(0.0)
@@ -485,7 +485,7 @@ def test_steam_main_balance_includes_deaerator_steam_use() -> None:
 
 
 def test_deaerator_feedwater_accounting_tracks_site_water_requirement() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("LP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -549,7 +549,7 @@ def test_deaerator_feedwater_accounting_tracks_site_water_requirement() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.source_steam_generated["LP_120"].fix(2.0)
     model.feedwater_to_desuperheat["LP_120"].fix(0.5)
@@ -572,7 +572,7 @@ def test_deaerator_feedwater_accounting_tracks_site_water_requirement() -> None:
 
 
 def test_utility_steam_import_requires_selected_header() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -588,7 +588,7 @@ def test_utility_steam_import_requires_selected_header() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.utility_steam_to_header["MP_185"].fix(10.0)
     model.level_selected["MP_185"].fix(1.0)
@@ -599,7 +599,7 @@ def test_utility_steam_import_requires_selected_header() -> None:
 
 
 def test_boiler_block_supplies_vhp_header_and_calculates_fuel() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -636,7 +636,7 @@ def test_boiler_block_supplies_vhp_header_and_calculates_fuel() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.boiler_size["boiler_1"].fix(3.0)
     model.boiler_steam_generation["boiler_1"].fix(2.0)
@@ -654,7 +654,7 @@ def test_boiler_block_supplies_vhp_header_and_calculates_fuel() -> None:
 
 
 def test_vhp_source_block_supplies_vhp_header_and_calculates_fuel() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -697,7 +697,7 @@ def test_vhp_source_block_supplies_vhp_header_and_calculates_fuel() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.vhp_selected["VHP_90"].fix(1.0)
     model.vhp_source_selected["source_1"].fix(1.0)
@@ -726,7 +726,7 @@ def test_vhp_source_block_supplies_vhp_header_and_calculates_fuel() -> None:
 
 
 def test_boiler_load_and_size_require_selected_unit() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -760,7 +760,7 @@ def test_boiler_load_and_size_require_selected_unit() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.boiler_selected["boiler_1"].fix(1.0)
     model.boiler_size["boiler_1"].fix(10.0)
@@ -775,7 +775,7 @@ def test_boiler_load_and_size_require_selected_unit() -> None:
 
 
 def test_equipment_costs_add_capital_and_maintenance_to_objective() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -822,7 +822,7 @@ def test_equipment_costs_add_capital_and_maintenance_to_objective() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.level_selected["MP_185"].fix(0.0)
     model.source_heat_to_steam["MP_185"].fix(0.0)
@@ -841,7 +841,7 @@ def test_equipment_costs_add_capital_and_maintenance_to_objective() -> None:
 
 
 def test_equipment_costs_cover_turbines_gas_turbines_and_hrsgs() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("LP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -931,7 +931,7 @@ def test_equipment_costs_cover_turbines_gas_turbines_and_hrsgs() -> None:
         ),
         power_demand=0.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.level_selected["LP_120"].fix(0.0)
     model.source_heat_to_steam["LP_120"].fix(0.0)
@@ -957,7 +957,7 @@ def test_equipment_costs_cover_turbines_gas_turbines_and_hrsgs() -> None:
 
 
 def test_fuel_electricity_and_water_costs_contribute_to_objective() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("LP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -1011,7 +1011,7 @@ def test_fuel_electricity_and_water_costs_contribute_to_objective() -> None:
         water_cost=WaterCost(unit_cost=2.0),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.level_selected["LP_120"].fix(0.0)
     model.source_heat_to_steam["LP_120"].fix(0.0)
@@ -1028,7 +1028,7 @@ def test_fuel_electricity_and_water_costs_contribute_to_objective() -> None:
 
 
 def test_cost_scaling_applies_operating_hours_and_currency_scale() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("LP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -1097,7 +1097,7 @@ def test_cost_scaling_applies_operating_hours_and_currency_scale() -> None:
         operating_hours=8000.0,
         cost_scale=1e-6,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.level_selected["LP_120"].fix(0.0)
     model.source_heat_to_steam["LP_120"].fix(0.0)
@@ -1118,7 +1118,7 @@ def test_cost_scaling_applies_operating_hours_and_currency_scale() -> None:
 
 
 def test_fuel_costs_cover_gas_turbines_and_hrsg_supplementary_firing() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("LP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -1177,7 +1177,7 @@ def test_fuel_costs_cover_gas_turbines_and_hrsg_supplementary_firing() -> None:
         ),
         power_demand=0.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.level_selected["LP_120"].fix(0.0)
     model.source_heat_to_steam["LP_120"].fix(0.0)
@@ -1193,7 +1193,7 @@ def test_fuel_costs_cover_gas_turbines_and_hrsg_supplementary_firing() -> None:
 
 
 def test_electricity_balance_and_grid_limits_are_explicit() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -1211,7 +1211,7 @@ def test_electricity_balance_and_grid_limits_are_explicit() -> None:
         grid_export_limit=5.0,
         transmission_efficiency=1.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.grid_power_import.fix(20.0)
     model.onsite_power_generation.fix(10.0)
@@ -1223,7 +1223,7 @@ def test_electricity_balance_and_grid_limits_are_explicit() -> None:
 
 
 def test_cooling_water_load_and_cost_include_bottom_source_residual() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -1252,7 +1252,7 @@ def test_cooling_water_load_and_cost_include_bottom_source_residual() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.source_residual_heat["MP_95"].fix(5.0)
     model.cooling_water_total_load.fix(12.0)
@@ -1264,7 +1264,7 @@ def test_cooling_water_load_and_cost_include_bottom_source_residual() -> None:
 
 
 def test_cascades_reset_between_steam_mains() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("HP", "MP"),
         steam_levels=(
             SteamLevelCandidate(
@@ -1297,7 +1297,7 @@ def test_cascades_reset_between_steam_mains() -> None:
         ),
         power_demand=0.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.source_residual_heat["HP_95"].fix(7.0)
     model.source_heat_to_steam["MP_185"].fix(5.0)
@@ -1314,7 +1314,7 @@ def test_cascades_reset_between_steam_mains() -> None:
 
 
 def test_cooling_water_load_sums_bottom_source_residuals_by_main() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("HP", "MP"),
         steam_levels=(
             SteamLevelCandidate(
@@ -1361,7 +1361,7 @@ def test_cooling_water_load_sums_bottom_source_residuals_by_main() -> None:
         ),
         power_demand=0.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.source_residual_heat["HP_95"].fix(3.0)
     model.source_residual_heat["MP_95"].fix(5.0)
@@ -1373,7 +1373,7 @@ def test_cooling_water_load_sums_bottom_source_residuals_by_main() -> None:
 
 
 def test_hot_oil_supplies_selected_sink_heat_and_adds_fuel_cost() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -1405,7 +1405,7 @@ def test_hot_oil_supplies_selected_sink_heat_and_adds_fuel_cost() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.hot_oil_selected["MP_185"].fix(1.0)
     model.hot_oil_selected["MP_95"].fix(0.0)
@@ -1431,7 +1431,7 @@ def test_hot_oil_supplies_selected_sink_heat_and_adds_fuel_cost() -> None:
 
 
 def test_hot_oil_temperature_order_resets_between_steam_mains() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("HP", "MP"),
         steam_levels=(
             SteamLevelCandidate(
@@ -1472,14 +1472,14 @@ def test_hot_oil_temperature_order_resets_between_steam_mains() -> None:
         ),
         power_demand=0.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     assert "MP_185" not in model.hot_oil_temperature_order
     assert "HP_95" in model.hot_oil_temperature_order
 
 
 def test_hot_oil_furnace_cost_uses_total_heat_load_and_selection() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -1524,7 +1524,7 @@ def test_hot_oil_furnace_cost_uses_total_heat_load_and_selection() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.level_selected["MP_185"].fix(0.0)
     model.source_heat_to_steam["MP_185"].fix(0.0)
@@ -1544,7 +1544,7 @@ def test_hot_oil_furnace_cost_uses_total_heat_load_and_selection() -> None:
 
 
 def test_hot_oil_selection_prefers_higher_temperatures_and_excludes_steam() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -1573,7 +1573,7 @@ def test_hot_oil_selection_prefers_higher_temperatures_and_excludes_steam() -> N
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.hot_oil_selected["MP_185"].fix(1.0)
     model.hot_oil_selected["MP_95"].fix(1.0)
@@ -1588,7 +1588,7 @@ def test_hot_oil_selection_prefers_higher_temperatures_and_excludes_steam() -> N
 
 
 def test_vhp_turbine_and_letdown_connections_feed_selected_header() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -1632,7 +1632,7 @@ def test_vhp_turbine_and_letdown_connections_feed_selected_header() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.vhp_turbine_selected["turbine_1"].fix(1.0)
     model.vhp_turbine_steam_flow["turbine_1"].fix(4.0)
@@ -1649,7 +1649,7 @@ def test_vhp_turbine_and_letdown_connections_feed_selected_header() -> None:
 
 
 def test_vhp_utility_steam_requires_configured_connection() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -1691,7 +1691,7 @@ def test_vhp_utility_steam_requires_configured_connection() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     assert ("VHP_90", "MP_95") in model.vhp_connection_flow_aggregation
     model.utility_steam_from_vhp["VHP_90", "MP_95"].fix(1.0)
@@ -1702,7 +1702,7 @@ def test_vhp_utility_steam_requires_configured_connection() -> None:
 
 
 def test_vhp_turbine_power_feeds_onsite_power_generation() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -1737,7 +1737,7 @@ def test_vhp_turbine_power_feeds_onsite_power_generation() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.vhp_turbine_power_generation["turbine_1"].fix(1.8)
     model.onsite_power_generation.fix(1.8)
@@ -1748,7 +1748,7 @@ def test_vhp_turbine_power_feeds_onsite_power_generation() -> None:
 
 
 def test_vhp_turbine_selection_requires_selected_vhp_and_header() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -1783,7 +1783,7 @@ def test_vhp_turbine_selection_requires_selected_vhp_and_header() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.vhp_turbine_selected["turbine_1"].fix(1.0)
     model.vhp_selected["VHP_90"].fix(1.0)
@@ -1798,7 +1798,7 @@ def test_vhp_turbine_selection_requires_selected_vhp_and_header() -> None:
 
 
 def test_gas_turbine_generates_power_and_exhaust_heat() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -1824,7 +1824,7 @@ def test_gas_turbine_generates_power_and_exhaust_heat() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.gas_turbine_selected["gt_1"].fix(1.0)
     model.gas_turbine_fuel_flow["gt_1"].fix(5.0)
@@ -1840,7 +1840,7 @@ def test_gas_turbine_generates_power_and_exhaust_heat() -> None:
 
 
 def test_hrsg_uses_gas_turbine_exhaust_to_generate_vhp_steam() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -1883,7 +1883,7 @@ def test_hrsg_uses_gas_turbine_exhaust_to_generate_vhp_steam() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.gas_turbine_exhaust_heat["gt_1"].fix(20.0)
     model.hrsg_exhaust_heat_input["hrsg_1"].fix(20.0)
@@ -1904,7 +1904,7 @@ def test_hrsg_uses_gas_turbine_exhaust_to_generate_vhp_steam() -> None:
 
 
 def test_hrsg_supplementary_firing_adds_heat_input() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -1950,7 +1950,7 @@ def test_hrsg_supplementary_firing_adds_heat_input() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.gas_turbine_selected["gt_1"].fix(1.0)
     model.gas_turbine_exhaust_heat["gt_1"].fix(20.0)
@@ -1975,7 +1975,7 @@ def test_hrsg_supplementary_firing_adds_heat_input() -> None:
 
 
 def test_gas_turbine_power_feeds_onsite_power_generation() -> None:
-    data = StyleModelData(
+    data = UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(
@@ -2001,7 +2001,7 @@ def test_gas_turbine_power_feeds_onsite_power_generation() -> None:
         ),
         power_demand=25.0,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
 
     model.gas_turbine_power_generation["gt_1"].fix(1.5)
     model.onsite_power_generation.fix(1.5)

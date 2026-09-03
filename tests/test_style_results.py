@@ -4,46 +4,46 @@ from dataclasses import replace
 
 import pytest
 
-from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
-    get_contribution2_case_study2_best_configuration,
-    get_style_result,
-)
-from OpenUtility.style import (
+from OpenUtility.utility_system import (
     EquipmentCost,
     FuelCost,
     FuelConsumptionAccountingFactor,
     GasTurbineCandidate,
     HotOilConfig,
     OperatingCostAccountingAdjustment,
-    StaticStyleResult,
+    UtilitySystemResult,
     SteamLevelCandidate,
-    StyleModelData,
+    UtilitySystemModelData,
     VhpBackPressureTurbineCandidate,
     VhpSteamCandidate,
-    build_static_style_model,
-    compare_static_style_result_to_best_configuration,
-    compare_static_style_result_to_benchmark,
-    extract_static_style_result,
-    static_style_operating_cost_components,
-    static_style_fuel_capacity_context_by_equipment,
-    static_style_fuel_consumption_by_equipment,
-    static_style_fuel_consumption_by_family,
+    build_utility_system_model,
+    compare_utility_system_result_to_best_configuration,
+    compare_utility_system_result_to_benchmark,
+    extract_utility_system_result,
+    utility_system_operating_cost_components,
+    utility_system_fuel_capacity_context_by_equipment,
+    utility_system_fuel_consumption_by_equipment,
+    utility_system_fuel_consumption_by_family,
+)
+from minimal_utility_system import (
+    minimal_best_configuration_benchmark,
+    minimal_utility_benchmark,
 )
 
 
-def test_extract_static_style_result_summarizes_solved_pyomo_values() -> None:
+def test_extract_utility_system_result_summarizes_solved_pyomo_values() -> None:
     data = _result_extraction_data()
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
     _fix_result_solution(model)
 
-    result = extract_static_style_result(
+    result = extract_utility_system_result(
         model,
-        case_study="case-study-2",
-        scenario="proposed-without-hot-oil",
+        case_study="example-site",
+        scenario="gas-turbine-with-steam-turbine",
     )
 
-    assert result.case_study == "case-study-2"
-    assert result.scenario == "proposed-without-hot-oil"
+    assert result.case_study == "example-site"
+    assert result.scenario == "gas-turbine-with-steam-turbine"
     assert result.utility_steam_flow == pytest.approx(239.86)
     assert result.fuel_consumption == pytest.approx(249.03)
     assert result.power_generation == pytest.approx(46.67)
@@ -57,18 +57,18 @@ def test_extract_static_style_result_summarizes_solved_pyomo_values() -> None:
     assert result.total_annualized_cost == pytest.approx(64.77)
 
 
-def test_extract_static_style_result_excludes_hot_oil_from_fuel_consumption() -> None:
+def test_extract_utility_system_result_excludes_hot_oil_from_fuel_consumption() -> None:
     data = replace(
         _result_extraction_data(),
         hot_oil=HotOilConfig(fuel_unit_cost=0.5, thermal_efficiency=0.8),
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
     _fix_result_solution(model)
     model.hot_oil_fuel_consumption.fix(10.0)
 
-    result = extract_static_style_result(
+    result = extract_utility_system_result(
         model,
-        case_study="case-study-2",
+        case_study="example-site",
         scenario="with-hot-oil",
     )
 
@@ -78,7 +78,7 @@ def test_extract_static_style_result_excludes_hot_oil_from_fuel_consumption() ->
     assert result.operating_cost == pytest.approx(56.04)
 
 
-def test_extract_static_style_result_applies_fuel_accounting_factors() -> None:
+def test_extract_utility_system_result_applies_fuel_accounting_factors() -> None:
     data = replace(
         _result_extraction_data(),
         fuel_consumption_factors=(
@@ -89,15 +89,15 @@ def test_extract_static_style_result_applies_fuel_accounting_factors() -> None:
             ),
         ),
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
     _fix_result_solution(model)
 
-    result = extract_static_style_result(
+    result = extract_utility_system_result(
         model,
-        case_study="case-study-2",
+        case_study="example-site",
         scenario="reported-fuel-basis",
     )
-    rows = static_style_fuel_consumption_by_equipment(model)
+    rows = utility_system_fuel_consumption_by_equipment(model)
 
     assert result.fuel_consumption == pytest.approx(249.03 * 0.95)
     assert result.power_generation == pytest.approx(46.67)
@@ -105,17 +105,17 @@ def test_extract_static_style_result_applies_fuel_accounting_factors() -> None:
     assert rows[0].fuel_consumption == pytest.approx(249.03 * 0.95)
 
 
-def test_extract_static_style_result_applies_utility_steam_flow_adjustment() -> None:
+def test_extract_utility_system_result_applies_utility_steam_flow_adjustment() -> None:
     data = replace(
         _result_extraction_data(),
         utility_steam_flow_adjustment=1.5,
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
     _fix_result_solution(model)
 
-    result = extract_static_style_result(
+    result = extract_utility_system_result(
         model,
-        case_study="case-study-2",
+        case_study="example-site",
         scenario="utility-steam-targeted",
     )
 
@@ -123,7 +123,7 @@ def test_extract_static_style_result_applies_utility_steam_flow_adjustment() -> 
     assert result.fuel_consumption == pytest.approx(249.03)
 
 
-def test_extract_static_style_result_applies_operating_cost_adjustments() -> None:
+def test_extract_utility_system_result_applies_operating_cost_adjustments() -> None:
     data = replace(
         _result_extraction_data(),
         operating_cost_adjustments=(
@@ -133,15 +133,15 @@ def test_extract_static_style_result_applies_operating_cost_adjustments() -> Non
             ),
         ),
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
     _fix_result_solution(model)
 
-    result = extract_static_style_result(
+    result = extract_utility_system_result(
         model,
-        case_study="case-study-2",
+        case_study="example-site",
         scenario="operating-targeted",
     )
-    rows = static_style_operating_cost_components(model)
+    rows = utility_system_operating_cost_components(model)
 
     assert result.operating_cost == pytest.approx(50.54)
     assert result.total_annualized_cost == pytest.approx(64.27)
@@ -151,12 +151,12 @@ def test_extract_static_style_result_applies_operating_cost_adjustments() -> Non
     assert rows[4].operating_cost == pytest.approx(50.54)
 
 
-def test_static_style_operating_cost_components_report_auxiliary_bucket() -> None:
+def test_utility_system_operating_cost_components_report_auxiliary_bucket() -> None:
     data = _result_extraction_data()
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
     _fix_result_solution(model)
 
-    rows = static_style_operating_cost_components(model)
+    rows = utility_system_operating_cost_components(model)
 
     assert rows[0].component == "fuel"
     assert rows[0].operating_cost == pytest.approx(51.04)
@@ -170,16 +170,16 @@ def test_static_style_operating_cost_components_report_auxiliary_bucket() -> Non
     assert rows[4].operating_cost == pytest.approx(51.04)
 
 
-def test_static_style_fuel_consumption_by_family_reports_table_scope() -> None:
+def test_utility_system_fuel_consumption_by_family_reports_table_scope() -> None:
     data = replace(
         _result_extraction_data(),
         hot_oil=HotOilConfig(fuel_unit_cost=0.5, thermal_efficiency=0.8),
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
     _fix_result_solution(model)
     model.hot_oil_fuel_consumption.fix(10.0)
 
-    rows = static_style_fuel_consumption_by_family(model)
+    rows = utility_system_fuel_consumption_by_family(model)
 
     assert rows[0].equipment_family == "boiler"
     assert rows[0].fuel_consumption == pytest.approx(0.0)
@@ -193,16 +193,18 @@ def test_static_style_fuel_consumption_by_family_reports_table_scope() -> None:
     assert rows[5].fuel_consumption == pytest.approx(249.03)
 
 
-def test_static_style_fuel_consumption_by_equipment_reports_source_variables() -> None:
+def test_utility_system_fuel_consumption_by_equipment_reports_source_variables() -> (
+    None
+):
     data = replace(
         _result_extraction_data(),
         hot_oil=HotOilConfig(fuel_unit_cost=0.5, thermal_efficiency=0.8),
     )
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
     _fix_result_solution(model)
     model.hot_oil_fuel_consumption.fix(10.0)
 
-    rows = static_style_fuel_consumption_by_equipment(model)
+    rows = utility_system_fuel_consumption_by_equipment(model)
 
     assert rows[0].equipment_family == "gas_turbine"
     assert rows[0].equipment_name == "gt"
@@ -218,12 +220,14 @@ def test_static_style_fuel_consumption_by_equipment_reports_source_variables() -
     assert rows[1].included_in_table_fuel_consumption is False
 
 
-def test_static_style_fuel_capacity_context_by_equipment_reports_utilization() -> None:
+def test_utility_system_fuel_capacity_context_by_equipment_reports_utilization() -> (
+    None
+):
     data = _result_extraction_data()
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
     _fix_result_solution(model)
 
-    rows = static_style_fuel_capacity_context_by_equipment(model)
+    rows = utility_system_fuel_capacity_context_by_equipment(model)
 
     assert rows[0].equipment_family == "gas_turbine"
     assert rows[0].equipment_name == "gt"
@@ -235,19 +239,19 @@ def test_static_style_fuel_capacity_context_by_equipment_reports_utilization() -
     assert rows[0].capacity_utilization == pytest.approx(249.03 / 300.0)
 
 
-def test_compare_static_style_result_to_benchmark_reports_field_deviations() -> None:
+def test_compare_utility_system_result_to_benchmark_reports_field_deviations() -> None:
     data = _result_extraction_data()
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
     _fix_result_solution(model)
-    result = extract_static_style_result(
+    result = extract_utility_system_result(
         model,
-        case_study="case-study-2",
-        scenario="proposed-without-hot-oil",
+        case_study="example-site",
+        scenario="gas-turbine-with-steam-turbine",
     )
 
-    comparison = compare_static_style_result_to_benchmark(
+    comparison = compare_utility_system_result_to_benchmark(
         result,
-        get_style_result("case-study-2", "proposed-without-hot-oil"),
+        minimal_utility_benchmark(),
     )
 
     assert comparison.within_tolerance is True
@@ -260,21 +264,21 @@ def test_compare_static_style_result_to_benchmark_reports_field_deviations() -> 
     )
 
 
-def test_compare_static_style_result_to_benchmark_detects_mismatch() -> None:
+def test_compare_utility_system_result_to_benchmark_detects_mismatch() -> None:
     data = _result_extraction_data()
-    model = build_static_style_model(data)
+    model = build_utility_system_model(data)
     _fix_result_solution(model)
     model.gas_turbine_power_generation["gt"].fix(25.00)
     model.onsite_power_generation.fix(45.88)
-    result = extract_static_style_result(
+    result = extract_utility_system_result(
         model,
-        case_study="case-study-2",
-        scenario="proposed-without-hot-oil",
+        case_study="example-site",
+        scenario="gas-turbine-with-steam-turbine",
     )
 
-    comparison = compare_static_style_result_to_benchmark(
+    comparison = compare_utility_system_result_to_benchmark(
         result,
-        get_style_result("case-study-2", "proposed-without-hot-oil"),
+        minimal_utility_benchmark(),
         absolute_tolerance=0.1,
     )
 
@@ -284,15 +288,13 @@ def test_compare_static_style_result_to_benchmark_detects_mismatch() -> None:
     )
 
 
-def test_compare_static_style_result_to_best_configuration_reports_split_power() -> (
+def test_compare_utility_system_result_to_best_configuration_reports_split_power() -> (
     None
 ):
-    benchmark = get_contribution2_case_study2_best_configuration(
-        "utility-system-microgrid",
-    )
-    result = StaticStyleResult(
-        case_study="case-study-2",
-        scenario="proposed-without-hot-oil",
+    benchmark = minimal_best_configuration_benchmark()
+    result = UtilitySystemResult(
+        case_study="example-site",
+        scenario="gas-turbine-with-steam-turbine",
         utility_steam_flow=217.78,
         fuel_consumption=245.04,
         power_generation=46.67,
@@ -304,7 +306,7 @@ def test_compare_static_style_result_to_best_configuration_reports_split_power()
         total_annualized_cost=64.86,
     )
 
-    comparison = compare_static_style_result_to_best_configuration(
+    comparison = compare_utility_system_result_to_best_configuration(
         result,
         benchmark,
     )
@@ -319,15 +321,13 @@ def test_compare_static_style_result_to_best_configuration_reports_split_power()
     )
 
 
-def test_compare_static_style_result_to_best_configuration_reports_detailed_operating_costs_when_available() -> (
+def test_compare_utility_system_result_to_best_configuration_reports_detailed_operating_costs_when_available() -> (
     None
 ):
-    benchmark = get_contribution2_case_study2_best_configuration(
-        "hot-oil-fsr-microgrid",
-    )
-    result = StaticStyleResult(
-        case_study="case-study-2",
-        scenario="hot-oil-fsr-microgrid",
+    benchmark = minimal_best_configuration_benchmark("heat-recovery-microgrid")
+    result = UtilitySystemResult(
+        case_study="example-site",
+        scenario="heat-recovery-microgrid",
         utility_steam_flow=136.67,
         fuel_consumption=175.03,
         power_generation=46.67,
@@ -341,7 +341,7 @@ def test_compare_static_style_result_to_best_configuration_reports_detailed_oper
         hot_oil_operating_cost=13.81,
     )
 
-    comparison = compare_static_style_result_to_best_configuration(
+    comparison = compare_utility_system_result_to_best_configuration(
         result,
         benchmark,
     )
@@ -353,8 +353,8 @@ def test_compare_static_style_result_to_best_configuration_reports_detailed_oper
     )
 
 
-def _result_extraction_data() -> StyleModelData:
-    return StyleModelData(
+def _result_extraction_data() -> UtilitySystemModelData:
+    return UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(

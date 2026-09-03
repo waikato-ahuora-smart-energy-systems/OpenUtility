@@ -11,19 +11,19 @@ import pandas as pd
 from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
     get_contribution2_case_study2_best_configuration,
 )
-from OpenUtility.style import (
-    StaticStyleScenarioCatalog,
+from OpenUtility.utility_system import (
+    UtilitySystemScenarioCatalog,
     best_configuration_comparison_rows,
     best_configuration_summary_row,
-    compare_static_style_result_to_best_configuration,
-    pyomo_static_style_solver,
-    run_static_style_scenario,
-    style_fuel_calibration_target_rows,
-    style_fuel_consumption_capacity_rows,
-    style_fuel_consumption_factor_map_from_calibration_target_rows,
-    style_operating_cost_adjustment_map_from_target_rows,
-    style_operating_cost_component_rows,
-    style_operating_cost_target_rows,
+    compare_utility_system_result_to_best_configuration,
+    pyomo_utility_system_solver,
+    run_utility_system_scenario,
+    utility_system_fuel_calibration_target_rows,
+    utility_system_fuel_consumption_capacity_rows,
+    utility_system_fuel_consumption_factor_map_from_calibration_target_rows,
+    utility_system_operating_cost_adjustment_map_from_target_rows,
+    utility_system_operating_cost_component_rows,
+    utility_system_operating_cost_target_rows,
 )
 from case_study.jimenez_romero_utility_system_optimization.style_model_builders import (
     style_case_study_2_contribution2_best_configuration_catalog,
@@ -131,7 +131,7 @@ def _table_2_9_catalog(
     apply_fuel_targets: bool,
     apply_operating_targets: bool,
     solver_time_limit: float,
-) -> StaticStyleScenarioCatalog:
+) -> UtilitySystemScenarioCatalog:
     if catalog == "reported-equipment":
         if apply_fuel_targets or apply_operating_targets:
             raise ValueError("target bridges are only available for physical-profile")
@@ -173,8 +173,8 @@ def _physical_profile_fuel_target_factors(
         calibrated=calibrated,
     )
     rows = _fuel_capacity_rows(catalog, solver_time_limit=solver_time_limit)
-    target_rows = style_fuel_calibration_target_rows(rows)
-    return style_fuel_consumption_factor_map_from_calibration_target_rows(target_rows)
+    target_rows = utility_system_fuel_calibration_target_rows(rows)
+    return utility_system_fuel_consumption_factor_map_from_calibration_target_rows(target_rows)
 
 
 def _physical_profile_operating_cost_target_adjustments(
@@ -188,21 +188,21 @@ def _physical_profile_operating_cost_target_adjustments(
         fuel_consumption_factors_by_scenario=fuel_factors_by_scenario,
     )
     rows = _operating_cost_component_rows(catalog, solver_time_limit=solver_time_limit)
-    target_rows = style_operating_cost_target_rows(rows)
-    return style_operating_cost_adjustment_map_from_target_rows(target_rows)
+    target_rows = utility_system_operating_cost_target_rows(rows)
+    return utility_system_operating_cost_adjustment_map_from_target_rows(target_rows)
 
 
 def _fuel_capacity_rows(
-    catalog: StaticStyleScenarioCatalog,
+    catalog: UtilitySystemScenarioCatalog,
     *,
     solver_time_limit: float,
 ) -> tuple[dict[str, object], ...]:
     rows: list[dict[str, object]] = []
     solve = _pyomo_highs_solver(solver_time_limit=solver_time_limit)
     for scenario in catalog:
-        run = run_static_style_scenario(scenario, solve=solve)
+        run = run_utility_system_scenario(scenario, solve=solve)
         rows.extend(
-            style_fuel_consumption_capacity_rows(
+            utility_system_fuel_consumption_capacity_rows(
                 catalog="physical-profile",
                 scenario=scenario,
                 model=run.model,
@@ -215,16 +215,16 @@ def _fuel_capacity_rows(
 
 
 def _operating_cost_component_rows(
-    catalog: StaticStyleScenarioCatalog,
+    catalog: UtilitySystemScenarioCatalog,
     *,
     solver_time_limit: float,
 ) -> tuple[dict[str, object], ...]:
     rows: list[dict[str, object]] = []
     solve = _pyomo_highs_solver(solver_time_limit=solver_time_limit)
     for scenario in catalog:
-        run = run_static_style_scenario(scenario, solve=solve)
+        run = run_utility_system_scenario(scenario, solve=solve)
         rows.extend(
-            style_operating_cost_component_rows(
+            utility_system_operating_cost_component_rows(
                 catalog="physical-profile",
                 scenario=scenario,
                 model=run.model,
@@ -239,15 +239,15 @@ def _operating_cost_component_rows(
 def _comparison_and_summary_rows(
     *,
     catalog: str,
-    scenario_catalog: StaticStyleScenarioCatalog,
+    scenario_catalog: UtilitySystemScenarioCatalog,
     solver_time_limit: float,
 ) -> tuple[tuple[dict[str, Any], ...], tuple[dict[str, Any], ...]]:
     comparison_rows: list[dict[str, Any]] = []
     summary_rows: list[dict[str, Any]] = []
     solve = _pyomo_highs_solver(solver_time_limit=solver_time_limit)
     for scenario in scenario_catalog:
-        run = run_static_style_scenario(scenario, solve=solve)
-        comparison = compare_static_style_result_to_best_configuration(
+        run = run_utility_system_scenario(scenario, solve=solve)
+        comparison = compare_utility_system_result_to_best_configuration(
             run.result,
             get_contribution2_case_study2_best_configuration(scenario.scenario),
             absolute_tolerance=scenario.absolute_tolerance,
@@ -268,7 +268,7 @@ def _comparison_and_summary_rows(
 
 
 def _pyomo_highs_solver(*, solver_time_limit: float):
-    return pyomo_static_style_solver(
+    return pyomo_utility_system_solver(
         "appsi_highs",
         options={"time_limit": solver_time_limit},
     )

@@ -7,7 +7,7 @@ import pyomo.environ as pyo
 from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
     get_contribution2_computational_result,
 )
-from OpenUtility.style.bilevel import (
+from OpenUtility.utility_system.bilevel import (
     BilevelDecompositionRun,
     BilevelIntegerAssignment,
     BilevelSubproblemResult,

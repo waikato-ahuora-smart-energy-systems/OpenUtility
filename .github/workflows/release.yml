@@ -1,0 +1,27 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+      - name: Install dependencies
+        run: uv sync --extra dev --extra docs --extra notebook --extra release
+      - name: Run release gate
+        run: uv run python tools/release_check.py
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@release/v1

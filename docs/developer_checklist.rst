@@ -5,35 +5,27 @@ Install the package with development dependencies:
 
 .. code-block:: bash
 
-   python -m pip install -e ".[dev]"
+   python -m pip install -e ".[dev,docs,release]"
 
 Run the full verification suite:
 
 .. code-block:: bash
 
-   python -m pytest
    python -m ruff check .
+   python -m ruff format --check .
+   python -m mypy OpenUtility
+   python -m pytest --cov=OpenUtility --cov-report=term-missing --cov-fail-under=90
+   python -m sphinx -W -b html docs /tmp/openutility-docs-html
+   python -m build --no-isolation
 
-Run the notebook workflow test directly:
-
-.. code-block:: bash
-
-   python -m pytest tests/test_notebook_workflow.py
-
-Build the Read the Docs source locally:
-
-.. code-block:: bash
-
-   python -m sphinx -b html docs /tmp/openutility-docs-html
-
-Recreate the calibrated benchmark comparison report:
+Run the single release gate:
 
 .. code-block:: bash
 
-   openutility-style-table2-9 --catalog physical-profile --apply-fuel-targets --apply-operating-targets --format csv
+   python tools/release_check.py
 
-Open the checked notebook example:
+The release gate checks linting, formatting, typing, tests, docs, build
+metadata, wheel contents, dependency audit, and a fresh-install smoke test.
 
-.. code-block:: bash
-
-   jupyter lab case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/notebooks/replication.ipynb
+The public test suite must not import or read private replication workflows.
+Use small package-owned fixtures for reproducible tests.

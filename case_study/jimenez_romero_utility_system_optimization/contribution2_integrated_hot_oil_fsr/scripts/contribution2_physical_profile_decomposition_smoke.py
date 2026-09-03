@@ -8,20 +8,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 from case_study.jimenez_romero_utility_system_optimization.style_model_builders import (
     style_case_study_2_contribution2_physical_profile_catalog,
 )
-from OpenUtility.style import (
+from OpenUtility.utility_system import (
     bilevel_decomposition_run_rows,
     format_bilevel_decomposition_run_rows,
-    pyomo_static_style_solver,
-    run_static_style_fixed_assignment_decomposition,
+    pyomo_utility_system_solver,
+    run_utility_system_fixed_assignment_decomposition,
 )
 
 
 def trajectory_rows() -> tuple[dict[str, object], ...]:
     scenario = next(iter(style_case_study_2_contribution2_physical_profile_catalog()))
-    run = run_static_style_fixed_assignment_decomposition(
+    run = run_utility_system_fixed_assignment_decomposition(
         scenario,
-        solve_master=pyomo_static_style_solver("appsi_highs"),
-        solve_subproblem=pyomo_static_style_solver("appsi_highs"),
+        solve_master=pyomo_utility_system_solver("appsi_highs"),
+        solve_subproblem=pyomo_utility_system_solver("appsi_highs"),
         max_iterations=1,
     )
     return bilevel_decomposition_run_rows(run)

@@ -1,22 +1,16 @@
 OpenUtility
 ===========
 
-OpenUtility is a Pyomo-based utility-system optimization package for
-replicating selected Jimenez-Romero utility-system case-study methods and
-results.
-The current user path is a notebook-first workflow: import one helper, solve a
-checked STYLE case study, then inspect comparison tables and graphs.
+OpenUtility is a Pyomo-based utility-system optimization package with thermal
+profile handling and HPR investment/dispatch optimization. HPR is the umbrella
+term for heat pump and refrigeration assets.
 
-Notebook-first workflow
------------------------
-
-Start with the checked example notebook:
-
-``case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/notebooks/replication.ipynb``
-
-The notebook loads Contribution 2 case-study 2, solves the physical-profile
-Table 2-9 scenarios with the Pyomo/HiGHS SolverFactory path, and presents model
-versus benchmark outputs as pandas tables and matplotlib plots.
+The reusable package exposes typed model inputs, Pyomo model construction,
+solver adapters, reporting helpers, and bilevel decomposition utilities.
+OpenUtility does not import OpenPinch or TESPy; it consumes plain data that
+upstream targeting or thermodynamic tools can export.
+Private replication workflows are intentionally outside the public package and
+are not part of the release test boundary.
 
 .. toctree::
    :maxdepth: 2

@@ -1,4 +1,4 @@
-"""Thermal interval helpers for OpenPinch streams and zones."""
+"""Thermal interval helpers for stream-like process data."""
 
 from __future__ import annotations
 
@@ -38,7 +38,7 @@ def build_temperature_intervals(
     *,
     precision: int = 10,
 ) -> tuple[TemperatureInterval, ...]:
-    """Build descending intervals from OpenPinch shifted stream kinks."""
+    """Build descending intervals from shifted stream temperature kinks."""
 
     kinks: set[float] = set()
     for stream in _active_streams(streams):
@@ -57,7 +57,7 @@ def heat_content_by_interval(
     streams: Any | Iterable[Any],
     intervals: Iterable[TemperatureInterval],
 ) -> HeatIntervalProfile:
-    """Calculate interval heat content using the STYLE heat-profile formula."""
+    """Calculate interval heat content from shifted stream temperatures."""
 
     interval_tuple = tuple(intervals)
     source_heat = {interval.key: 0.0 for interval in interval_tuple}
@@ -95,14 +95,14 @@ def _active_streams(streams: Any | Iterable[Any]) -> tuple[Any, ...]:
 
 
 def _stream_iterable(streams: Any | Iterable[Any]) -> Iterable[Any]:
-    if _is_openpinch_stream(streams):
+    if _is_stream_like(streams):
         return (streams,)
     if hasattr(streams, "process_streams"):
         return getattr(streams, "process_streams")
     return streams
 
 
-def _is_openpinch_stream(value: Any) -> bool:
+def _is_stream_like(value: Any) -> bool:
     return all(
         hasattr(value, attribute)
         for attribute in ("type", "t_min_star", "t_max_star", "CP")
@@ -112,7 +112,7 @@ def _is_openpinch_stream(value: Any) -> bool:
 def _stream_type(stream: Any) -> str:
     stream_type = getattr(stream, "type", None)
     if stream_type is None:
-        raise TypeError("stream must expose an OpenPinch type")
+        raise TypeError("stream must expose a process-stream type")
     return str(stream_type).strip().lower()
 
 

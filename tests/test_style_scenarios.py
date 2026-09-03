@@ -2,50 +2,48 @@ from __future__ import annotations
 
 import pytest
 
-from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
-    get_style_result,
-)
-from OpenUtility.style import (
-    StaticStyleScenario,
-    StaticStyleScenarioCatalog,
+from OpenUtility.utility_system import (
+    UtilitySystemScenario,
+    UtilitySystemScenarioCatalog,
     SteamLevelCandidate,
-    StyleModelData,
+    UtilitySystemModelData,
 )
+from minimal_utility_system import minimal_utility_benchmark
 
 
 def test_static_style_scenario_catalog_returns_registered_scenarios() -> None:
-    scenario = StaticStyleScenario(
-        case_study="case-study-2",
-        scenario="proposed-without-hot-oil",
+    scenario = UtilitySystemScenario(
+        case_study="example-site",
+        scenario="gas-turbine-with-steam-turbine",
         data=_minimal_data(),
-        benchmark=get_style_result("case-study-2", "proposed-without-hot-oil"),
+        benchmark=minimal_utility_benchmark(),
     )
-    catalog = StaticStyleScenarioCatalog((scenario,))
+    catalog = UtilitySystemScenarioCatalog((scenario,))
 
-    assert catalog.keys() == (("case-study-2", "proposed-without-hot-oil"),)
-    assert catalog.get("case-study-2", "proposed-without-hot-oil") == scenario
+    assert catalog.keys() == (("example-site", "gas-turbine-with-steam-turbine"),)
+    assert catalog.get("example-site", "gas-turbine-with-steam-turbine") == scenario
 
 
 def test_static_style_scenario_catalog_rejects_duplicate_keys() -> None:
-    scenario = StaticStyleScenario(
-        case_study="case-study-2",
-        scenario="proposed-without-hot-oil",
+    scenario = UtilitySystemScenario(
+        case_study="example-site",
+        scenario="gas-turbine-with-steam-turbine",
         data=_minimal_data(),
     )
 
-    with pytest.raises(ValueError, match="duplicate static STYLE scenario"):
-        StaticStyleScenarioCatalog((scenario, scenario))
+    with pytest.raises(ValueError, match="duplicate static utility-system scenario"):
+        UtilitySystemScenarioCatalog((scenario, scenario))
 
 
 def test_static_style_scenario_catalog_reports_missing_key() -> None:
-    catalog = StaticStyleScenarioCatalog(())
+    catalog = UtilitySystemScenarioCatalog(())
 
-    with pytest.raises(KeyError, match="No static STYLE scenario"):
-        catalog.get("case-study-2", "missing")
+    with pytest.raises(KeyError, match="No static utility-system scenario"):
+        catalog.get("example-site", "missing")
 
 
-def _minimal_data() -> StyleModelData:
-    return StyleModelData(
+def _minimal_data() -> UtilitySystemModelData:
+    return UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(

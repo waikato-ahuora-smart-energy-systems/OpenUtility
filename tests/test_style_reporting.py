@@ -5,31 +5,7 @@ import json
 import pytest
 import pyomo.environ as pyo
 
-from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
-    CONTRIBUTION2_COMPUTATIONAL_RESULTS,
-    CONTRIBUTION2_MODEL_STATISTICS,
-    CONTRIBUTION2_STEAM_PROPERTY_COMPARISONS,
-    get_contribution2_case_study2_best_configuration,
-)
-from case_study.jimenez_romero_utility_system_optimization.contribution2_computational_performance import (
-    contribution2_bilevel_benchmark_trajectory_rows,
-    contribution2_bilevel_trajectory_comparison_rows,
-    contribution2_computational_best_method_rows,
-    contribution2_computational_method_summary_rows,
-    contribution2_computational_result_rows,
-    contribution2_model_statistic_rows,
-    contribution2_synthetic_bilevel_decomposition_run,
-    format_contribution2_bilevel_benchmark_trajectory_rows,
-    format_contribution2_bilevel_trajectory_comparison_rows,
-    format_contribution2_computational_best_method_rows,
-    format_contribution2_computational_method_summary_rows,
-    format_contribution2_computational_result_rows,
-    format_contribution2_model_statistic_rows,
-    format_steam_property_comparison_rows,
-    model_derived_steam_property_comparison_rows,
-    steam_property_comparison_rows,
-)
-from OpenUtility.style import (
+from OpenUtility.utility_system import (
     BilevelDecompositionIteration,
     BilevelDecompositionRun,
     BilevelIncumbent,
@@ -38,10 +14,10 @@ from OpenUtility.style import (
     BilevelSolutionPool,
     BilevelSkippedCandidate,
     BilevelSubproblemResult,
-    StaticStyleScenario,
-    StaticStyleResult,
+    UtilitySystemScenario,
+    UtilitySystemResult,
     SteamLevelCandidate,
-    StyleModelData,
+    UtilitySystemModelData,
     best_configuration_comparison_rows,
     best_configuration_summary_row,
     bilevel_candidate_audit_bundle_rows,
@@ -55,7 +31,7 @@ from OpenUtility.style import (
     bilevel_candidate_source_filter_variable_rows,
     bilevel_skipped_candidate_rows,
     bilevel_skipped_candidate_delta_summary_rows,
-    compare_static_style_result_to_best_configuration,
+    compare_utility_system_result_to_best_configuration,
     format_comparison_rows,
     format_bilevel_candidate_audit_bundle_rows,
     format_bilevel_decomposition_run_rows,
@@ -68,59 +44,58 @@ from OpenUtility.style import (
     format_bilevel_candidate_source_filter_variable_rows,
     format_bilevel_skipped_candidate_rows,
     format_bilevel_skipped_candidate_delta_summary_rows,
-    format_style_operating_cost_component_rows,
-    format_style_operating_cost_target_rows,
-    format_style_decomposition_objective_comparison_rows,
-    format_style_decomposition_skipped_candidate_rows,
-    format_style_decomposition_trajectory_rows,
-    format_style_fuel_calibration_target_rows,
-    format_style_fuel_consumption_diagnosis_rows,
-    format_style_fuel_consumption_capacity_rows,
-    format_style_fuel_consumption_equipment_rows,
-    format_style_fuel_consumption_family_rows,
-    format_style_fuel_consumption_residual_ranking_rows,
-    format_style_candidate_audit_bundle_rows,
+    format_utility_system_operating_cost_component_rows,
+    format_utility_system_operating_cost_target_rows,
+    format_utility_system_decomposition_objective_comparison_rows,
+    format_utility_system_decomposition_skipped_candidate_rows,
+    format_utility_system_decomposition_trajectory_rows,
+    format_utility_system_fuel_calibration_target_rows,
+    format_utility_system_fuel_consumption_diagnosis_rows,
+    format_utility_system_fuel_consumption_capacity_rows,
+    format_utility_system_fuel_consumption_equipment_rows,
+    format_utility_system_fuel_consumption_family_rows,
+    format_utility_system_fuel_consumption_residual_ranking_rows,
+    format_utility_system_candidate_audit_bundle_rows,
     format_summary_rows,
-    style_operating_cost_adjustment_map_from_target_rows,
-    style_operating_cost_component_rows,
-    style_operating_cost_target_rows,
-    style_decomposition_objective_comparison_rows,
-    style_decomposition_skipped_candidate_rows,
-    style_decomposition_trajectory_rows,
-    style_fuel_calibration_target_rows,
-    style_fuel_consumption_factor_map_from_calibration_target_rows,
-    style_fuel_consumption_diagnosis_rows,
-    style_fuel_consumption_capacity_rows,
-    style_fuel_consumption_equipment_rows,
-    style_fuel_consumption_family_rows,
-    style_fuel_consumption_residual_ranking_rows,
-    style_candidate_audit_bundle_rows,
-    style_candidate_pool_rows,
-    style_candidate_pool_comparison_rows,
-    style_candidate_selection_delta_rows,
-    style_candidate_selection_delta_summary_rows,
-    style_candidate_source_filter_detail_rows,
-    style_candidate_source_filter_summary_rows,
-    style_candidate_source_filter_variable_rows,
-    format_style_candidate_pool_rows,
-    format_style_candidate_pool_comparison_rows,
-    format_style_candidate_selection_delta_rows,
-    format_style_candidate_selection_delta_summary_rows,
-    format_style_candidate_source_filter_detail_rows,
-    format_style_candidate_source_filter_summary_rows,
-    format_style_candidate_source_filter_variable_rows,
-    style_skipped_candidate_delta_summary_rows,
-    format_style_skipped_candidate_delta_summary_rows,
+    utility_system_operating_cost_adjustment_map_from_target_rows,
+    utility_system_operating_cost_component_rows,
+    utility_system_operating_cost_target_rows,
+    utility_system_decomposition_objective_comparison_rows,
+    utility_system_decomposition_skipped_candidate_rows,
+    utility_system_decomposition_trajectory_rows,
+    utility_system_fuel_calibration_target_rows,
+    utility_system_fuel_consumption_factor_map_from_calibration_target_rows,
+    utility_system_fuel_consumption_diagnosis_rows,
+    utility_system_fuel_consumption_capacity_rows,
+    utility_system_fuel_consumption_equipment_rows,
+    utility_system_fuel_consumption_family_rows,
+    utility_system_fuel_consumption_residual_ranking_rows,
+    utility_system_candidate_audit_bundle_rows,
+    utility_system_candidate_pool_rows,
+    utility_system_candidate_pool_comparison_rows,
+    utility_system_candidate_selection_delta_rows,
+    utility_system_candidate_selection_delta_summary_rows,
+    utility_system_candidate_source_filter_detail_rows,
+    utility_system_candidate_source_filter_summary_rows,
+    utility_system_candidate_source_filter_variable_rows,
+    format_utility_system_candidate_pool_rows,
+    format_utility_system_candidate_pool_comparison_rows,
+    format_utility_system_candidate_selection_delta_rows,
+    format_utility_system_candidate_selection_delta_summary_rows,
+    format_utility_system_candidate_source_filter_detail_rows,
+    format_utility_system_candidate_source_filter_summary_rows,
+    format_utility_system_candidate_source_filter_variable_rows,
+    utility_system_skipped_candidate_delta_summary_rows,
+    format_utility_system_skipped_candidate_delta_summary_rows,
 )
+from minimal_utility_system import minimal_best_configuration_benchmark
 
 
 def test_best_configuration_comparison_rows_flattens_deviations() -> None:
-    benchmark = get_contribution2_case_study2_best_configuration(
-        "utility-system-microgrid",
-    )
-    result = StaticStyleResult(
-        case_study="contribution-2-case-study-2",
-        scenario="utility-system-microgrid",
+    benchmark = minimal_best_configuration_benchmark()
+    result = UtilitySystemResult(
+        case_study="example-site",
+        scenario="microgrid",
         utility_steam_flow=217.78,
         fuel_consumption=245.04,
         power_generation=46.67,
@@ -132,7 +107,7 @@ def test_best_configuration_comparison_rows_flattens_deviations() -> None:
         total_annualized_cost=64.86,
         fuel_cost=51.78,
     )
-    comparison = compare_static_style_result_to_best_configuration(
+    comparison = compare_utility_system_result_to_best_configuration(
         result,
         benchmark,
     )
@@ -143,8 +118,8 @@ def test_best_configuration_comparison_rows_flattens_deviations() -> None:
     )
 
     assert rows[0]["catalog"] == "reported-equipment"
-    assert rows[0]["case_study"] == "contribution-2-case-study-2"
-    assert rows[0]["scenario"] == "utility-system-microgrid"
+    assert rows[0]["case_study"] == "example-site"
+    assert rows[0]["scenario"] == "microgrid"
     assert rows[0]["field"] == "utility_steam_flow"
     assert rows[0]["actual"] == pytest.approx(217.78)
     assert rows[0]["benchmark"] == pytest.approx(217.78)
@@ -155,8 +130,8 @@ def test_format_comparison_rows_supports_csv_and_json() -> None:
     rows = (
         {
             "catalog": "reported-equipment",
-            "case_study": "contribution-2-case-study-2",
-            "scenario": "utility-system-microgrid",
+            "case_study": "example-site",
+            "scenario": "microgrid",
             "field": "fuel_consumption",
             "actual": 245.04,
             "benchmark": 245.04,
@@ -176,13 +151,16 @@ def test_format_comparison_rows_supports_csv_and_json() -> None:
     assert json.loads(json_output)[0]["field"] == "fuel_consumption"
 
 
+def test_format_comparison_rows_rejects_unknown_format() -> None:
+    with pytest.raises(ValueError, match="unsupported comparison output format"):
+        format_comparison_rows((), output_format="yaml")
+
+
 def test_best_configuration_summary_row_reports_failing_fields() -> None:
-    benchmark = get_contribution2_case_study2_best_configuration(
-        "utility-system-microgrid",
-    )
-    result = StaticStyleResult(
-        case_study="contribution-2-case-study-2-physical-profile",
-        scenario="utility-system-microgrid",
+    benchmark = minimal_best_configuration_benchmark()
+    result = UtilitySystemResult(
+        case_study="example-site-physical-profile",
+        scenario="microgrid",
         utility_steam_flow=217.78,
         fuel_consumption=248.5740702880787,
         power_generation=46.67,
@@ -194,7 +172,7 @@ def test_best_configuration_summary_row_reports_failing_fields() -> None:
         total_annualized_cost=64.86,
         fuel_cost=51.78,
     )
-    comparison = compare_static_style_result_to_best_configuration(
+    comparison = compare_utility_system_result_to_best_configuration(
         result,
         benchmark,
         absolute_tolerance=1e-2,
@@ -215,7 +193,26 @@ def test_best_configuration_summary_row_reports_failing_fields() -> None:
     )
 
 
-def test_style_fuel_consumption_family_rows_explain_total_residual() -> None:
+def test_format_summary_rows_supports_json_and_rejects_unknown_format() -> None:
+    rows = (
+        {
+            "catalog": "physical-profile",
+            "case_study": "example",
+            "scenario": "scenario",
+            "within_tolerance": True,
+            "max_absolute_deviation": 0.0,
+            "failing_fields": "",
+        },
+    )
+
+    assert json.loads(format_summary_rows(rows, output_format="json"))[0][
+        "within_tolerance"
+    ]
+    with pytest.raises(ValueError, match="unsupported summary output format"):
+        format_summary_rows(rows, output_format="yaml")
+
+
+def test_utility_system_fuel_consumption_family_rows_explain_total_residual() -> None:
     model = pyo.ConcreteModel()
     model.BOILERS = pyo.Set(initialize=("boiler",))
     model.boiler_fuel_consumption = pyo.Var(model.BOILERS, initialize=10.0)
@@ -236,10 +233,10 @@ def test_style_fuel_consumption_family_rows_explain_total_residual() -> None:
     model.vhp_source_fuel_consumption["vhp"].fix(7.0)
     model.hot_oil_fuel_consumption = pyo.Var(initialize=9.0)
     model.hot_oil_fuel_consumption.fix(9.0)
-    scenario = StaticStyleScenario(
+    scenario = UtilitySystemScenario(
         case_study="case",
-        scenario="utility-system-microgrid",
-        data=StyleModelData(
+        scenario="microgrid",
+        data=UtilitySystemModelData(
             steam_mains=("MP",),
             steam_levels=(
                 SteamLevelCandidate(
@@ -255,17 +252,15 @@ def test_style_fuel_consumption_family_rows_explain_total_residual() -> None:
             power_demand=0.0,
         ),
     )
-    benchmark = get_contribution2_case_study2_best_configuration(
-        "utility-system-microgrid",
-    )
+    benchmark = minimal_best_configuration_benchmark()
 
-    rows = style_fuel_consumption_family_rows(
+    rows = utility_system_fuel_consumption_family_rows(
         catalog="physical-profile",
         scenario=scenario,
         model=model,
         benchmark=benchmark,
     )
-    csv_output = format_style_fuel_consumption_family_rows(
+    csv_output = format_utility_system_fuel_consumption_family_rows(
         rows,
         output_format="csv",
     )
@@ -274,7 +269,7 @@ def test_style_fuel_consumption_family_rows_explain_total_residual() -> None:
         {
             "catalog": "physical-profile",
             "case_study": "case",
-            "scenario": "utility-system-microgrid",
+            "scenario": "microgrid",
             "equipment_family": "boiler",
             "included_in_table_fuel_consumption": True,
             "fuel_consumption": 10.0,
@@ -285,7 +280,7 @@ def test_style_fuel_consumption_family_rows_explain_total_residual() -> None:
         {
             "catalog": "physical-profile",
             "case_study": "case",
-            "scenario": "utility-system-microgrid",
+            "scenario": "microgrid",
             "equipment_family": "gas_turbine",
             "included_in_table_fuel_consumption": True,
             "fuel_consumption": 40.0,
@@ -296,7 +291,7 @@ def test_style_fuel_consumption_family_rows_explain_total_residual() -> None:
         {
             "catalog": "physical-profile",
             "case_study": "case",
-            "scenario": "utility-system-microgrid",
+            "scenario": "microgrid",
             "equipment_family": "hrsg_supplementary",
             "included_in_table_fuel_consumption": True,
             "fuel_consumption": 15.0,
@@ -307,7 +302,7 @@ def test_style_fuel_consumption_family_rows_explain_total_residual() -> None:
         {
             "catalog": "physical-profile",
             "case_study": "case",
-            "scenario": "utility-system-microgrid",
+            "scenario": "microgrid",
             "equipment_family": "vhp_source",
             "included_in_table_fuel_consumption": True,
             "fuel_consumption": 7.0,
@@ -318,7 +313,7 @@ def test_style_fuel_consumption_family_rows_explain_total_residual() -> None:
         {
             "catalog": "physical-profile",
             "case_study": "case",
-            "scenario": "utility-system-microgrid",
+            "scenario": "microgrid",
             "equipment_family": "hot_oil",
             "included_in_table_fuel_consumption": False,
             "fuel_consumption": 9.0,
@@ -329,7 +324,7 @@ def test_style_fuel_consumption_family_rows_explain_total_residual() -> None:
         {
             "catalog": "physical-profile",
             "case_study": "case",
-            "scenario": "utility-system-microgrid",
+            "scenario": "microgrid",
             "equipment_family": "table_total",
             "included_in_table_fuel_consumption": True,
             "fuel_consumption": 72.0,
@@ -346,7 +341,7 @@ def test_style_fuel_consumption_family_rows_explain_total_residual() -> None:
     )
 
 
-def test_style_fuel_consumption_equipment_rows_trace_family_totals() -> None:
+def test_utility_system_fuel_consumption_equipment_rows_trace_family_totals() -> None:
     model = pyo.ConcreteModel()
     model.BOILERS = pyo.Set(initialize=("boiler",))
     model.boiler_fuel_consumption = pyo.Var(model.BOILERS, initialize=10.0)
@@ -367,10 +362,10 @@ def test_style_fuel_consumption_equipment_rows_trace_family_totals() -> None:
     model.vhp_source_fuel_consumption["vhp"].fix(7.0)
     model.hot_oil_fuel_consumption = pyo.Var(initialize=9.0)
     model.hot_oil_fuel_consumption.fix(9.0)
-    scenario = StaticStyleScenario(
+    scenario = UtilitySystemScenario(
         case_study="case",
-        scenario="utility-system-microgrid",
-        data=StyleModelData(
+        scenario="microgrid",
+        data=UtilitySystemModelData(
             steam_mains=("MP",),
             steam_levels=(
                 SteamLevelCandidate(
@@ -386,17 +381,15 @@ def test_style_fuel_consumption_equipment_rows_trace_family_totals() -> None:
             power_demand=0.0,
         ),
     )
-    benchmark = get_contribution2_case_study2_best_configuration(
-        "utility-system-microgrid",
-    )
+    benchmark = minimal_best_configuration_benchmark()
 
-    rows = style_fuel_consumption_equipment_rows(
+    rows = utility_system_fuel_consumption_equipment_rows(
         catalog="physical-profile",
         scenario=scenario,
         model=model,
         benchmark=benchmark,
     )
-    csv_output = format_style_fuel_consumption_equipment_rows(
+    csv_output = format_utility_system_fuel_consumption_equipment_rows(
         rows,
         output_format="csv",
     )
@@ -404,7 +397,7 @@ def test_style_fuel_consumption_equipment_rows_trace_family_totals() -> None:
     assert rows[1] == {
         "catalog": "physical-profile",
         "case_study": "case",
-        "scenario": "utility-system-microgrid",
+        "scenario": "microgrid",
         "equipment_family": "gas_turbine",
         "equipment_name": "gt",
         "fuel_variable": "gas_turbine_fuel_flow[gt]",
@@ -429,7 +422,9 @@ def test_style_fuel_consumption_equipment_rows_trace_family_totals() -> None:
     )
 
 
-def test_style_fuel_consumption_capacity_rows_report_utilization_context() -> None:
+def test_utility_system_fuel_consumption_capacity_rows_report_utilization_context() -> (
+    None
+):
     model = pyo.ConcreteModel()
     model.GAS_TURBINES = pyo.Set(initialize=("gt",))
     model.gas_turbine_fuel_flow = pyo.Var(model.GAS_TURBINES, initialize=20.0)
@@ -441,10 +436,10 @@ def test_style_fuel_consumption_capacity_rows_report_utilization_context() -> No
     )
     model.gas_turbine_selected = pyo.Var(model.GAS_TURBINES, initialize=1.0)
     model.gas_turbine_selected["gt"].fix(1.0)
-    scenario = StaticStyleScenario(
+    scenario = UtilitySystemScenario(
         case_study="case",
-        scenario="utility-system-microgrid",
-        data=StyleModelData(
+        scenario="microgrid",
+        data=UtilitySystemModelData(
             steam_mains=("MP",),
             steam_levels=(
                 SteamLevelCandidate(
@@ -460,17 +455,15 @@ def test_style_fuel_consumption_capacity_rows_report_utilization_context() -> No
             power_demand=0.0,
         ),
     )
-    benchmark = get_contribution2_case_study2_best_configuration(
-        "utility-system-microgrid",
-    )
+    benchmark = minimal_best_configuration_benchmark()
 
-    rows = style_fuel_consumption_capacity_rows(
+    rows = utility_system_fuel_consumption_capacity_rows(
         catalog="physical-profile",
         scenario=scenario,
         model=model,
         benchmark=benchmark,
     )
-    csv_output = format_style_fuel_consumption_capacity_rows(
+    csv_output = format_utility_system_fuel_consumption_capacity_rows(
         rows,
         output_format="csv",
     )
@@ -479,7 +472,7 @@ def test_style_fuel_consumption_capacity_rows_report_utilization_context() -> No
         {
             "catalog": "physical-profile",
             "case_study": "case",
-            "scenario": "utility-system-microgrid",
+            "scenario": "microgrid",
             "equipment_family": "gas_turbine",
             "equipment_name": "gt",
             "fuel_variable": "gas_turbine_fuel_flow[gt]",
@@ -504,7 +497,9 @@ def test_style_fuel_consumption_capacity_rows_report_utilization_context() -> No
     )
 
 
-def test_style_fuel_consumption_diagnosis_rows_classify_residual_drivers() -> None:
+def test_utility_system_fuel_consumption_diagnosis_rows_classify_residual_drivers() -> (
+    None
+):
     capacity_rows = (
         {
             "catalog": "physical-profile",
@@ -562,8 +557,8 @@ def test_style_fuel_consumption_diagnosis_rows_classify_residual_drivers() -> No
         },
     )
 
-    rows = style_fuel_consumption_diagnosis_rows(capacity_rows)
-    csv_output = format_style_fuel_consumption_diagnosis_rows(
+    rows = utility_system_fuel_consumption_diagnosis_rows(capacity_rows)
+    csv_output = format_utility_system_fuel_consumption_diagnosis_rows(
         rows,
         output_format="csv",
     )
@@ -586,7 +581,9 @@ def test_style_fuel_consumption_diagnosis_rows_classify_residual_drivers() -> No
     )
 
 
-def test_style_fuel_calibration_target_rows_compute_adjustment_to_benchmark() -> None:
+def test_utility_system_fuel_calibration_target_rows_compute_adjustment_to_benchmark() -> (
+    None
+):
     capacity_rows = (
         {
             "catalog": "physical-profile",
@@ -626,8 +623,8 @@ def test_style_fuel_calibration_target_rows_compute_adjustment_to_benchmark() ->
         },
     )
 
-    rows = style_fuel_calibration_target_rows(capacity_rows)
-    csv_output = format_style_fuel_calibration_target_rows(
+    rows = utility_system_fuel_calibration_target_rows(capacity_rows)
+    csv_output = format_utility_system_fuel_calibration_target_rows(
         rows,
         output_format="csv",
     )
@@ -664,8 +661,10 @@ def test_style_fuel_calibration_target_rows_compute_adjustment_to_benchmark() ->
     )
 
 
-def test_style_fuel_calibration_target_rows_increase_capped_equipment_fuel() -> None:
-    rows = style_fuel_calibration_target_rows(
+def test_utility_system_fuel_calibration_target_rows_increase_capped_equipment_fuel() -> (
+    None
+):
+    rows = utility_system_fuel_calibration_target_rows(
         (
             {
                 "catalog": "physical-profile",
@@ -694,7 +693,9 @@ def test_style_fuel_calibration_target_rows_increase_capped_equipment_fuel() -> 
     assert rows[0]["fuel_consumption_adjustment_factor"] == pytest.approx(38.0 / 36.0)
 
 
-def test_style_fuel_consumption_factor_map_from_calibration_target_rows() -> None:
+def test_utility_system_fuel_consumption_factor_map_from_calibration_target_rows() -> (
+    None
+):
     target_rows = (
         {
             "catalog": "physical-profile",
@@ -755,7 +756,7 @@ def test_style_fuel_consumption_factor_map_from_calibration_target_rows() -> Non
         },
     )
 
-    factors = style_fuel_consumption_factor_map_from_calibration_target_rows(
+    factors = utility_system_fuel_consumption_factor_map_from_calibration_target_rows(
         target_rows,
     )
 
@@ -766,7 +767,9 @@ def test_style_fuel_consumption_factor_map_from_calibration_target_rows() -> Non
     )
 
 
-def test_style_operating_cost_component_rows_compare_auxiliary_bucket() -> None:
+def test_utility_system_operating_cost_component_rows_compare_auxiliary_bucket() -> (
+    None
+):
     model = pyo.ConcreteModel()
     model.STEAM_LEVELS = pyo.Set(initialize=("MP",))
     model.operating_cost_per_heat = pyo.Param(model.STEAM_LEVELS, initialize=0.0)
@@ -782,10 +785,10 @@ def test_style_operating_cost_component_rows_compare_auxiliary_bucket() -> None:
     model.cooling_water_operating_cost.fix(3.173114394)
     model.water_operating_cost = pyo.Var(initialize=0.0)
     model.water_operating_cost.fix(0.0)
-    scenario = StaticStyleScenario(
+    scenario = UtilitySystemScenario(
         case_study="case",
-        scenario="utility-system-stand-alone",
-        data=StyleModelData(
+        scenario="stand-alone",
+        data=UtilitySystemModelData(
             steam_mains=("MP",),
             steam_levels=(
                 SteamLevelCandidate(
@@ -802,15 +805,13 @@ def test_style_operating_cost_component_rows_compare_auxiliary_bucket() -> None:
         ),
     )
 
-    rows = style_operating_cost_component_rows(
+    rows = utility_system_operating_cost_component_rows(
         catalog="physical-profile",
         scenario=scenario,
         model=model,
-        benchmark=get_contribution2_case_study2_best_configuration(
-            "utility-system-stand-alone",
-        ),
+        benchmark=minimal_best_configuration_benchmark(),
     )
-    csv_output = format_style_operating_cost_component_rows(
+    csv_output = format_utility_system_operating_cost_component_rows(
         rows,
         output_format="csv",
     )
@@ -818,11 +819,11 @@ def test_style_operating_cost_component_rows_compare_auxiliary_bucket() -> None:
     assert rows[3] == {
         "catalog": "physical-profile",
         "case_study": "case",
-        "scenario": "utility-system-stand-alone",
+        "scenario": "stand-alone",
         "operating_cost_component": "auxiliary_or_unallocated",
         "actual_operating_cost": pytest.approx(3.173114394),
-        "benchmark_operating_cost": pytest.approx(2.23),
-        "operating_cost_residual": pytest.approx(0.943114394),
+        "benchmark_operating_cost": pytest.approx(-1.29),
+        "operating_cost_residual": pytest.approx(4.463114394),
     }
     assert csv_output.splitlines()[0] == (
         "catalog,case_study,scenario,operating_cost_component,"
@@ -830,7 +831,9 @@ def test_style_operating_cost_component_rows_compare_auxiliary_bucket() -> None:
     )
 
 
-def test_style_operating_cost_target_rows_compute_auxiliary_adjustment() -> None:
+def test_utility_system_operating_cost_target_rows_compute_auxiliary_adjustment() -> (
+    None
+):
     rows = (
         {
             "catalog": "physical-profile",
@@ -888,8 +891,8 @@ def test_style_operating_cost_target_rows_compute_auxiliary_adjustment() -> None
         },
     )
 
-    target_rows = style_operating_cost_target_rows(rows)
-    csv_output = format_style_operating_cost_target_rows(
+    target_rows = utility_system_operating_cost_target_rows(rows)
+    csv_output = format_utility_system_operating_cost_target_rows(
         target_rows,
         output_format="csv",
     )
@@ -911,7 +914,9 @@ def test_style_operating_cost_target_rows_compute_auxiliary_adjustment() -> None
             "operating_cost_residual": 3.0,
         },
     )
-    assert style_operating_cost_adjustment_map_from_target_rows(target_rows) == {
+    assert utility_system_operating_cost_adjustment_map_from_target_rows(
+        target_rows
+    ) == {
         "scenario-a": {"auxiliary_or_unallocated": -3.0},
     }
     assert csv_output.splitlines()[0] == (
@@ -923,7 +928,9 @@ def test_style_operating_cost_target_rows_compute_auxiliary_adjustment() -> None
     )
 
 
-def test_style_fuel_consumption_residual_ranking_rows_rank_largest_residuals() -> None:
+def test_utility_system_fuel_consumption_residual_ranking_rows_rank_largest_residuals() -> (
+    None
+):
     fuel_rows = (
         {
             "catalog": "physical-profile",
@@ -982,12 +989,12 @@ def test_style_fuel_consumption_residual_ranking_rows_rank_largest_residuals() -
         },
     )
 
-    rows = style_fuel_consumption_residual_ranking_rows(fuel_rows)
-    csv_output = format_style_fuel_consumption_residual_ranking_rows(
+    rows = utility_system_fuel_consumption_residual_ranking_rows(fuel_rows)
+    csv_output = format_utility_system_fuel_consumption_residual_ranking_rows(
         rows,
         output_format="csv",
     )
-    json_output = format_style_fuel_consumption_residual_ranking_rows(
+    json_output = format_utility_system_fuel_consumption_residual_ranking_rows(
         rows,
         output_format="json",
     )
@@ -1032,7 +1039,7 @@ def test_style_fuel_consumption_residual_ranking_rows_rank_largest_residuals() -
     assert json.loads(json_output)[0]["scenario"] == "scenario-b"
 
 
-def test_style_fuel_consumption_residual_ranking_rows_allows_zero_denominators() -> (
+def test_utility_system_fuel_consumption_residual_ranking_rows_allows_zero_denominators() -> (
     None
 ):
     fuel_rows = (
@@ -1060,126 +1067,10 @@ def test_style_fuel_consumption_residual_ranking_rows_allows_zero_denominators()
         },
     )
 
-    rows = style_fuel_consumption_residual_ranking_rows(fuel_rows)
+    rows = utility_system_fuel_consumption_residual_ranking_rows(fuel_rows)
 
     assert rows[0]["largest_family_share_of_table"] is None
     assert rows[0]["residual_percent_of_benchmark"] is None
-
-
-def test_steam_property_comparison_rows_report_model_deviations() -> None:
-    rows = steam_property_comparison_rows(CONTRIBUTION2_STEAM_PROPERTY_COMPARISONS)
-    vhp_row = rows[0]
-    csv_output = format_steam_property_comparison_rows(rows[:1], output_format="csv")
-
-    assert len(rows) == 6
-    assert vhp_row["configuration"] == "best-obtained-configuration"
-    assert vhp_row["turbine"] == "VHP-ST 1"
-    assert vhp_row["enthalpy_change_deviation"] == pytest.approx(-0.0018)
-    assert vhp_row["power_generation_deviation"] == pytest.approx(-0.14)
-    assert csv_output.splitlines()[0] == (
-        "configuration,turbine,inlet_temperature,inlet_pressure,outlet_pressure,"
-        "real_isentropic_enthalpy_change,model_isentropic_enthalpy_change,"
-        "enthalpy_change_deviation,iapws_power_generation,model_power_generation,"
-        "power_generation_deviation"
-    )
-
-
-def test_model_derived_steam_property_comparison_rows_recompute_iapws_values() -> None:
-    rows = model_derived_steam_property_comparison_rows(
-        CONTRIBUTION2_STEAM_PROPERTY_COMPARISONS,
-    )
-    vhp_row = rows[0]
-    total_row = rows[2]
-
-    assert vhp_row["configuration"] == "best-obtained-configuration"
-    assert vhp_row["real_isentropic_enthalpy_change"] == pytest.approx(
-        0.1385,
-        abs=1e-4,
-    )
-    assert vhp_row["iapws_power_generation"] == pytest.approx(10.29, abs=0.02)
-    assert total_row["turbine"] == "total"
-    assert total_row["iapws_power_generation"] == pytest.approx(11.51, abs=0.03)
-
-
-def test_contribution2_model_statistic_rows_are_reportable() -> None:
-    rows = contribution2_model_statistic_rows(CONTRIBUTION2_MODEL_STATISTICS)
-    csv_output = format_contribution2_model_statistic_rows(
-        rows[:1],
-        output_format="csv",
-    )
-
-    assert len(rows) == 12
-    assert rows[5]["test_number"] == 6
-    assert rows[5]["reference"] == "Sun et al. (2015)"
-    assert rows[5]["integrates_hot_oil_and_fsr"] is True
-    assert rows[5]["variable_count"] == 9550
-    assert csv_output.splitlines()[0] == (
-        "test_number,reference,steam_mains,power_demand,"
-        "integrates_hot_oil_and_fsr,variable_count,binary_count,equation_count"
-    )
-
-
-def test_contribution2_computational_result_rows_are_reportable() -> None:
-    rows = contribution2_computational_result_rows(CONTRIBUTION2_COMPUTATIONAL_RESULTS)
-    csv_output = format_contribution2_computational_result_rows(
-        rows[:1],
-        output_format="csv",
-    )
-
-    assert len(rows) == 72
-    assert rows[0]["test_number"] == 1
-    assert rows[0]["method"] == "baron"
-    assert rows[0]["optimality_gap"] == pytest.approx(0.031)
-    assert rows[2]["method"] == "bilevel"
-    assert csv_output.splitlines()[0] == (
-        "test_number,scenario,method,best_solution_found,best_possible,"
-        "optimality_gap,computational_time_seconds,hit_time_limit"
-    )
-
-
-def test_contribution2_computational_best_method_rows_are_reportable() -> None:
-    rows = contribution2_computational_best_method_rows(
-        CONTRIBUTION2_COMPUTATIONAL_RESULTS,
-    )
-    test_6_scenario_2 = next(
-        row for row in rows if row["test_number"] == 6 and row["scenario"] == 2
-    )
-    csv_output = format_contribution2_computational_best_method_rows(
-        rows[:1],
-        output_format="csv",
-    )
-
-    assert len(rows) == 24
-    assert rows[0]["best_method"] == "s-milp"
-    assert rows[0]["best_solution_found"] == pytest.approx(30.09)
-    assert test_6_scenario_2["best_method"] == "bilevel"
-    assert test_6_scenario_2["best_solution_found"] == pytest.approx(53.891)
-    assert test_6_scenario_2["optimality_gap"] == pytest.approx(1.232)
-    assert csv_output.splitlines()[0] == (
-        "test_number,scenario,best_method,best_solution_found,best_possible,"
-        "optimality_gap,computational_time_seconds,hit_time_limit"
-    )
-
-
-def test_contribution2_computational_method_summary_rows_are_reportable() -> None:
-    rows = contribution2_computational_method_summary_rows(
-        CONTRIBUTION2_COMPUTATIONAL_RESULTS,
-    )
-    baron = rows[0]
-    csv_output = format_contribution2_computational_method_summary_rows(
-        rows[:1],
-        output_format="csv",
-    )
-
-    assert [row["method"] for row in rows] == ["baron", "s-milp", "bilevel"]
-    assert baron["result_count"] == 24
-    assert baron["time_limit_count"] == 16
-    assert baron["best_solution_count"] == 5
-    assert rows[1]["time_limit_count"] == 0
-    assert csv_output.splitlines()[0] == (
-        "method,result_count,best_solution_count,time_limit_count,"
-        "mean_computational_time_seconds"
-    )
 
 
 def test_bilevel_decomposition_run_rows_are_reportable() -> None:
@@ -1994,7 +1885,9 @@ def test_bilevel_candidate_audit_bundle_rows_are_reportable() -> None:
     assert json.loads(json_output)[0]["audit_section"] == "accepted-incumbent"
 
 
-def test_style_decomposition_trajectory_rows_include_scenario_metadata() -> None:
+def test_utility_system_decomposition_trajectory_rows_include_scenario_metadata() -> (
+    None
+):
     assignment = BilevelIntegerAssignment.from_mapping({"select_level": 1})
     incumbent = BilevelIncumbent(
         label="iteration-1",
@@ -2020,10 +1913,10 @@ def test_style_decomposition_trajectory_rows_include_scenario_metadata() -> None
         solution_pool=BilevelSolutionPool((incumbent,)),
         stop_reason="max-iterations",
     )
-    scenario = StaticStyleScenario(
+    scenario = UtilitySystemScenario(
         case_study="case",
         scenario="scenario",
-        data=StyleModelData(
+        data=UtilitySystemModelData(
             steam_mains=("MP",),
             steam_levels=(
                 SteamLevelCandidate(
@@ -2040,12 +1933,12 @@ def test_style_decomposition_trajectory_rows_include_scenario_metadata() -> None
         ),
     )
 
-    rows = style_decomposition_trajectory_rows(
+    rows = utility_system_decomposition_trajectory_rows(
         catalog="physical-profile",
         scenario=scenario,
         run=run,
     )
-    csv_output = format_style_decomposition_trajectory_rows(
+    csv_output = format_utility_system_decomposition_trajectory_rows(
         rows,
         output_format="csv",
     )
@@ -2063,7 +1956,9 @@ def test_style_decomposition_trajectory_rows_include_scenario_metadata() -> None
     )
 
 
-def test_style_decomposition_skipped_candidate_rows_include_scenario_metadata() -> None:
+def test_utility_system_decomposition_skipped_candidate_rows_include_scenario_metadata() -> (
+    None
+):
     skipped = BilevelSkippedCandidate(
         candidate_label="candidate-2",
         source_label="source-scenario",
@@ -2076,10 +1971,10 @@ def test_style_decomposition_skipped_candidate_rows_include_scenario_metadata() 
         stop_reason="candidate-exhausted",
         skipped_candidates=(skipped,),
     )
-    scenario = StaticStyleScenario(
+    scenario = UtilitySystemScenario(
         case_study="case",
         scenario="scenario",
-        data=StyleModelData(
+        data=UtilitySystemModelData(
             steam_mains=("MP",),
             steam_levels=(
                 SteamLevelCandidate(
@@ -2096,12 +1991,12 @@ def test_style_decomposition_skipped_candidate_rows_include_scenario_metadata() 
         ),
     )
 
-    rows = style_decomposition_skipped_candidate_rows(
+    rows = utility_system_decomposition_skipped_candidate_rows(
         catalog="physical-profile-candidates",
         scenario=scenario,
         run=run,
     )
-    csv_output = format_style_decomposition_skipped_candidate_rows(
+    csv_output = format_utility_system_decomposition_skipped_candidate_rows(
         rows,
         output_format="csv",
     )
@@ -2118,15 +2013,15 @@ def test_style_decomposition_skipped_candidate_rows_include_scenario_metadata() 
     )
 
 
-def test_style_candidate_pool_rows_include_scenario_metadata() -> None:
+def test_utility_system_candidate_pool_rows_include_scenario_metadata() -> None:
     candidate = BilevelCandidateAssignment(
         source_label="source-scenario",
         assignment=BilevelIntegerAssignment.from_mapping({"select_level": 1}),
     )
-    scenario = StaticStyleScenario(
+    scenario = UtilitySystemScenario(
         case_study="case",
         scenario="scenario",
-        data=StyleModelData(
+        data=UtilitySystemModelData(
             steam_mains=("MP",),
             steam_levels=(
                 SteamLevelCandidate(
@@ -2143,12 +2038,12 @@ def test_style_candidate_pool_rows_include_scenario_metadata() -> None:
         ),
     )
 
-    rows = style_candidate_pool_rows(
+    rows = utility_system_candidate_pool_rows(
         catalog="physical-profile-candidates",
         scenario=scenario,
         candidates=(candidate,),
     )
-    csv_output = format_style_candidate_pool_rows(rows, output_format="csv")
+    csv_output = format_utility_system_candidate_pool_rows(rows, output_format="csv")
 
     assert rows[0]["catalog"] == "physical-profile-candidates"
     assert rows[0]["case_study"] == "case"
@@ -2160,16 +2055,18 @@ def test_style_candidate_pool_rows_include_scenario_metadata() -> None:
     )
 
 
-def test_style_candidate_pool_comparison_rows_include_scenario_metadata() -> None:
+def test_utility_system_candidate_pool_comparison_rows_include_scenario_metadata() -> (
+    None
+):
     accepted = BilevelIntegerAssignment.from_mapping({"select_level": 1})
     candidate = BilevelCandidateAssignment(
         source_label="source-scenario",
         assignment=accepted,
     )
-    scenario = StaticStyleScenario(
+    scenario = UtilitySystemScenario(
         case_study="case",
         scenario="scenario",
-        data=StyleModelData(
+        data=UtilitySystemModelData(
             steam_mains=("MP",),
             steam_levels=(
                 SteamLevelCandidate(
@@ -2186,13 +2083,13 @@ def test_style_candidate_pool_comparison_rows_include_scenario_metadata() -> Non
         ),
     )
 
-    rows = style_candidate_pool_comparison_rows(
+    rows = utility_system_candidate_pool_comparison_rows(
         catalog="physical-profile-candidates",
         scenario=scenario,
         candidates=(candidate,),
         accepted_assignment=accepted,
     )
-    csv_output = format_style_candidate_pool_comparison_rows(
+    csv_output = format_utility_system_candidate_pool_comparison_rows(
         rows,
         output_format="csv",
     )
@@ -2208,7 +2105,9 @@ def test_style_candidate_pool_comparison_rows_include_scenario_metadata() -> Non
     )
 
 
-def test_style_candidate_source_filter_summary_rows_include_scenario_metadata() -> None:
+def test_utility_system_candidate_source_filter_summary_rows_include_scenario_metadata() -> (
+    None
+):
     candidates = (
         BilevelCandidateAssignment(
             source_label="source-a",
@@ -2224,10 +2123,10 @@ def test_style_candidate_source_filter_summary_rows_include_scenario_metadata() 
             assignment=BilevelIntegerAssignment.from_mapping({"select_level": 1}),
         ),
     )
-    scenario = StaticStyleScenario(
+    scenario = UtilitySystemScenario(
         case_study="case",
         scenario="scenario",
-        data=StyleModelData(
+        data=UtilitySystemModelData(
             steam_mains=("MP",),
             steam_levels=(
                 SteamLevelCandidate(
@@ -2244,13 +2143,13 @@ def test_style_candidate_source_filter_summary_rows_include_scenario_metadata() 
         ),
     )
 
-    rows = style_candidate_source_filter_summary_rows(
+    rows = utility_system_candidate_source_filter_summary_rows(
         catalog="physical-profile-candidates",
         scenario=scenario,
         candidates=candidates,
         variable_names=("select_level", "select_hrsg"),
     )
-    csv_output = format_style_candidate_source_filter_summary_rows(
+    csv_output = format_utility_system_candidate_source_filter_summary_rows(
         rows,
         output_format="csv",
     )
@@ -2277,7 +2176,9 @@ def test_style_candidate_source_filter_summary_rows_include_scenario_metadata() 
     )
 
 
-def test_style_candidate_source_filter_detail_rows_include_scenario_metadata() -> None:
+def test_utility_system_candidate_source_filter_detail_rows_include_scenario_metadata() -> (
+    None
+):
     candidates = (
         BilevelCandidateAssignment(
             source_label="calibrated:case:source",
@@ -2289,10 +2190,10 @@ def test_style_candidate_source_filter_detail_rows_include_scenario_metadata() -
             ),
         ),
     )
-    scenario = StaticStyleScenario(
+    scenario = UtilitySystemScenario(
         case_study="case",
         scenario="scenario",
-        data=StyleModelData(
+        data=UtilitySystemModelData(
             steam_mains=("MP",),
             steam_levels=(
                 SteamLevelCandidate(
@@ -2309,13 +2210,13 @@ def test_style_candidate_source_filter_detail_rows_include_scenario_metadata() -
         ),
     )
 
-    rows = style_candidate_source_filter_detail_rows(
+    rows = utility_system_candidate_source_filter_detail_rows(
         catalog="physical-profile-candidates",
         scenario=scenario,
         candidates=candidates,
         variable_names=("select_level", "select_hrsg"),
     )
-    csv_output = format_style_candidate_source_filter_detail_rows(
+    csv_output = format_utility_system_candidate_source_filter_detail_rows(
         rows,
         output_format="csv",
     )
@@ -2345,7 +2246,7 @@ def test_style_candidate_source_filter_detail_rows_include_scenario_metadata() -
     )
 
 
-def test_style_candidate_source_filter_variable_rows_include_scenario_metadata() -> (
+def test_utility_system_candidate_source_filter_variable_rows_include_scenario_metadata() -> (
     None
 ):
     candidates = (
@@ -2359,10 +2260,10 @@ def test_style_candidate_source_filter_variable_rows_include_scenario_metadata()
             ),
         ),
     )
-    scenario = StaticStyleScenario(
+    scenario = UtilitySystemScenario(
         case_study="case",
         scenario="scenario",
-        data=StyleModelData(
+        data=UtilitySystemModelData(
             steam_mains=("MP",),
             steam_levels=(
                 SteamLevelCandidate(
@@ -2379,13 +2280,13 @@ def test_style_candidate_source_filter_variable_rows_include_scenario_metadata()
         ),
     )
 
-    rows = style_candidate_source_filter_variable_rows(
+    rows = utility_system_candidate_source_filter_variable_rows(
         catalog="physical-profile-candidates",
         scenario=scenario,
         candidates=candidates,
         variable_names=("select_level", "select_hrsg"),
     )
-    csv_output = format_style_candidate_source_filter_variable_rows(
+    csv_output = format_utility_system_candidate_source_filter_variable_rows(
         rows,
         output_format="csv",
     )
@@ -2418,7 +2319,9 @@ def test_style_candidate_source_filter_variable_rows_include_scenario_metadata()
     )
 
 
-def test_style_candidate_selection_delta_rows_include_scenario_metadata() -> None:
+def test_utility_system_candidate_selection_delta_rows_include_scenario_metadata() -> (
+    None
+):
     accepted = BilevelIntegerAssignment.from_mapping(
         {
             "select_level": 1,
@@ -2434,10 +2337,10 @@ def test_style_candidate_selection_delta_rows_include_scenario_metadata() -> Non
             },
         ),
     )
-    scenario = StaticStyleScenario(
+    scenario = UtilitySystemScenario(
         case_study="case",
         scenario="scenario",
-        data=StyleModelData(
+        data=UtilitySystemModelData(
             steam_mains=("MP",),
             steam_levels=(
                 SteamLevelCandidate(
@@ -2454,13 +2357,13 @@ def test_style_candidate_selection_delta_rows_include_scenario_metadata() -> Non
         ),
     )
 
-    rows = style_candidate_selection_delta_rows(
+    rows = utility_system_candidate_selection_delta_rows(
         catalog="physical-profile-candidates",
         scenario=scenario,
         candidates=(candidate,),
         accepted_assignment=accepted,
     )
-    csv_output = format_style_candidate_selection_delta_rows(
+    csv_output = format_utility_system_candidate_selection_delta_rows(
         rows,
         output_format="csv",
     )
@@ -2484,7 +2387,7 @@ def test_style_candidate_selection_delta_rows_include_scenario_metadata() -> Non
     )
 
 
-def test_style_candidate_selection_delta_summary_rows_include_scenario_metadata() -> (
+def test_utility_system_candidate_selection_delta_summary_rows_include_scenario_metadata() -> (
     None
 ):
     accepted = BilevelIntegerAssignment.from_mapping(
@@ -2502,10 +2405,10 @@ def test_style_candidate_selection_delta_summary_rows_include_scenario_metadata(
             },
         ),
     )
-    scenario = StaticStyleScenario(
+    scenario = UtilitySystemScenario(
         case_study="case",
         scenario="scenario",
-        data=StyleModelData(
+        data=UtilitySystemModelData(
             steam_mains=("MP",),
             steam_levels=(
                 SteamLevelCandidate(
@@ -2522,13 +2425,13 @@ def test_style_candidate_selection_delta_summary_rows_include_scenario_metadata(
         ),
     )
 
-    rows = style_candidate_selection_delta_summary_rows(
+    rows = utility_system_candidate_selection_delta_summary_rows(
         catalog="physical-profile-candidates",
         scenario=scenario,
         candidates=(candidate,),
         accepted_assignment=accepted,
     )
-    csv_output = format_style_candidate_selection_delta_summary_rows(
+    csv_output = format_utility_system_candidate_selection_delta_summary_rows(
         rows,
         output_format="csv",
     )
@@ -2552,7 +2455,9 @@ def test_style_candidate_selection_delta_summary_rows_include_scenario_metadata(
     )
 
 
-def test_style_skipped_candidate_delta_summary_rows_include_scenario_metadata() -> None:
+def test_utility_system_skipped_candidate_delta_summary_rows_include_scenario_metadata() -> (
+    None
+):
     accepted = BilevelIntegerAssignment.from_mapping(
         {
             "level_selected[MP_75]": 1,
@@ -2576,10 +2481,10 @@ def test_style_skipped_candidate_delta_summary_rows_include_scenario_metadata() 
         stop_reason="candidate-exhausted",
         skipped_candidates=(skipped,),
     )
-    scenario = StaticStyleScenario(
+    scenario = UtilitySystemScenario(
         case_study="case",
         scenario="scenario",
-        data=StyleModelData(
+        data=UtilitySystemModelData(
             steam_mains=("MP",),
             steam_levels=(
                 SteamLevelCandidate(
@@ -2596,13 +2501,13 @@ def test_style_skipped_candidate_delta_summary_rows_include_scenario_metadata() 
         ),
     )
 
-    rows = style_skipped_candidate_delta_summary_rows(
+    rows = utility_system_skipped_candidate_delta_summary_rows(
         catalog="physical-profile-candidates",
         scenario=scenario,
         run=run,
         accepted_assignment=accepted,
     )
-    csv_output = format_style_skipped_candidate_delta_summary_rows(
+    csv_output = format_utility_system_skipped_candidate_delta_summary_rows(
         rows,
         output_format="csv",
     )
@@ -2629,7 +2534,7 @@ def test_style_skipped_candidate_delta_summary_rows_include_scenario_metadata() 
     )
 
 
-def test_style_candidate_audit_bundle_rows_include_scenario_metadata() -> None:
+def test_utility_system_candidate_audit_bundle_rows_include_scenario_metadata() -> None:
     accepted = BilevelIntegerAssignment.from_mapping(
         {
             "level_selected[MP_75]": 1,
@@ -2662,10 +2567,10 @@ def test_style_candidate_audit_bundle_rows_include_scenario_metadata() -> None:
         stop_reason="candidate-exhausted",
         skipped_candidates=(skipped,),
     )
-    scenario = StaticStyleScenario(
+    scenario = UtilitySystemScenario(
         case_study="case",
         scenario="scenario",
-        data=StyleModelData(
+        data=UtilitySystemModelData(
             steam_mains=("MP",),
             steam_levels=(
                 SteamLevelCandidate(
@@ -2682,14 +2587,14 @@ def test_style_candidate_audit_bundle_rows_include_scenario_metadata() -> None:
         ),
     )
 
-    rows = style_candidate_audit_bundle_rows(
+    rows = utility_system_candidate_audit_bundle_rows(
         catalog="physical-profile-candidates",
         scenario=scenario,
         candidates=(candidate,),
         run=run,
         accepted_assignment=accepted,
     )
-    csv_output = format_style_candidate_audit_bundle_rows(
+    csv_output = format_utility_system_candidate_audit_bundle_rows(
         rows,
         output_format="csv",
     )
@@ -2710,10 +2615,10 @@ def test_style_candidate_audit_bundle_rows_include_scenario_metadata() -> None:
     )
 
 
-def test_style_decomposition_objective_comparison_rows_are_reportable() -> None:
-    benchmark = get_contribution2_case_study2_best_configuration(
-        "utility-system-microgrid",
-    )
+def test_utility_system_decomposition_objective_comparison_rows_are_reportable() -> (
+    None
+):
+    benchmark = minimal_best_configuration_benchmark()
     assignment = BilevelIntegerAssignment.from_mapping({"select_level": 1})
     incumbent = BilevelIncumbent(
         label="iteration-1",
@@ -2739,10 +2644,10 @@ def test_style_decomposition_objective_comparison_rows_are_reportable() -> None:
         solution_pool=BilevelSolutionPool((incumbent,)),
         stop_reason="max-iterations",
     )
-    scenario = StaticStyleScenario(
+    scenario = UtilitySystemScenario(
         case_study="case",
-        scenario="utility-system-microgrid",
-        data=StyleModelData(
+        scenario="microgrid",
+        data=UtilitySystemModelData(
             steam_mains=("MP",),
             steam_levels=(
                 SteamLevelCandidate(
@@ -2759,13 +2664,13 @@ def test_style_decomposition_objective_comparison_rows_are_reportable() -> None:
         ),
     )
 
-    rows = style_decomposition_objective_comparison_rows(
+    rows = utility_system_decomposition_objective_comparison_rows(
         catalog="physical-profile",
         scenario=scenario,
         run=run,
         benchmark=benchmark,
     )
-    csv_output = format_style_decomposition_objective_comparison_rows(
+    csv_output = format_utility_system_decomposition_objective_comparison_rows(
         rows,
         output_format="csv",
     )
@@ -2778,110 +2683,3 @@ def test_style_decomposition_objective_comparison_rows_are_reportable() -> None:
         "catalog,case_study,scenario,iteration_index,objective_value,"
         "benchmark_total_cost,absolute_deviation,within_tolerance"
     )
-
-
-def test_contribution2_bilevel_benchmark_trajectory_rows_are_reportable() -> None:
-    rows = contribution2_bilevel_benchmark_trajectory_rows(
-        CONTRIBUTION2_COMPUTATIONAL_RESULTS,
-    )
-    test_6_scenario_2 = next(
-        row for row in rows if row["test_number"] == 6 and row["scenario"] == 2
-    )
-    csv_output = format_contribution2_bilevel_benchmark_trajectory_rows(
-        rows[:1],
-        output_format="csv",
-    )
-
-    assert len(rows) == 24
-    assert rows[0]["test_number"] == 1
-    assert rows[0]["scenario"] == 1
-    assert rows[0]["iteration_index"] == 1
-    assert rows[0]["objective_value"] == pytest.approx(30.487)
-    assert rows[0]["best_bound"] == pytest.approx(30.456)
-    assert rows[0]["optimality_gap"] == pytest.approx(0.031)
-    assert rows[0]["elapsed_seconds"] == pytest.approx(190.2)
-    assert rows[0]["subproblem_status"] == "reported"
-    assert rows[0]["stop_reason"] == "reported"
-    assert rows[0]["selected_binary_count"] is None
-    assert rows[0]["unselected_binary_count"] is None
-    assert test_6_scenario_2["objective_value"] == pytest.approx(53.891)
-    assert test_6_scenario_2["best_bound"] == pytest.approx(52.659)
-    assert test_6_scenario_2["optimality_gap"] == pytest.approx(1.232)
-    assert csv_output.splitlines()[0] == (
-        "test_number,scenario,iteration_index,objective_value,best_bound,"
-        "optimality_gap,elapsed_seconds,hit_time_limit,selected_binary_count,"
-        "unselected_binary_count,subproblem_status,stop_reason"
-    )
-
-
-def test_contribution2_bilevel_trajectory_comparison_rows_are_reportable() -> None:
-    actual_rows = (
-        {
-            "iteration_index": 1,
-            "objective_value": 53.892,
-            "best_bound": 52.659,
-            "optimality_gap": 1.233,
-            "elapsed_seconds": 2613.3,
-            "subproblem_status": "reported",
-            "stop_reason": "reported",
-        },
-    )
-
-    rows = contribution2_bilevel_trajectory_comparison_rows(
-        test_number=6,
-        scenario=2,
-        actual_rows=actual_rows,
-        benchmark_rows=contribution2_bilevel_benchmark_trajectory_rows(
-            CONTRIBUTION2_COMPUTATIONAL_RESULTS,
-        ),
-        absolute_tolerance=5e-4,
-    )
-    objective_row = rows[0]
-    status_row = next(row for row in rows if row["field"] == "stop_reason")
-    csv_output = format_contribution2_bilevel_trajectory_comparison_rows(
-        rows[:1],
-        output_format="csv",
-    )
-
-    assert len(rows) == 6
-    assert objective_row["test_number"] == 6
-    assert objective_row["scenario"] == 2
-    assert objective_row["iteration_index"] == 1
-    assert objective_row["field"] == "objective_value"
-    assert objective_row["actual"] == pytest.approx(53.892)
-    assert objective_row["benchmark"] == pytest.approx(53.891)
-    assert objective_row["absolute_deviation"] == pytest.approx(0.001)
-    assert objective_row["within_tolerance"] is False
-    assert status_row["absolute_deviation"] is None
-    assert status_row["within_tolerance"] is True
-    assert csv_output.splitlines()[0] == (
-        "test_number,scenario,iteration_index,field,actual,benchmark,"
-        "absolute_deviation,within_tolerance"
-    )
-
-
-def test_synthetic_bilevel_run_compares_with_contribution2_benchmark_rows() -> None:
-    run = contribution2_synthetic_bilevel_decomposition_run(
-        test_number=6,
-        scenario=2,
-    )
-    actual_rows = bilevel_decomposition_run_rows(run)
-
-    rows = contribution2_bilevel_trajectory_comparison_rows(
-        test_number=6,
-        scenario=2,
-        actual_rows=actual_rows,
-        benchmark_rows=contribution2_bilevel_benchmark_trajectory_rows(
-            CONTRIBUTION2_COMPUTATIONAL_RESULTS,
-        ),
-    )
-
-    assert {row["field"] for row in rows} == {
-        "objective_value",
-        "best_bound",
-        "optimality_gap",
-        "elapsed_seconds",
-        "subproblem_status",
-        "stop_reason",
-    }
-    assert all(row["within_tolerance"] for row in rows)

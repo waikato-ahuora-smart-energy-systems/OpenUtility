@@ -22,14 +22,13 @@ def main(argv: list[str] | None = None) -> int:
 
     _run([sys.executable, "-m", "ruff", "check", "."])
     _run([sys.executable, "-m", "ruff", "format", "--check", "."])
-    _run([sys.executable, "-m", "mypy", "OpenUtility", "case_study"])
+    _run([sys.executable, "-m", "mypy", "OpenUtility"])
     _run(
         [
             sys.executable,
             "-m",
             "pytest",
             "--cov=OpenUtility",
-            "--cov=case_study",
             "--cov-report=term-missing",
             "--cov-fail-under=90",
         ],
@@ -110,18 +109,14 @@ def _inspect_wheel(wheel: Path) -> None:
         not any("scipy" in line.lower() for line in requires_dist),
         "wheel metadata must not directly require scipy",
     )
+    _require(
+        not any("openpinch" in line.lower() for line in requires_dist),
+        "wheel metadata must not directly require OpenPinch",
+    )
     _require("OpenUtility/py.typed" in names, "wheel must include OpenUtility/py.typed")
     _require(
-        sum(name.startswith("case_study/") and name.endswith(".csv") for name in names)
-        >= 34,
-        "wheel must include checked case-study CSV assets",
-    )
-    _require(
-        sum(
-            name.startswith("case_study/") and name.endswith(".ipynb") for name in names
-        )
-        >= 3,
-        "wheel must include case-study notebooks",
+        not any(name.startswith("case_study/") for name in names),
+        "wheel must not include private case-study assets",
     )
     forbidden_fragments = (
         "__pycache__",
@@ -152,41 +147,158 @@ def _smoke_install(wheel: Path) -> None:
 def _smoke_install_code() -> str:
     return textwrap.dedent(
         """
-        import io
-
         import pyomo.environ as pyo
         from pyomo.environ import SolverFactory
 
         import OpenUtility
-        from case_study.jimenez_romero_utility_system_optimization.cli import main
 
-        assert "pyomo_static_style_solver" in OpenUtility.__all__
+        assert "pyomo_utility_system_solver" in OpenUtility.__all__
         assert SolverFactory("appsi_highs").available(exception_flag=False)
 
         model = pyo.ConcreteModel()
         model.x = pyo.Var(domain=pyo.Binary)
         model.objective = pyo.Objective(expr=model.x)
-        solver = OpenUtility.pyomo_static_style_solver("appsi_highs")
+        solver = OpenUtility.pyomo_utility_system_solver("appsi_highs")
         status = solver(model)
         assert status.termination_condition == "optimal"
         assert pyo.value(model.x) == 0
 
-        output = io.StringIO()
-        code = main(
-            [
-                "--catalog",
-                "reported-equipment",
-                "--view",
-                "summary",
-                "--format",
-                "csv",
-            ],
-            stdout=output,
+        units = {
+            "source_temperature": "degC",
+            "sink_temperature": "degC",
+            "q_source": "kW",
+            "q_sink": "kW",
+            "electric_power": "kW",
+        }
+        level = OpenUtility.SteamLevelCandidate(
+            name="MP_100",
+            steam_main="MP",
+            temperature=100.0,
+            source_heat_available=0.0,
+            sink_heat_demand=0.0,
+            generation_enthalpy_delta=1.0,
+            use_enthalpy_delta=1.0,
         )
-        assert code == 0
-        text = output.getvalue()
-        assert "catalog,case_study,scenario,within_tolerance" in text
-        assert "reported-equipment,contribution-2-case-study-2" in text
+        heat_pump_map = OpenUtility.HprPerformanceMap(
+            schema_version="1.0",
+            map_id="hp-map",
+            mode="heat_pump",
+            units=units,
+            reference_capacity=150.0,
+            interpolation_topology="ordered_part_load_curve",
+            thermodynamic_backend="synthetic",
+            model_id="smoke",
+            provenance={"source": "release-smoke"},
+            points=(
+                OpenUtility.HprPerformancePoint(
+                    name="full",
+                    curve_id="curve",
+                    source_temperature=40.0,
+                    sink_temperature=80.0,
+                    load_fraction=1.0,
+                    q_source=100.0,
+                    q_sink=150.0,
+                    electric_power=50.0,
+                ),
+            ),
+        )
+        heat_pump_data = OpenUtility.UtilitySystemModelData(
+            steam_mains=("MP",),
+            steam_levels=(level,),
+            power_demand=0.0,
+            thermal_nodes=(
+                OpenUtility.ThermalNode("waste", 40.0, "source"),
+                OpenUtility.ThermalNode("heat", 80.0, "sink", heating_unit_cost=10.0),
+            ),
+            periods=(
+                OpenUtility.OperatingPeriod(
+                    name="day",
+                    hours=1.0,
+                    electricity_import_unit_cost=1.0,
+                    source_heat_available={"waste": 100.0},
+                    heating_demand={"heat": 150.0},
+                ),
+            ),
+            hpr_performance_maps=(heat_pump_map,),
+            hpr_candidates=(
+                OpenUtility.HprCandidate(
+                    name="hp",
+                    mode="heat_pump",
+                    map_id="hp-map",
+                    source_node="waste",
+                    sink_node="heat",
+                    fixed_capacity=150.0,
+                ),
+            ),
+        )
+        heat_pump_model = OpenUtility.build_utility_system_model(heat_pump_data)
+        status = solver(heat_pump_model)
+        assert status.termination_condition == "optimal"
+        assert pyo.value(heat_pump_model.hpr_q_sink["hp", "day"]) == 150.0
+
+        refrigeration_map = OpenUtility.HprPerformanceMap(
+            schema_version="1.0",
+            map_id="ref-map",
+            mode="refrigeration",
+            units=units,
+            reference_capacity=100.0,
+            interpolation_topology="ordered_part_load_curve",
+            thermodynamic_backend="synthetic",
+            model_id="smoke",
+            provenance={"source": "release-smoke"},
+            points=(
+                OpenUtility.HprPerformancePoint(
+                    name="full",
+                    curve_id="curve",
+                    source_temperature=-5.0,
+                    sink_temperature=35.0,
+                    load_fraction=1.0,
+                    q_source=100.0,
+                    q_sink=125.0,
+                    electric_power=25.0,
+                ),
+            ),
+        )
+        refrigeration_data = OpenUtility.UtilitySystemModelData(
+            steam_mains=("MP",),
+            steam_levels=(level,),
+            power_demand=0.0,
+            thermal_nodes=(
+                OpenUtility.ThermalNode(
+                    "cold",
+                    -5.0,
+                    "cooling",
+                    cooling_unit_cost=10.0,
+                ),
+                OpenUtility.ThermalNode("reject", 35.0, "rejection"),
+            ),
+            periods=(
+                OpenUtility.OperatingPeriod(
+                    name="day",
+                    hours=1.0,
+                    electricity_import_unit_cost=1.0,
+                    cooling_demand={"cold": 100.0},
+                    rejection_capacity={"reject": 200.0},
+                ),
+            ),
+            hpr_performance_maps=(refrigeration_map,),
+            hpr_candidates=(
+                OpenUtility.HprCandidate(
+                    name="chiller",
+                    mode="refrigeration",
+                    map_id="ref-map",
+                    source_node="cold",
+                    rejection_node="reject",
+                    fixed_capacity=100.0,
+                ),
+            ),
+        )
+        refrigeration_model = OpenUtility.build_utility_system_model(
+            refrigeration_data
+        )
+        status = solver(refrigeration_model)
+        assert status.termination_condition == "optimal"
+        assert pyo.value(refrigeration_model.hpr_q_source["chiller", "day"]) == 100.0
         """,
     ).strip()
 

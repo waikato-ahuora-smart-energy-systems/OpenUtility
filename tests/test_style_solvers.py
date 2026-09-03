@@ -5,17 +5,17 @@ from types import SimpleNamespace
 import pyomo.environ as pyo
 import pytest
 
-from OpenUtility.style import (
-    StaticStyleScenario,
+from OpenUtility.utility_system import (
+    UtilitySystemScenario,
     SteamLevelCandidate,
-    StyleModelData,
-    pyomo_static_style_solver,
-    run_static_style_scenario,
-    solve_static_style_model_with_pyomo,
+    UtilitySystemModelData,
+    pyomo_utility_system_solver,
+    run_utility_system_scenario,
+    solve_utility_system_model_with_pyomo,
 )
 
 
-def test_solve_static_style_model_with_pyomo_reports_solver_status(
+def test_solve_utility_system_model_with_pyomo_reports_solver_status(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     created_solvers = []
@@ -26,12 +26,12 @@ def test_solve_static_style_model_with_pyomo_reports_solver_status(
         return solver
 
     monkeypatch.setattr(
-        "OpenUtility.style.solvers.pyo.SolverFactory",
+        "OpenUtility.utility_system.solvers.pyo.SolverFactory",
         solver_factory,
     )
     model = pyo.ConcreteModel()
 
-    status = solve_static_style_model_with_pyomo(
+    status = solve_utility_system_model_with_pyomo(
         model,
         "fake-milp",
         tee=True,
@@ -49,7 +49,7 @@ def test_solve_static_style_model_with_pyomo_reports_solver_status(
     assert status.message == "fixed test solve"
 
 
-def test_pyomo_static_style_solver_returns_runner_callback(
+def test_pyomo_utility_system_solver_returns_runner_callback(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     created_solvers = []
@@ -60,11 +60,11 @@ def test_pyomo_static_style_solver_returns_runner_callback(
         return solver
 
     monkeypatch.setattr(
-        "OpenUtility.style.solvers.pyo.SolverFactory",
+        "OpenUtility.utility_system.solvers.pyo.SolverFactory",
         solver_factory,
     )
     model = pyo.ConcreteModel()
-    solve = pyomo_static_style_solver("fake-milp", options={"threads": 2})
+    solve = pyomo_utility_system_solver("fake-milp", options={"threads": 2})
 
     status = solve(model)
 
@@ -72,22 +72,22 @@ def test_pyomo_static_style_solver_returns_runner_callback(
     assert status.status == "ok"
 
 
-def test_solve_static_style_model_with_pyomo_requires_available_solver(
+def test_solve_utility_system_model_with_pyomo_requires_available_solver(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     def solver_factory(name: str):
         return _FakeUnavailableSolver(name)
 
     monkeypatch.setattr(
-        "OpenUtility.style.solvers.pyo.SolverFactory",
+        "OpenUtility.utility_system.solvers.pyo.SolverFactory",
         solver_factory,
     )
 
     with pytest.raises(RuntimeError, match="Pyomo solver 'missing' is not available"):
-        solve_static_style_model_with_pyomo(pyo.ConcreteModel(), "missing")
+        solve_utility_system_model_with_pyomo(pyo.ConcreteModel(), "missing")
 
 
-def test_solve_static_style_model_with_pyomo_sets_pyomo_values() -> None:
+def test_solve_utility_system_model_with_pyomo_sets_pyomo_values() -> None:
     model = pyo.ConcreteModel()
     model.use_unit = pyo.Var(domain=pyo.Binary)
     model.load_flow = pyo.Var(domain=pyo.NonNegativeReals, bounds=(0.0, 10.0))
@@ -96,7 +96,7 @@ def test_solve_static_style_model_with_pyomo_sets_pyomo_values() -> None:
     )
     model.objective = pyo.Objective(expr=0.1 * model.use_unit + model.load_flow)
 
-    status = solve_static_style_model_with_pyomo(model, "appsi_highs")
+    status = solve_utility_system_model_with_pyomo(model, "appsi_highs")
 
     assert status.status == "ok"
     assert status.termination_condition == "optimal"
@@ -104,12 +104,12 @@ def test_solve_static_style_model_with_pyomo_sets_pyomo_values() -> None:
     assert pyo.value(model.load_flow) == pytest.approx(0.5)
 
 
-def test_pyomo_static_style_solver_solves_scalar_model() -> None:
+def test_pyomo_utility_system_solver_solves_scalar_model() -> None:
     model = pyo.ConcreteModel()
     model.x = pyo.Var(domain=pyo.NonNegativeReals)
     model.minimum = pyo.Constraint(expr=model.x >= 2.0)
     model.objective = pyo.Objective(expr=model.x)
-    solve = pyomo_static_style_solver("appsi_highs", options={"time_limit": 10.0})
+    solve = pyomo_utility_system_solver("appsi_highs", options={"time_limit": 10.0})
 
     status = solve(model)
 
@@ -118,10 +118,10 @@ def test_pyomo_static_style_solver_solves_scalar_model() -> None:
 
 
 def test_pyomo_highs_solver_solves_static_style_runner_smoke() -> None:
-    scenario = StaticStyleScenario(
+    scenario = UtilitySystemScenario(
         case_study="solver-smoke",
         scenario="balanced-one-level",
-        data=StyleModelData(
+        data=UtilitySystemModelData(
             steam_mains=("MP",),
             steam_levels=(
                 SteamLevelCandidate(
@@ -142,9 +142,9 @@ def test_pyomo_highs_solver_solves_static_style_runner_smoke() -> None:
         ),
     )
 
-    run = run_static_style_scenario(
+    run = run_utility_system_scenario(
         scenario,
-        solve=pyomo_static_style_solver("appsi_highs"),
+        solve=pyomo_utility_system_solver("appsi_highs"),
     )
 
     assert run.solver.status == "ok"
@@ -158,10 +158,10 @@ def test_pyomo_highs_solver_solves_static_style_runner_smoke() -> None:
 def test_pyomo_highs_solver_allows_selected_header_heat_to_cascade_to_lower_sink() -> (
     None
 ):
-    scenario = StaticStyleScenario(
+    scenario = UtilitySystemScenario(
         case_study="solver-smoke",
         scenario="selected-header-cascades-sink-heat",
-        data=StyleModelData(
+        data=UtilitySystemModelData(
             steam_mains=("MP",),
             steam_levels=(
                 SteamLevelCandidate(
@@ -195,9 +195,9 @@ def test_pyomo_highs_solver_allows_selected_header_heat_to_cascade_to_lower_sink
         ),
     )
 
-    run = run_static_style_scenario(
+    run = run_utility_system_scenario(
         scenario,
-        solve=pyomo_static_style_solver("appsi_highs"),
+        solve=pyomo_utility_system_solver("appsi_highs"),
     )
 
     assert run.solver.status == "ok"

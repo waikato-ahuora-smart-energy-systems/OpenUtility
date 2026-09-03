@@ -5,21 +5,12 @@ from dataclasses import dataclass
 import pytest
 import pyomo.environ as pyo
 
-from case_study.jimenez_romero_utility_system_optimization.benchmarks import (
-    CONTRIBUTION2_COMPUTATIONAL_RESULTS,
-    Contribution2ComputationalResult,
-)
-from case_study.jimenez_romero_utility_system_optimization.contribution2_computational_performance import (
-    contribution2_reported_bilevel_decomposition_run,
-    contribution2_synthetic_bilevel_decomposition_run,
-)
-from case_study.jimenez_romero_utility_system_optimization.style_model_builders import (
-    style_case_study_2_contribution2_physical_profile_catalog,
-)
-from OpenUtility.style import (
+from OpenUtility.utility_system import (
+    BilevelCandidateAssignment,
     BilevelDecompositionRun,
     BilevelIncumbent,
     BilevelIntegerAssignment,
+    BilevelIntegerCut,
     BilevelSolutionPool,
     BilevelSkippedCandidate,
     BilevelSubproblemResult,
@@ -27,36 +18,31 @@ from OpenUtility.style import (
     GasTurbineCandidate,
     HotOilConfig,
     HrsgCandidate,
-    StaticStyleScenario,
-    StaticStyleSolverStatus,
+    UtilitySystemScenario,
+    UtilitySystemSolverStatus,
     SteamLevelCandidate,
-    StyleModelData,
+    UtilitySystemModelData,
     VhpSteamCandidate,
     VhpSteamSourceCandidate,
     add_bilevel_no_good_cuts,
-    bilevel_decomposition_run_rows,
     bilevel_incumbents_from_computational_results,
     bilevel_no_good_cut_expression,
     build_bilevel_master_with_no_good_cuts,
-    build_static_style_binary_selection_master,
-    build_static_style_model,
+    build_utility_system_binary_selection_master,
+    build_utility_system_model,
     compatible_bilevel_candidate_assignments,
     compatible_bilevel_integer_assignments,
-    fix_style_master_integer_assignment,
+    fix_utility_system_master_integer_assignment,
     run_bilevel_decomposition,
     run_bilevel_decomposition_iteration,
-    run_static_style_binary_selection_candidate_decomposition,
-    run_static_style_fixed_assignment_decomposition,
-    pyomo_static_style_solver,
-    style_binary_selection_candidate_from_scenario,
-    style_binary_selection_candidate_records_from_scenarios,
-    style_binary_selection_candidate_solver,
-    style_binary_selection_candidates_from_scenarios,
-    style_binary_selection_master_assignment_from_model,
-    style_fixed_assignment_subproblem_result,
-    style_master_binary_variables,
-    style_master_integer_assignment_from_model,
-    run_static_style_binary_selection_decomposition,
+    run_utility_system_fixed_assignment_decomposition,
+    pyomo_utility_system_solver,
+    utility_system_binary_selection_candidate_solver,
+    utility_system_binary_selection_master_assignment_from_model,
+    utility_system_fixed_assignment_subproblem_result,
+    utility_system_master_binary_variables,
+    utility_system_master_integer_assignment_from_model,
+    run_utility_system_binary_selection_decomposition,
 )
 
 
@@ -90,6 +76,82 @@ def test_bilevel_integer_assignment_creates_no_good_cut_terms() -> None:
     assert cut.is_satisfied_by(different_assignment) is True
     assert cut.excludes(different_assignment) is False
     assert assignment.hamming_distance(different_assignment) == 1
+
+
+def test_bilevel_integer_assignment_rejects_distance_between_different_variables() -> (
+    None
+):
+    first = BilevelIntegerAssignment.from_mapping({"select_boiler": 1})
+    second = BilevelIntegerAssignment.from_mapping({"select_hrsg": 1})
+
+    with pytest.raises(ValueError, match="same variables"):
+        first.hamming_distance(second)
+
+
+def test_bilevel_candidate_assignment_requires_nonblank_source_label() -> None:
+    assignment = BilevelIntegerAssignment.from_mapping({"select_boiler": 1})
+
+    with pytest.raises(ValueError, match="source label"):
+        BilevelCandidateAssignment(assignment=assignment, source_label=" ")
+
+
+def test_bilevel_integer_cut_validates_terms_and_distance() -> None:
+    with pytest.raises(ValueError, match="at least one variable"):
+        BilevelIntegerCut(selected_variables=(), unselected_variables=())
+    with pytest.raises(ValueError, match="cannot overlap"):
+        BilevelIntegerCut(
+            selected_variables=("select_boiler",),
+            unselected_variables=("select_boiler",),
+        )
+    with pytest.raises(ValueError, match="at least 1"):
+        BilevelIntegerCut(
+            selected_variables=("select_boiler",),
+            unselected_variables=(),
+            minimum_hamming_distance=0,
+        )
+
+
+def test_bilevel_integer_cut_requires_complete_assignment() -> None:
+    cut = BilevelIntegerCut(
+        selected_variables=("select_boiler",),
+        unselected_variables=("select_hrsg",),
+    )
+    assignment = BilevelIntegerAssignment.from_mapping({"select_boiler": 1})
+
+    with pytest.raises(ValueError, match="missing cut variables"):
+        cut.left_hand_side_value(assignment)
+
+
+def test_compatible_bilevel_assignments_require_target_variables() -> None:
+    with pytest.raises(ValueError, match="at least one target variable"):
+        compatible_bilevel_integer_assignments((), variable_names=())
+    with pytest.raises(ValueError, match="at least one target variable"):
+        compatible_bilevel_candidate_assignments((), variable_names=())
+
+
+def test_bilevel_incumbent_validates_solution_metadata() -> None:
+    assignment = BilevelIntegerAssignment.from_mapping({"select_boiler": 1})
+
+    with pytest.raises(ValueError, match="label is required"):
+        BilevelIncumbent(label="", objective_value=1.0, assignment=assignment)
+    with pytest.raises(ValueError, match="objective value must be finite"):
+        BilevelIncumbent(
+            label="bad", objective_value=float("inf"), assignment=assignment
+        )
+    with pytest.raises(ValueError, match="best bound must be finite"):
+        BilevelIncumbent(
+            label="bad",
+            objective_value=1.0,
+            assignment=assignment,
+            best_bound=float("inf"),
+        )
+    with pytest.raises(ValueError, match="elapsed seconds must be non-negative"):
+        BilevelIncumbent(
+            label="bad",
+            objective_value=1.0,
+            assignment=assignment,
+            elapsed_seconds=-1.0,
+        )
 
 
 def test_bilevel_solution_pool_tracks_best_unique_incumbent() -> None:
@@ -382,56 +444,12 @@ def test_run_bilevel_decomposition_stops_on_duplicate_incumbent() -> None:
     assert len(run.solution_pool.incumbents) == 1
 
 
-def test_contribution2_reported_bilevel_decomposition_run_matches_fixture() -> None:
-    run = contribution2_reported_bilevel_decomposition_run(
-        test_number=6,
-        scenario=2,
-    )
-    iteration = run.iterations[0]
+def test_utility_system_master_binary_variables_extracts_canonical_selection_lookup() -> (
+    None
+):
+    model = build_utility_system_model(_style_master_data())
 
-    assert run.stop_reason == "reported"
-    assert run.converged is False
-    assert len(run.iterations) == 1
-    assert iteration.incumbent.label == "iteration-1"
-    assert iteration.incumbent.objective_value == pytest.approx(53.891)
-    assert iteration.incumbent.best_bound == pytest.approx(52.659)
-    assert iteration.incumbent.elapsed_seconds == pytest.approx(2613.3)
-    assert iteration.subproblem.status == "reported"
-    assert iteration.assignment.as_dict() == {
-        "reported_bilevel_solution": 1,
-        "test_6": 1,
-        "scenario_2": 1,
-    }
-
-
-def test_contribution2_synthetic_bilevel_decomposition_run_uses_loop() -> None:
-    run = contribution2_synthetic_bilevel_decomposition_run(
-        test_number=6,
-        scenario=2,
-    )
-    iteration = run.iterations[0]
-
-    assert run.stop_reason == "reported"
-    assert iteration.master_status == "synthetic-master-optimal"
-    assert iteration.subproblem.source_method == "bilevel"
-    assert iteration.assignment.as_dict() == {
-        "reported_bilevel_solution": 1,
-        "test_6": 1,
-        "scenario_2": 1,
-    }
-    assert tuple(iteration.next_master_model.bilevel_no_good_cuts.keys()) == (0,)
-
-    for variable_name, value in iteration.assignment.as_dict().items():
-        iteration.next_master_model.master_choice[variable_name].value = value
-    assert pyo.value(iteration.next_master_model.bilevel_no_good_cuts[0].body) == (
-        pytest.approx(0.0)
-    )
-
-
-def test_style_master_binary_variables_extracts_canonical_selection_lookup() -> None:
-    model = build_static_style_model(_style_master_data())
-
-    variables = style_master_binary_variables(model)
+    variables = utility_system_master_binary_variables(model)
 
     assert variables["level_selected[MP_185]"] is model.level_selected["MP_185"]
     assert variables["vhp_selected[VHP_90]"] is model.vhp_selected["VHP_90"]
@@ -451,15 +469,15 @@ def test_style_master_binary_variables_extracts_canonical_selection_lookup() -> 
 
 
 def test_style_master_assignment_reads_current_pyomo_binary_values() -> None:
-    model = build_static_style_model(_style_master_data())
-    variables = style_master_binary_variables(model)
+    model = build_utility_system_model(_style_master_data())
+    variables = utility_system_master_binary_variables(model)
     for variable in variables.values():
         variable.value = 0.0
     model.level_selected["MP_185"].value = 1.0
     model.boiler_selected["boiler_1"].value = 1.0
     model.hrsg_supplementary_firing_selected["hrsg_1"].value = 1.0
 
-    assignment = style_master_integer_assignment_from_model(model)
+    assignment = utility_system_master_integer_assignment_from_model(model)
 
     values = assignment.as_dict()
     assert values["level_selected[MP_185]"] == 1
@@ -475,27 +493,31 @@ def test_style_master_assignment_reads_current_pyomo_binary_values() -> None:
     assert pyo.value(constraints[0].body) == pytest.approx(0.0)
 
 
-def test_fix_style_master_integer_assignment_fixes_pyomo_binary_values() -> None:
-    model = build_static_style_model(_style_master_data())
-    variables = style_master_binary_variables(model)
+def test_fix_utility_system_master_integer_assignment_fixes_pyomo_binary_values() -> (
+    None
+):
+    model = build_utility_system_model(_style_master_data())
+    variables = utility_system_master_binary_variables(model)
     values = {name: 0 for name in variables}
     values["level_selected[MP_185]"] = 1
     values["boiler_selected[boiler_1]"] = 1
     values["hot_oil_furnace_selected"] = 1
     assignment = BilevelIntegerAssignment.from_mapping(values)
 
-    fixed_names = fix_style_master_integer_assignment(model, assignment)
+    fixed_names = fix_utility_system_master_integer_assignment(model, assignment)
 
     assert fixed_names == tuple(variables)
     for name, variable in variables.items():
         assert variable.fixed is True
         assert pyo.value(variable) == pytest.approx(values[name])
-    assert style_master_integer_assignment_from_model(model) == assignment
+    assert utility_system_master_integer_assignment_from_model(model) == assignment
 
 
-def test_fix_style_master_integer_assignment_requires_exact_binary_names() -> None:
-    model = build_static_style_model(_style_master_data())
-    variables = style_master_binary_variables(model)
+def test_fix_utility_system_master_integer_assignment_requires_exact_binary_names() -> (
+    None
+):
+    model = build_utility_system_model(_style_master_data())
+    variables = utility_system_master_binary_variables(model)
     missing_assignment = BilevelIntegerAssignment.from_mapping(
         {name: 0 for name in variables if name != "level_selected[MP_185]"},
     )
@@ -503,53 +525,59 @@ def test_fix_style_master_integer_assignment_requires_exact_binary_names() -> No
         dict.fromkeys((*variables, "unknown_binary"), 0),
     )
 
-    with pytest.raises(KeyError, match="missing STYLE master binary values"):
-        fix_style_master_integer_assignment(model, missing_assignment)
-    with pytest.raises(KeyError, match="unknown STYLE master binary values"):
-        fix_style_master_integer_assignment(model, extra_assignment)
+    with pytest.raises(KeyError, match="missing utility-system master binary values"):
+        fix_utility_system_master_integer_assignment(model, missing_assignment)
+    with pytest.raises(KeyError, match="unknown utility-system master binary values"):
+        fix_utility_system_master_integer_assignment(model, extra_assignment)
 
 
-def test_style_fixed_assignment_subproblem_result_solves_static_style_model() -> None:
+def test_utility_system_fixed_assignment_subproblem_result_solves_static_style_model() -> (
+    None
+):
     scenario = _static_style_subproblem_smoke_scenario()
     assignment = _static_style_assignment(
         scenario,
         selected_variables=("level_selected[MP_100]",),
     )
 
-    subproblem = style_fixed_assignment_subproblem_result(
+    subproblem = utility_system_fixed_assignment_subproblem_result(
         scenario,
         assignment,
-        solve=pyomo_static_style_solver("appsi_highs"),
+        solve=pyomo_utility_system_solver("appsi_highs"),
     )
 
     assert subproblem.objective_value == pytest.approx(0.0)
     assert subproblem.best_bound is None
     assert subproblem.status == "optimal"
-    assert subproblem.source_method == "static-style-fixed-assignment"
+    assert subproblem.source_method == "utility-system-fixed-assignment"
 
 
-def test_style_fixed_assignment_subproblem_result_rejects_failed_solve() -> None:
+def test_utility_system_fixed_assignment_subproblem_result_rejects_failed_solve() -> (
+    None
+):
     scenario = _static_style_subproblem_smoke_scenario()
     assignment = _static_style_assignment(scenario)
 
-    def solve(_model: pyo.ConcreteModel) -> StaticStyleSolverStatus:
-        return StaticStyleSolverStatus(
+    def solve(_model: pyo.ConcreteModel) -> UtilitySystemSolverStatus:
+        return UtilitySystemSolverStatus(
             status="warning",
             termination_condition="infeasible",
             message="test infeasible subproblem",
         )
 
     with pytest.raises(RuntimeError, match="fixed-assignment subproblem"):
-        style_fixed_assignment_subproblem_result(scenario, assignment, solve=solve)
+        utility_system_fixed_assignment_subproblem_result(
+            scenario, assignment, solve=solve
+        )
 
 
-def test_run_static_style_fixed_assignment_decomposition_uses_style_master() -> None:
+def test_run_utility_system_fixed_assignment_decomposition_uses_style_master() -> None:
     scenario = _static_style_subproblem_smoke_scenario()
 
-    run = run_static_style_fixed_assignment_decomposition(
+    run = run_utility_system_fixed_assignment_decomposition(
         scenario,
-        solve_master=pyomo_static_style_solver("appsi_highs"),
-        solve_subproblem=pyomo_static_style_solver("appsi_highs"),
+        solve_master=pyomo_utility_system_solver("appsi_highs"),
+        solve_subproblem=pyomo_utility_system_solver("appsi_highs"),
         max_iterations=1,
     )
     iteration = run.iterations[0]
@@ -564,18 +592,18 @@ def test_run_static_style_fixed_assignment_decomposition_uses_style_master() -> 
     assert tuple(iteration.next_master_model.bilevel_no_good_cuts.keys()) == (0,)
 
 
-def test_build_static_style_binary_selection_master_uses_style_binary_names() -> None:
+def test_build_utility_system_binary_selection_master_uses_style_binary_names() -> None:
     data = _style_master_data()
-    full_model = build_static_style_model(data)
+    full_model = build_utility_system_model(data)
 
-    master = build_static_style_binary_selection_master(data)
+    master = build_utility_system_binary_selection_master(data)
 
     assert tuple(master.master_choice) == tuple(
-        style_master_binary_variables(full_model)
+        utility_system_master_binary_variables(full_model)
     )
     assert all(master.master_choice[name].is_binary() for name in master.master_choice)
     assert len(tuple(master.component_data_objects(pyo.Var))) == len(
-        style_master_binary_variables(full_model),
+        utility_system_master_binary_variables(full_model),
     )
 
 
@@ -593,17 +621,17 @@ def test_static_style_binary_selection_decomposition_evaluates_fixed_subproblem(
             model.master_choice[name].value = value
         return "binary-selection-master"
 
-    run = run_static_style_binary_selection_decomposition(
+    run = run_utility_system_binary_selection_decomposition(
         scenario,
         solve_master=solve_master,
-        solve_subproblem=pyomo_static_style_solver("appsi_highs"),
+        solve_subproblem=pyomo_utility_system_solver("appsi_highs"),
         max_iterations=1,
     )
     iteration = run.iterations[0]
 
     assert iteration.master_status == "binary-selection-master"
     assert (
-        style_binary_selection_master_assignment_from_model(
+        utility_system_binary_selection_master_assignment_from_model(
             iteration.master_model,
         )
         == assignment
@@ -612,10 +640,12 @@ def test_static_style_binary_selection_decomposition_evaluates_fixed_subproblem(
     assert tuple(iteration.next_master_model.bilevel_no_good_cuts.keys()) == (0,)
 
 
-def test_style_binary_selection_candidate_solver_skips_excluded_assignments() -> None:
+def test_utility_system_binary_selection_candidate_solver_skips_excluded_assignments() -> (
+    None
+):
     data = _style_master_data()
     variable_names = tuple(
-        build_static_style_binary_selection_master(data).master_choice,
+        build_utility_system_binary_selection_master(data).master_choice,
     )
     first_values = dict.fromkeys(variable_names, 0)
     first_values["level_selected[MP_185]"] = 1
@@ -623,16 +653,16 @@ def test_style_binary_selection_candidate_solver_skips_excluded_assignments() ->
     second_values["boiler_selected[boiler_1]"] = 1
     first = BilevelIntegerAssignment.from_mapping(first_values)
     second = BilevelIntegerAssignment.from_mapping(second_values)
-    solve_master = style_binary_selection_candidate_solver((first, second))
+    solve_master = utility_system_binary_selection_candidate_solver((first, second))
 
-    master = build_static_style_binary_selection_master(data)
+    master = build_utility_system_binary_selection_master(data)
     first_status = solve_master(master)
 
     assert first_status == "candidate-1"
-    assert style_binary_selection_master_assignment_from_model(master) == first
+    assert utility_system_binary_selection_master_assignment_from_model(master) == first
 
     cut_master = build_bilevel_master_with_no_good_cuts(
-        lambda: build_static_style_binary_selection_master(data),
+        lambda: build_utility_system_binary_selection_master(data),
         BilevelSolutionPool(
             (
                 BilevelIncumbent(
@@ -647,274 +677,9 @@ def test_style_binary_selection_candidate_solver_skips_excluded_assignments() ->
     second_status = solve_master(cut_master)
 
     assert second_status == "candidate-2"
-    assert style_binary_selection_master_assignment_from_model(cut_master) == second
-
-
-def test_style_binary_selection_candidate_from_scenario_solves_and_extracts_assignment() -> (
-    None
-):
-    scenario = next(iter(style_case_study_2_contribution2_physical_profile_catalog()))
-
-    assignment = style_binary_selection_candidate_from_scenario(
-        scenario,
-        solve=pyomo_static_style_solver("appsi_highs"),
-    )
-
-    assert len(assignment.selected_variables) == 7
-    assert len(assignment.unselected_variables) == 270
-    assert assignment.as_dict()["level_selected[HP_272p5]"] == 1
-    assert assignment.as_dict()["boiler_selected[reported-boiler]"] == 1
-
-
-def test_style_binary_selection_candidates_from_scenarios_are_unique_and_ordered() -> (
-    None
-):
-    scenarios = tuple(
-        style_case_study_2_contribution2_physical_profile_catalog(),
-    ) + tuple(
-        style_case_study_2_contribution2_physical_profile_catalog(calibrated=False),
-    )
-
-    candidates = style_binary_selection_candidates_from_scenarios(
-        scenarios,
-        solve=pyomo_static_style_solver("appsi_highs"),
-    )
-
-    assert len(candidates) == 4
-    assert [len(candidate.values) for candidate in candidates] == [277, 187, 186, 186]
-    assert [len(candidate.selected_variables) for candidate in candidates] == [
-        7,
-        46,
-        45,
-        24,
-    ]
-
-
-def test_style_binary_selection_candidate_records_preserve_source_labels() -> None:
-    scenarios = tuple(
-        style_case_study_2_contribution2_physical_profile_catalog(),
-    ) + tuple(
-        style_case_study_2_contribution2_physical_profile_catalog(calibrated=False),
-    )
-
-    records = style_binary_selection_candidate_records_from_scenarios(
-        scenarios,
-        solve=pyomo_static_style_solver("appsi_highs"),
-    )
-
-    assert len(records) == 4
-    assert records[0].source_label == (
-        "contribution-2-case-study-2-physical-profile:utility-system-stand-alone"
-    )
-    assert [len(record.assignment.selected_variables) for record in records] == [
-        7,
-        46,
-        45,
-        24,
-    ]
-
-
-def test_style_binary_selection_candidate_records_accept_source_label_factory() -> None:
-    scenarios = tuple(
-        style_case_study_2_contribution2_physical_profile_catalog(),
-    )
-
-    records = style_binary_selection_candidate_records_from_scenarios(
-        scenarios[:1],
-        solve=pyomo_static_style_solver("appsi_highs"),
-        source_label_factory=lambda scenario: f"calibrated:{scenario.scenario}",
-    )
-
-    assert len(records) == 1
-    assert records[0].source_label == "calibrated:utility-system-stand-alone"
-
-
-def test_compatible_bilevel_integer_assignments_filters_to_target_variables() -> None:
-    calibrated_catalog = style_case_study_2_contribution2_physical_profile_catalog()
-    uncalibrated_catalog = style_case_study_2_contribution2_physical_profile_catalog(
-        calibrated=False,
-    )
-    scenarios = tuple(calibrated_catalog) + tuple(uncalibrated_catalog)
-    candidates = style_binary_selection_candidates_from_scenarios(
-        scenarios,
-        solve=pyomo_static_style_solver("appsi_highs"),
-    )
-    target = calibrated_catalog.get(
-        "contribution-2-case-study-2-physical-profile",
-        "hot-oil-fsr-microgrid",
-    )
-    target_variables = tuple(
-        build_static_style_binary_selection_master(target.data).master_choice,
-    )
-
-    compatible = compatible_bilevel_integer_assignments(
-        candidates,
-        variable_names=target_variables,
-    )
-
-    assert len(compatible) == 2
-    assert [len(candidate.selected_variables) for candidate in compatible] == [45, 24]
-    assert all(
-        set(candidate.as_dict()) == set(target_variables) for candidate in compatible
-    )
-
-
-def test_compatible_bilevel_candidate_assignments_keeps_source_labels() -> None:
-    calibrated_catalog = style_case_study_2_contribution2_physical_profile_catalog()
-    uncalibrated_catalog = style_case_study_2_contribution2_physical_profile_catalog(
-        calibrated=False,
-    )
-    target = calibrated_catalog.get(
-        "contribution-2-case-study-2-physical-profile",
-        "hot-oil-fsr-microgrid",
-    )
-    records = style_binary_selection_candidate_records_from_scenarios(
-        tuple(calibrated_catalog) + tuple(uncalibrated_catalog),
-        solve=pyomo_static_style_solver("appsi_highs"),
-    )
-
-    compatible = compatible_bilevel_candidate_assignments(
-        records,
-        variable_names=build_static_style_binary_selection_master(
-            target.data,
-        ).master_choice,
-    )
-
-    assert [len(record.assignment.selected_variables) for record in compatible] == [
-        45,
-        24,
-    ]
-    assert [record.source_label for record in compatible] == [
-        "contribution-2-case-study-2-physical-profile:hot-oil-fsr-microgrid",
-        "contribution-2-case-study-2-physical-profile:hot-oil-fsr-stand-alone",
-    ]
-
-
-def test_solved_candidate_pool_drives_binary_selection_master_after_cut() -> None:
-    calibrated_catalog = style_case_study_2_contribution2_physical_profile_catalog()
-    uncalibrated_catalog = style_case_study_2_contribution2_physical_profile_catalog(
-        calibrated=False,
-    )
-    target = calibrated_catalog.get(
-        "contribution-2-case-study-2-physical-profile",
-        "hot-oil-fsr-microgrid",
-    )
-    target_variables = tuple(
-        build_static_style_binary_selection_master(target.data).master_choice,
-    )
-    candidates = compatible_bilevel_integer_assignments(
-        style_binary_selection_candidates_from_scenarios(
-            tuple(calibrated_catalog) + tuple(uncalibrated_catalog),
-            solve=pyomo_static_style_solver("appsi_highs"),
-        ),
-        variable_names=target_variables,
-    )
-    solve_master = style_binary_selection_candidate_solver(candidates)
-
-    master = build_static_style_binary_selection_master(target.data)
-    first_status = solve_master(master)
-
-    assert first_status == "candidate-1"
-    assert style_binary_selection_master_assignment_from_model(master) == candidates[0]
-
-    cut_master = build_bilevel_master_with_no_good_cuts(
-        lambda: build_static_style_binary_selection_master(target.data),
-        BilevelSolutionPool(
-            (
-                BilevelIncumbent(
-                    label="first-solved-candidate",
-                    objective_value=1.0,
-                    assignment=candidates[0],
-                ),
-            ),
-        ),
-        binary_variables=lambda model: model.master_choice,
-    )
-    second_status = solve_master(cut_master)
-
-    assert second_status == "candidate-2"
     assert (
-        style_binary_selection_master_assignment_from_model(cut_master)
-        == (candidates[1])
-    )
-
-
-def test_static_style_binary_selection_candidate_decomposition_skips_failed_candidate() -> (
-    None
-):
-    calibrated_catalog = style_case_study_2_contribution2_physical_profile_catalog()
-    uncalibrated_catalog = style_case_study_2_contribution2_physical_profile_catalog(
-        calibrated=False,
-    )
-    target = calibrated_catalog.get(
-        "contribution-2-case-study-2-physical-profile",
-        "hot-oil-fsr-microgrid",
-    )
-    candidates = compatible_bilevel_integer_assignments(
-        style_binary_selection_candidates_from_scenarios(
-            tuple(calibrated_catalog) + tuple(uncalibrated_catalog),
-            solve=pyomo_static_style_solver("appsi_highs"),
-        ),
-        variable_names=build_static_style_binary_selection_master(
-            target.data,
-        ).master_choice,
-    )
-
-    run = run_static_style_binary_selection_candidate_decomposition(
-        target,
-        candidates=candidates,
-        solve_subproblem=pyomo_static_style_solver("appsi_highs"),
-        max_iterations=2,
-    )
-
-    assert run.stop_reason == "candidate-exhausted"
-    assert run.skipped_candidate_count == 1
-    assert len(run.skipped_candidates) == 1
-    assert run.skipped_candidates[0].candidate_label == "candidate-2"
-    assert run.skipped_candidates[0].assignment == candidates[1]
-    assert "fixed-assignment subproblem" in run.skipped_candidates[0].reason
-    assert len(run.iterations) == 1
-    assert run.iterations[0].master_status == "candidate-1"
-    assert run.iterations[0].subproblem.objective_value == pytest.approx(53.89)
-    assert run.iterations[0].assignment == candidates[0]
-    assert run.solution_pool.best_objective_value == pytest.approx(53.89)
-
-
-def test_candidate_decomposition_skipped_diagnostic_reports_candidate_source() -> None:
-    calibrated_catalog = style_case_study_2_contribution2_physical_profile_catalog()
-    uncalibrated_catalog = style_case_study_2_contribution2_physical_profile_catalog(
-        calibrated=False,
-    )
-    target = calibrated_catalog.get(
-        "contribution-2-case-study-2-physical-profile",
-        "hot-oil-fsr-microgrid",
-    )
-    candidates = compatible_bilevel_candidate_assignments(
-        style_binary_selection_candidate_records_from_scenarios(
-            tuple(calibrated_catalog) + tuple(uncalibrated_catalog),
-            solve=pyomo_static_style_solver("appsi_highs"),
-        ),
-        variable_names=build_static_style_binary_selection_master(
-            target.data,
-        ).master_choice,
-    )
-
-    run = run_static_style_binary_selection_candidate_decomposition(
-        target,
-        candidates=candidates,
-        solve_subproblem=pyomo_static_style_solver("appsi_highs"),
-        max_iterations=2,
-    )
-
-    assert run.skipped_candidates[0].candidate_label == "candidate-2"
-    assert run.skipped_candidates[0].source_label == candidates[1].source_label
-    assert run.skipped_candidates[0].source_label == (
-        "contribution-2-case-study-2-physical-profile:hot-oil-fsr-stand-alone"
-    )
-    rows = bilevel_decomposition_run_rows(run)
-    assert rows[0]["candidate_source"] == candidates[0].source_label
-    assert rows[0]["candidate_source"] == (
-        "contribution-2-case-study-2-physical-profile:hot-oil-fsr-microgrid"
+        utility_system_binary_selection_master_assignment_from_model(cut_master)
+        == second
     )
 
 
@@ -939,7 +704,7 @@ def test_bilevel_decomposition_run_counts_skipped_candidate_diagnostics() -> Non
 def test_static_style_binary_selection_decomposition_advances_after_no_good_cut() -> (
     None
 ):
-    scenario = StaticStyleScenario(
+    scenario = UtilitySystemScenario(
         case_study="subproblem-smoke",
         scenario="equipment-alternatives",
         data=_style_master_data(),
@@ -957,10 +722,10 @@ def test_static_style_binary_selection_decomposition_advances_after_no_good_cut(
         ),
     )
 
-    run = run_static_style_binary_selection_decomposition(
+    run = run_utility_system_binary_selection_decomposition(
         scenario,
-        solve_master=style_binary_selection_candidate_solver((first, second)),
-        solve_subproblem=pyomo_static_style_solver("appsi_highs"),
+        solve_master=utility_system_binary_selection_candidate_solver((first, second)),
+        solve_subproblem=pyomo_utility_system_solver("appsi_highs"),
         max_iterations=2,
     )
 
@@ -977,62 +742,11 @@ def test_static_style_binary_selection_decomposition_advances_after_no_good_cut(
     assert len(run.solution_pool.incumbents) == 2
 
 
-def test_static_style_fixed_assignment_decomposition_runs_physical_profile_catalog_case() -> (
-    None
-):
-    scenario = next(iter(style_case_study_2_contribution2_physical_profile_catalog()))
-
-    run = run_static_style_fixed_assignment_decomposition(
-        scenario,
-        solve_master=pyomo_static_style_solver("appsi_highs"),
-        solve_subproblem=pyomo_static_style_solver("appsi_highs"),
-        max_iterations=1,
-    )
-    rows = bilevel_decomposition_run_rows(run)
-
-    assert scenario.scenario == "utility-system-stand-alone"
-    assert rows == (
-        {
-            "iteration_index": 1,
-            "candidate_source": "",
-            "objective_value": pytest.approx(67.6834),
-            "best_bound": None,
-            "optimality_gap": None,
-            "elapsed_seconds": None,
-            "hit_time_limit": False,
-            "selected_binary_count": 7,
-            "unselected_binary_count": 270,
-            "subproblem_status": "optimal",
-            "stop_reason": "max-iterations",
-            "skipped_candidate_count": 0,
-        },
-    )
-
-
 def test_style_master_assignment_requires_solved_binary_values() -> None:
-    model = build_static_style_model(_style_master_data())
+    model = build_utility_system_model(_style_master_data())
 
     with pytest.raises(ValueError, match="has no value"):
-        style_master_integer_assignment_from_model(model)
-
-
-def test_bilevel_incumbents_from_contribution2_computational_results() -> None:
-    incumbents = bilevel_incumbents_from_computational_results(
-        CONTRIBUTION2_COMPUTATIONAL_RESULTS,
-        assignment_factory=_benchmark_assignment,
-    )
-    pool = BilevelSolutionPool(incumbents)
-    best = pool.best_incumbent()
-
-    assert len(pool.incumbents) == 24
-    assert best.label == "test-12-scenario-2"
-    assert best.objective_value == pytest.approx(11.252)
-    assert best.best_bound == pytest.approx(9.235)
-    assert best.optimality_gap == pytest.approx(2.017)
-    assert best.elapsed_seconds == pytest.approx(2621.2)
-    assert best.assignment.as_dict()["test_12"] == 1
-    assert best.assignment.as_dict()["scenario_2"] == 1
-    assert len(pool.exclusion_cuts()) == 24
+        utility_system_master_integer_assignment_from_model(model)
 
 
 def test_bilevel_incumbents_accept_generic_computational_result_records() -> None:
@@ -1081,7 +795,7 @@ class _SyntheticComputationalResult:
 
 
 def _benchmark_assignment(
-    result: Contribution2ComputationalResult | _SyntheticComputationalResult,
+    result: _SyntheticComputationalResult,
 ) -> BilevelIntegerAssignment:
     values = {
         f"test_{test_number}": int(test_number == result.test_number)
@@ -1130,22 +844,25 @@ def _cut_count(model: pyo.ConcreteModel) -> int:
 
 
 def _static_style_assignment(
-    scenario: StaticStyleScenario,
+    scenario: UtilitySystemScenario,
     *,
     selected_variables: tuple[str, ...] = (),
 ) -> BilevelIntegerAssignment:
-    model = build_static_style_model(scenario.data)
+    model = build_utility_system_model(scenario.data)
     selected = set(selected_variables)
     return BilevelIntegerAssignment.from_mapping(
-        {name: int(name in selected) for name in style_master_binary_variables(model)},
+        {
+            name: int(name in selected)
+            for name in utility_system_master_binary_variables(model)
+        },
     )
 
 
-def _static_style_subproblem_smoke_scenario() -> StaticStyleScenario:
-    return StaticStyleScenario(
+def _static_style_subproblem_smoke_scenario() -> UtilitySystemScenario:
+    return UtilitySystemScenario(
         case_study="subproblem-smoke",
         scenario="one-level",
-        data=StyleModelData(
+        data=UtilitySystemModelData(
             steam_mains=("MP",),
             steam_levels=(
                 SteamLevelCandidate(
@@ -1167,8 +884,8 @@ def _static_style_subproblem_smoke_scenario() -> StaticStyleScenario:
     )
 
 
-def _style_master_data() -> StyleModelData:
-    return StyleModelData(
+def _style_master_data() -> UtilitySystemModelData:
+    return UtilitySystemModelData(
         steam_mains=("MP",),
         steam_levels=(
             SteamLevelCandidate(

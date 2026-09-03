@@ -2,14 +2,16 @@ from __future__ import annotations
 
 import pytest
 
-from OpenUtility.style import (
-    style_model_data_from_heat_profile,
-    style_model_data_from_heat_profile_for_steam_mains,
+from OpenUtility.utility_system import (
+    utility_system_model_data_from_heat_profile,
+    utility_system_model_data_from_heat_profile_for_steam_mains,
 )
 from OpenUtility.thermal import HeatIntervalProfile, TemperatureInterval
 
 
-def test_style_model_data_from_heat_profile_preserves_interval_heat_loads() -> None:
+def test_utility_system_model_data_from_heat_profile_preserves_interval_heat_loads() -> (
+    None
+):
     intervals = (
         TemperatureInterval(195.0, 185.0),
         TemperatureInterval(185.0, 95.0),
@@ -29,7 +31,7 @@ def test_style_model_data_from_heat_profile_preserves_interval_heat_loads() -> N
         },
     )
 
-    data = style_model_data_from_heat_profile(
+    data = utility_system_model_data_from_heat_profile(
         profile,
         steam_main="MP",
         power_demand=25.0,
@@ -55,7 +57,9 @@ def test_style_model_data_from_heat_profile_preserves_interval_heat_loads() -> N
     ]
 
 
-def test_style_model_data_from_heat_profile_sets_tight_cumulative_bounds() -> None:
+def test_utility_system_model_data_from_heat_profile_sets_tight_cumulative_bounds() -> (
+    None
+):
     intervals = (
         TemperatureInterval(195.0, 185.0),
         TemperatureInterval(185.0, 95.0),
@@ -75,7 +79,7 @@ def test_style_model_data_from_heat_profile_sets_tight_cumulative_bounds() -> No
         },
     )
 
-    data = style_model_data_from_heat_profile(
+    data = utility_system_model_data_from_heat_profile(
         profile,
         steam_main="MP",
         power_demand=25.0,
@@ -95,7 +99,7 @@ def test_style_model_data_from_heat_profile_sets_tight_cumulative_bounds() -> No
     ]
 
 
-def test_style_model_data_from_heat_profile_for_steam_mains_repeats_interval_candidates_per_main() -> (
+def test_utility_system_model_data_from_heat_profile_for_steam_mains_repeats_interval_candidates_per_main() -> (
     None
 ):
     profile = HeatIntervalProfile(
@@ -113,7 +117,7 @@ def test_style_model_data_from_heat_profile_for_steam_mains_repeats_interval_can
         },
     )
 
-    data = style_model_data_from_heat_profile_for_steam_mains(
+    data = utility_system_model_data_from_heat_profile_for_steam_mains(
         profile,
         steam_mains=("HP", "MP"),
         power_demand=25.0,
@@ -148,7 +152,7 @@ def test_style_model_data_from_heat_profile_for_steam_mains_repeats_interval_can
     )
 
 
-def test_style_model_data_from_heat_profile_for_steam_mains_can_assign_heat_loads_to_one_main() -> (
+def test_utility_system_model_data_from_heat_profile_for_steam_mains_can_assign_heat_loads_to_one_main() -> (
     None
 ):
     profile = HeatIntervalProfile(
@@ -166,7 +170,7 @@ def test_style_model_data_from_heat_profile_for_steam_mains_can_assign_heat_load
         },
     )
 
-    data = style_model_data_from_heat_profile_for_steam_mains(
+    data = utility_system_model_data_from_heat_profile_for_steam_mains(
         profile,
         steam_mains=("HP", "MP"),
         power_demand=25.0,
@@ -189,7 +193,7 @@ def test_style_model_data_from_heat_profile_for_steam_mains_can_assign_heat_load
     )
 
 
-def test_style_model_data_from_heat_profile_for_steam_mains_rejects_unknown_heat_load_main() -> (
+def test_utility_system_model_data_from_heat_profile_for_steam_mains_rejects_unknown_heat_load_main() -> (
     None
 ):
     profile = HeatIntervalProfile(
@@ -199,7 +203,7 @@ def test_style_model_data_from_heat_profile_for_steam_mains_rejects_unknown_heat
     )
 
     with pytest.raises(ValueError, match="heat-load steam main"):
-        style_model_data_from_heat_profile_for_steam_mains(
+        utility_system_model_data_from_heat_profile_for_steam_mains(
             profile,
             steam_mains=("HP", "MP"),
             power_demand=25.0,

@@ -1,28 +1,26 @@
 # OpenUtility
 
 OpenUtility is a Python package for Pyomo-based utility-system optimization,
-reporting, and Jimenez-Romero case-study replication.
+reporting, bilevel decomposition utilities, thermal profile handling, and HPR
+investment/dispatch optimization. HPR is used as the umbrella term for heat
+pump and refrigeration assets.
 
-The package boundary is deliberate:
+`OpenUtility/` is the reusable public package. Private replication workflows and
+large study-specific artifacts are intentionally outside the package boundary
+and are not included in release tests or built wheels.
 
-- `OpenUtility/` contains reusable model data classes, Pyomo model builders,
-  solver adapters, reporting helpers, bilevel decomposition utilities, and
-  thermal interval utilities.
-- `case_study/jimenez_romero_utility_system_optimization/` contains extracted
-  Jimenez-Romero input data, case-study builders, notebooks, scripts, and
-  checked generated outputs.
-
-OpenUtility targets Python `>=3.14.2` and solves the MILP workflows through
-Pyomo `SolverFactory("appsi_highs")` with the required `highspy` package.
-OpenPinch is a required dependency for stream, stream-collection, and zone
-objects used by the case-study heat-profile inputs.
+OpenUtility targets Python `>=3.14.2`. MILP solves use Pyomo
+`SolverFactory("appsi_highs")` through the required `highspy` package.
+OpenPinch is not a runtime dependency. OpenUtility consumes plain Python data
+that can be exported from OpenPinch, TESPy workflows, manufacturer data, or
+other upstream tools.
 
 ## Install
 
 From a checkout:
 
 ```bash
-python -m pip install -e ".[dev,docs,notebook,release]"
+python -m pip install -e ".[dev,docs,release]"
 ```
 
 For normal package use:
@@ -33,49 +31,36 @@ python -m pip install .
 
 ## Quick Start
 
-Run the main Contribution 2 Table 2-9 replication workflow:
-
 ```python
-from case_study.jimenez_romero_utility_system_optimization.contribution2_integrated_hot_oil_fsr import (
-    run_contribution2_table_2_9_case_study,
+from OpenUtility import (
+    SteamLevelCandidate,
+    UtilitySystemModelData,
+    build_utility_system_model,
+    pyomo_utility_system_solver,
 )
 
-run = run_contribution2_table_2_9_case_study(
-    catalog="physical-profile",
-    apply_fuel_targets=True,
-    apply_operating_targets=True,
+data = UtilitySystemModelData(
+    steam_mains=("MP",),
+    steam_levels=(
+        SteamLevelCandidate(
+            name="MP_100",
+            steam_main="MP",
+            temperature=100.0,
+            source_heat_available=5.0,
+            sink_heat_demand=5.0,
+            generation_enthalpy_delta=1.0,
+            use_enthalpy_delta=1.0,
+            source_heat_upper_bound=5.0,
+            sink_heat_upper_bound=5.0,
+        ),
+    ),
+    power_demand=0.0,
+    grid_import_limit=0.0,
+    grid_export_limit=0.0,
 )
-
-summary = run.summary_table()
-comparison = run.comparison_table()
-axes = run.plot_field_comparison("total_annualized_cost")
+model = build_utility_system_model(data)
+status = pyomo_utility_system_solver("appsi_highs")(model)
 ```
-
-The checked notebooks are:
-
-- `case_study/jimenez_romero_utility_system_optimization/style_stage1_hot_oil_and_steam_mains/notebooks/replication.ipynb`
-- `case_study/jimenez_romero_utility_system_optimization/contribution2_integrated_hot_oil_fsr/notebooks/replication.ipynb`
-- `case_study/jimenez_romero_utility_system_optimization/contribution2_computational_performance/notebooks/replication.ipynb`
-
-## CLI
-
-The installed CLI command remains:
-
-```bash
-openutility-style-table2-9 --catalog physical-profile --format csv
-```
-
-Common reports:
-
-```bash
-openutility-style-table2-9 --catalog reported-equipment --format csv
-openutility-style-table2-9 --catalog physical-profile --view summary --format csv
-openutility-style-table2-9 --report style-decomposition --view candidate-summary --format csv
-```
-
-Checked CSV outputs live under the relevant `case_study/.../outputs/`
-directories. The test suite verifies that current code regenerates the checked
-outputs from packaged input fixtures.
 
 ## Verification
 
@@ -85,18 +70,9 @@ Run the full release gate:
 python tools/release_check.py
 ```
 
-The gate runs:
-
-- `ruff check`
-- `ruff format --check`
-- `mypy`
-- `pytest` with coverage threshold
-- Sphinx docs with warnings as errors
-- source distribution and wheel build
-- wheel metadata and package-asset inspection
-- `twine check`
-- dependency audit
-- fresh wheel-install smoke test
+The gate runs linting, formatting, type checking, tests with coverage, Sphinx,
+source/wheel build, wheel inspection, `twine check`, dependency audit, and a
+fresh wheel-install smoke test.
 
 For offline local triage only:
 
@@ -106,23 +82,11 @@ python tools/release_check.py --skip-audit --skip-smoke-install
 
 ## Documentation
 
-Start with:
-
-- `docs/index.rst`
-- `docs/usage.md`
-- `docs/inputs.rst`
-- `docs/developer_checklist.md`
-- `docs/replication_plan.md`
-
 Build docs locally:
 
 ```bash
 python -m sphinx -W -b html docs /tmp/openutility-docs-html
 ```
 
-## Release Status
-
-OpenUtility `0.1.0` is an alpha release. The public reusable API is exposed
-through `OpenUtility.__all__` and `OpenUtility.style.__all__`. Case-study data,
-helpers, notebooks, scripts, and generated outputs are intentionally exported
-from the `case_study` package, not from `OpenUtility`.
+OpenUtility `0.1.0` is an alpha release. Public reusable APIs are exposed
+through `OpenUtility.__all__` and `OpenUtility.utility_system.__all__`.
