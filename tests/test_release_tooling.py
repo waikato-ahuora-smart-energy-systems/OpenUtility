@@ -64,6 +64,14 @@ def test_github_workflows_run_release_gate_and_publish_with_trusted_publishing()
     assert "astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d" in ci
 
     assert 'PYTHON_VERSION: "3.14.2"' in release
+    assert "workflow_run:" in release
+    assert 'workflows: ["CI"]' in release
+    assert 'branches: ["main"]' in release
+    assert "types: [completed]" in release
+    assert "github.event.workflow_run.conclusion == 'success'" in release
+    assert "github.event.workflow_run.event == 'push'" in release
+    assert "github.event.workflow_run.head_branch == 'main'" in release
+    assert "github.event.workflow_run.head_sha" in release
     assert "validate:" in release
     assert "publish:" in release
     assert "needs: validate" in release
@@ -73,6 +81,7 @@ def test_github_workflows_run_release_gate_and_publish_with_trusted_publishing()
         in release
     )
     assert "scripts/check_release_tag.py" in release
+    assert "scripts/check_release_version.py" in release
     assert "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in release
     assert (
         "actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c" in release

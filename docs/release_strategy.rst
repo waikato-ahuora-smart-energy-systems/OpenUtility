@@ -39,17 +39,22 @@ must provide a forward version manually before merging into ``main``.
 Main branch
 -----------
 
-Pushes to ``main`` run the same release gate. A releasable commit must therefore
-have a synchronized ``pyproject.toml``, ``uv.lock``, and ``.bumpversion.toml``.
+Pushes to ``main`` run the same release gate in CI. When that CI run completes
+successfully for a push event on ``main``, the ``Release`` workflow starts
+automatically from the exact commit SHA that CI tested. A releasable commit must
+therefore have a synchronized ``pyproject.toml``, ``uv.lock``, and
+``.bumpversion.toml``.
 
 Publishing
 ----------
 
-Production publishing is tag based. A tag must use the exact form ``vX.Y.Z`` and
-must match the version in ``pyproject.toml``. The release workflow validates the
-tag before running the release gate or publishing.
+Production publishing is CI-success based for ``main``. Tag pushes matching
+``v*`` remain available as an explicit manual release path. A tag must use the
+exact form ``vX.Y.Z`` and must match the version in ``pyproject.toml``. For
+automatic ``main`` releases, the release workflow validates the project version
+directly.
 
-The tag workflow separates validation from publication. The ``validate`` job
+The release workflow separates validation from publication. The ``validate`` job
 runs the full release gate first and uploads only the verified distributions as
 a GitHub Actions artifact. The ``publish`` job depends on ``validate``, downloads
 that artifact, and is the only job bound to the protected ``pypi`` environment.
@@ -64,5 +69,5 @@ The PyPI upload job uses GitHub OpenID Connect trusted publishing:
    environment: pypi
 
 Configure the same ``pypi`` environment in GitHub and PyPI. Recommended GitHub
-environment rules are required reviewers and deployment restrictions for release
-tags matching ``v*``.
+environment rules are required reviewers and deployment restrictions that allow
+the ``main`` branch and release tags matching ``v*``.

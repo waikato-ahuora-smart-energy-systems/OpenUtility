@@ -38,3 +38,11 @@ OpenPinch’s complementary producer design expects external thermal service tem
 **User Input**: "N/A - verification step for the active implementation request."
 **AI Response**: "Implemented strict alpha HPR schema validation, structured provenance preservation, fixed-capacity scaling, adjacent-only ordered part-load interpolation, mode-aware useful duty, release smoke updates, and documentation of the current isolated HPR electricity overlay. Verified with `uv run python tools/release_check.py`: 186 tests passed, coverage 90.24%, ruff, ruff format, mypy, Sphinx, build, twine check, pip-audit, and smoke install passed."
 **Context**: Construction/build and test completion for Multi-Period HPR follow-up corrections.
+
+---
+
+## Workflow Change Request
+**Timestamp**: 2026-09-04T19:37:36Z
+**User Input**: "If CI runs on main and passes, the release should run automatically."
+**AI Response**: "Inspected CI and release workflows, release validation scripts, and release documentation. Began updating the release workflow so a successful CI workflow_run on main starts the protected PyPI release path automatically."
+**Context**: GitHub Actions release automation update.

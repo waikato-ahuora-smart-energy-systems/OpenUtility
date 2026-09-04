@@ -4,6 +4,10 @@ on:
   push:
     tags:
       - "v*"
+  workflow_run:
+    workflows: ["CI"]
+    branches: ["main"]
+    types: [completed]
 
 permissions:
   contents: read
@@ -14,6 +18,15 @@ env:
 
 jobs:
   validate:
+    if: >-
+      ${{
+        github.event_name == 'push' ||
+        (
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_branch == 'main'
+        )
+      }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -21,6 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
         with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
           persist-credentials: false
       - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
         with:
@@ -33,7 +47,11 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen --extra dev --extra docs --extra notebook --extra release
       - name: Validate release tag
+        if: ${{ github.event_name == 'push' }}
         run: uv run --no-sync python scripts/check_release_tag.py "${GITHUB_REF_NAME}"
+      - name: Validate release version
+        if: ${{ github.event_name == 'workflow_run' }}
+        run: uv run --no-sync python scripts/check_release_version.py
       - name: Run release gate
         run: uv run --no-sync python tools/release_check.py
       - name: Upload verified distributions
