@@ -38,3 +38,27 @@ OpenPinch’s complementary producer design expects external thermal service tem
 **User Input**: "N/A - verification step for the active implementation request."
 **AI Response**: "Implemented strict alpha HPR schema validation, structured provenance preservation, fixed-capacity scaling, adjacent-only ordered part-load interpolation, mode-aware useful duty, release smoke updates, and documentation of the current isolated HPR electricity overlay. Verified with `uv run python tools/release_check.py`: 186 tests passed, coverage 90.24%, ruff, ruff format, mypy, Sphinx, build, twine check, pip-audit, and smoke install passed."
 **Context**: Construction/build and test completion for Multi-Period HPR follow-up corrections.
+
+---
+
+## Workflow Change Request
+**Timestamp**: 2026-09-04T19:37:36Z
+**User Input**: "If CI runs on main and passes, the release should run automatically."
+**AI Response**: "Inspected CI and release workflows, release validation scripts, and release documentation. Began updating the release workflow so a successful CI workflow_run on main starts the protected PyPI release path automatically."
+**Context**: GitHub Actions release automation update.
+
+---
+
+## CI Failure Triage
+**Timestamp**: 2026-09-04T19:45:50Z
+**User Input**: "CI failed on version bump"
+**AI Response**: "Inspected GitHub Actions run 33912538030. The bump-version job failed because the workflow added an AUTHORIZATION extraheader while checkout persisted credentials, causing GitHub to reject the fetch with Duplicate header: Authorization. Removed the redundant fetch extraheader from the bump-version job and added a regression test for that workflow shape."
+**Context**: GitHub Actions version bump failure correction.
+
+---
+
+## CI Failure Triage
+**Timestamp**: 2026-09-04T19:49:46Z
+**User Input**: "CI failed on version bump"
+**AI Response**: "Pushed the bump-version fix and observed CI run 33912975799. The original bump-version job passed, but release-version failed during its base-branch fetch because the checkout intentionally did not persist credentials and the custom bearer extraheader was not accepted for Git smart HTTP. Updated release-version to authenticate only the fetch URL with GITHUB_TOKEN, then unset GH_TOKEN before running repository-owned Python code."
+**Context**: GitHub Actions release-version fetch authentication correction.

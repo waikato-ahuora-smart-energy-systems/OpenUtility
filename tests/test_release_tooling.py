@@ -56,7 +56,18 @@ def test_github_workflows_run_release_gate_and_publish_with_trusted_publishing()
     assert "patch" in ci
     assert "contents: write" in ci
     assert "GH_TOKEN: ${{ github.token }}" in ci
-    assert "AUTHORIZATION: bearer ${GH_TOKEN}" in ci
+    assert "AUTHORIZATION: bearer ${GH_TOKEN}" not in ci
+    bump_job = ci.split("  bump-version:", maxsplit=1)[1].split(
+        "  release-version:",
+        maxsplit=1,
+    )[0]
+    release_version_job = ci.split("  release-version:", maxsplit=1)[1]
+    assert "persist-credentials: true" in bump_job
+    assert (
+        "https://x-access-token:${GH_TOKEN}@github.com/${BASE_REPOSITORY}.git"
+        in release_version_job
+    )
+    assert "unset GH_TOKEN" in release_version_job
     assert "scripts/check_lockfile_version.py" in ci
     assert "scripts/check_release_version.py" in ci
     assert "actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8" in ci
@@ -64,6 +75,14 @@ def test_github_workflows_run_release_gate_and_publish_with_trusted_publishing()
     assert "astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d" in ci
 
     assert 'PYTHON_VERSION: "3.14.2"' in release
+    assert "workflow_run:" in release
+    assert 'workflows: ["CI"]' in release
+    assert 'branches: ["main"]' in release
+    assert "types: [completed]" in release
+    assert "github.event.workflow_run.conclusion == 'success'" in release
+    assert "github.event.workflow_run.event == 'push'" in release
+    assert "github.event.workflow_run.head_branch == 'main'" in release
+    assert "github.event.workflow_run.head_sha" in release
     assert "validate:" in release
     assert "publish:" in release
     assert "needs: validate" in release
@@ -73,6 +92,7 @@ def test_github_workflows_run_release_gate_and_publish_with_trusted_publishing()
         in release
     )
     assert "scripts/check_release_tag.py" in release
+    assert "scripts/check_release_version.py" in release
     assert "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in release
     assert (
         "actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c" in release
