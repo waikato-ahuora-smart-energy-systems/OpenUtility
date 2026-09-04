@@ -97,6 +97,8 @@ def test_github_workflows_run_release_gate_and_publish_with_trusted_publishing()
     assert (
         "actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c" in release
     )
+    assert "name: openutility-dist-${{ github.run_id }}" in release
+    assert "github.run_attempt" not in release
     assert "environment:" in release
     assert "name: pypi" in release
     assert "url: https://pypi.org/project/OpenUtility/" in release

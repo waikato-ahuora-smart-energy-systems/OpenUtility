@@ -62,3 +62,11 @@ OpenPinch’s complementary producer design expects external thermal service tem
 **User Input**: "CI failed on version bump"
 **AI Response**: "Pushed the bump-version fix and observed CI run 33912975799. The original bump-version job passed, but release-version failed during its base-branch fetch because the checkout intentionally did not persist credentials and the custom bearer extraheader was not accepted for Git smart HTTP. Updated release-version to authenticate only the fetch URL with GITHUB_TOKEN, then unset GH_TOKEN before running repository-owned Python code."
 **Context**: GitHub Actions release-version fetch authentication correction.
+
+---
+
+## Release Failure Triage
+**Timestamp**: 2026-09-04T22:17:45Z
+**User Input**: "Failed"
+**AI Response**: "Inspected Release run 33917477453. After the pypi environment was updated to allow main and the publish job was approved, the rerun failed because the validate job uploaded openutility-dist-${{ github.run_id }}-${{ github.run_attempt }} on attempt 1 while the rerun publish job looked for attempt 2. Updated the release artifact name to use only github.run_id so rerun-failed-jobs can download the previously verified distributions."
+**Context**: GitHub Actions release artifact naming correction.
