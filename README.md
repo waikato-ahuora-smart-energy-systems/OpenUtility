@@ -65,10 +65,11 @@ Robin Smith:
 The package has since been generalized beyond the original replication
 workflows and extended with HPR optimization. In OpenUtility, HPR means heat
 pump and refrigeration: fixed-capacity HPR candidates can be selected and
-dispatched against multi-period thermal-node and electricity balances using
-versioned plain performance maps. The current HPR implementation is an
-optimization-layer model; thermodynamic map generation remains outside
-OpenUtility.
+dispatched against multi-period thermal-node balances using alpha versioned
+plain performance maps. HPR electricity is currently handled by a period-indexed
+overlay, while the original non-HPR electricity balance remains static. The HPR
+implementation is an optimization-layer model; thermodynamic map generation
+remains outside OpenUtility.
 
 ## Install
 

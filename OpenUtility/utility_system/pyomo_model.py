@@ -197,6 +197,11 @@ def _add_sets(
         initialize=tuple(_hpr_dispatch_point_keys(data)),
         ordered=True,
     )
+    model.HPR_DISPATCH_SEGMENTS = pyo.Set(
+        dimen=3,
+        initialize=tuple(_hpr_dispatch_segment_keys(data)),
+        ordered=True,
+    )
 
 
 def _add_parameters(
@@ -637,6 +642,17 @@ def _add_parameters(
         },
         mutable=False,
     )
+    model.hpr_capacity_scale = pyo.Param(
+        model.HPR_CANDIDATES,
+        initialize={
+            candidate.name: _hpr_candidate_capacity_scale(
+                candidate,
+                _hpr_maps_by_id(data),
+            )
+            for candidate in data.hpr_candidates
+        },
+        mutable=False,
+    )
 
 
 def _add_variables(model: pyo.ConcreteModel) -> None:
@@ -822,6 +838,10 @@ def _add_variables(model: pyo.ConcreteModel) -> None:
     model.hpr_selected = pyo.Var(model.HPR_CANDIDATES, domain=pyo.Binary)
     model.hpr_on = pyo.Var(model.HPR_CANDIDATE_PERIODS, domain=pyo.Binary)
     model.hpr_lambda = pyo.Var(model.HPR_DISPATCH_POINTS, domain=pyo.NonNegativeReals)
+    model.hpr_segment_selected = pyo.Var(
+        model.HPR_DISPATCH_SEGMENTS,
+        domain=pyo.Binary,
+    )
     model.hpr_q_source = pyo.Var(
         model.HPR_CANDIDATE_PERIODS,
         domain=pyo.NonNegativeReals,
@@ -1099,6 +1119,7 @@ def _add_hpr_constraints(
     candidates = {candidate.name: candidate for candidate in data.hpr_candidates}
     periods = {period.name: period for period in _operating_periods(data)}
     dispatch_points = _hpr_dispatch_points_by_candidate_period(data)
+    dispatch_segments = _hpr_dispatch_segments_by_candidate_period(data)
 
     def lambda_sum_rule(m: pyo.ConcreteModel, candidate: str, period: str):
         return (
@@ -1111,20 +1132,61 @@ def _add_hpr_constraints(
 
     def q_source_rule(m: pyo.ConcreteModel, candidate: str, period: str):
         return m.hpr_q_source[candidate, period] == sum(
-            m.hpr_lambda[candidate, period, point.name] * point.q_source
+            m.hpr_capacity_scale[candidate]
+            * m.hpr_lambda[candidate, period, point.name]
+            * point.q_source
             for point in dispatch_points[(candidate, period)]
         )
 
     def q_sink_rule(m: pyo.ConcreteModel, candidate: str, period: str):
         return m.hpr_q_sink[candidate, period] == sum(
-            m.hpr_lambda[candidate, period, point.name] * point.q_sink
+            m.hpr_capacity_scale[candidate]
+            * m.hpr_lambda[candidate, period, point.name]
+            * point.q_sink
             for point in dispatch_points[(candidate, period)]
         )
 
     def power_rule(m: pyo.ConcreteModel, candidate: str, period: str):
         return m.hpr_power[candidate, period] == sum(
-            m.hpr_lambda[candidate, period, point.name] * point.electric_power
+            m.hpr_capacity_scale[candidate]
+            * m.hpr_lambda[candidate, period, point.name]
+            * point.electric_power
             for point in dispatch_points[(candidate, period)]
+        )
+
+    def segment_sum_rule(m: pyo.ConcreteModel, candidate: str, period: str):
+        segments = dispatch_segments[(candidate, period)]
+        if not segments:
+            return pyo.Constraint.Feasible
+        return (
+            sum(
+                m.hpr_segment_selected[candidate, period, segment]
+                for segment in segments
+            )
+            == m.hpr_on[candidate, period]
+        )
+
+    def lambda_adjacency_rule(
+        m: pyo.ConcreteModel,
+        candidate: str,
+        period: str,
+        point_name: str,
+    ):
+        adjacent_segments = _hpr_adjacent_segments_for_point(
+            dispatch_points[(candidate, period)],
+            point_name,
+        )
+        if not adjacent_segments:
+            return (
+                m.hpr_lambda[candidate, period, point_name]
+                <= m.hpr_on[
+                    candidate,
+                    period,
+                ]
+            )
+        return m.hpr_lambda[candidate, period, point_name] <= sum(
+            m.hpr_segment_selected[candidate, period, segment]
+            for segment in adjacent_segments
         )
 
     def on_requires_selected_rule(m: pyo.ConcreteModel, candidate: str, period: str):
@@ -1134,10 +1196,14 @@ def _add_hpr_constraints(
         return m.hpr_selected[candidate] >= int(candidates[candidate].must_select)
 
     def minimum_load_rule(m: pyo.ConcreteModel, candidate: str, period: str):
-        max_q_sink = max(point.q_sink for point in dispatch_points[(candidate, period)])
-        return m.hpr_q_sink[candidate, period] >= (
+        max_reference_load = max(
+            _hpr_reference_load(point, candidates[candidate])
+            for point in dispatch_points[(candidate, period)]
+        )
+        max_useful_duty = m.hpr_capacity_scale[candidate] * max_reference_load
+        return m.hpr_q_useful[candidate, period] >= (
             candidates[candidate].minimum_load_fraction
-            * max_q_sink
+            * max_useful_duty
             * m.hpr_on[candidate, period]
         )
 
@@ -1246,6 +1312,22 @@ def _add_hpr_constraints(
         model.HPR_CANDIDATE_PERIODS,
         rule=power_rule,
     )
+    model.hpr_segment_sum = pyo.Constraint(
+        model.HPR_CANDIDATE_PERIODS,
+        rule=segment_sum_rule,
+    )
+    model.hpr_lambda_adjacency = pyo.Constraint(
+        model.HPR_DISPATCH_POINTS,
+        rule=lambda_adjacency_rule,
+    )
+    model.hpr_q_useful = pyo.Expression(
+        model.HPR_CANDIDATE_PERIODS,
+        rule=lambda m, candidate, period: _hpr_useful_duty_expression(
+            m,
+            candidates[candidate],
+            period,
+        ),
+    )
     model.hpr_on_requires_selected = pyo.Constraint(
         model.HPR_CANDIDATE_PERIODS,
         rule=on_requires_selected_rule,
@@ -1314,8 +1396,8 @@ def _add_hpr_constraints(
     )
     model.hpr_variable_operating_cost = pyo.Expression(
         expr=sum(
-            model.hpr_q_sink[candidate.name, period.name]
-            * candidate.variable_operating_cost_per_q_sink
+            model.hpr_q_useful[candidate.name, period.name]
+            * candidate.variable_operating_cost_per_q_useful
             * period.hours
             * model.cost_scale
             for candidate in data.hpr_candidates
@@ -2876,6 +2958,18 @@ def _hpr_dispatch_point_keys(
     )
 
 
+def _hpr_dispatch_segment_keys(
+    data: UtilitySystemModelData,
+) -> tuple[tuple[str, str, str], ...]:
+    return tuple(
+        (candidate, period, segment)
+        for (candidate, period), segments in _hpr_dispatch_segments_by_candidate_period(
+            data
+        ).items()
+        for segment in segments
+    )
+
+
 def _hpr_dispatch_points_by_candidate_period(
     data: UtilitySystemModelData,
 ) -> dict[tuple[str, str], tuple[HprPerformancePoint, ...]]:
@@ -2903,6 +2997,41 @@ def _hpr_dispatch_points_by_candidate_period(
             )
             points_by_candidate_period[(candidate.name, period.name)] = points
     return points_by_candidate_period
+
+
+def _hpr_dispatch_segments_by_candidate_period(
+    data: UtilitySystemModelData,
+) -> dict[tuple[str, str], tuple[str, ...]]:
+    return {
+        key: _hpr_segments_for_points(points)
+        for key, points in _hpr_dispatch_points_by_candidate_period(data).items()
+    }
+
+
+def _hpr_segments_for_points(
+    points: tuple[HprPerformancePoint, ...],
+) -> tuple[str, ...]:
+    return tuple(
+        _hpr_segment_key(left, right) for left, right in zip(points, points[1:])
+    )
+
+
+def _hpr_adjacent_segments_for_point(
+    points: tuple[HprPerformancePoint, ...],
+    point_name: str,
+) -> tuple[str, ...]:
+    adjacent_segments = []
+    for left, right in zip(points, points[1:]):
+        if point_name in {left.name, right.name}:
+            adjacent_segments.append(_hpr_segment_key(left, right))
+    return tuple(adjacent_segments)
+
+
+def _hpr_segment_key(
+    left: HprPerformancePoint,
+    right: HprPerformancePoint,
+) -> str:
+    return f"{left.name}__{right.name}"
 
 
 def _hpr_performance_sink_node(
@@ -2943,9 +3072,9 @@ def _matching_hpr_curve_points(
         point
         for point in performance_map.points
         if abs(point.source_temperature - source_temperature)
-        <= performance_map.balance_tolerance
+        <= performance_map.temperature_match_tolerance
         and abs(point.sink_temperature - sink_temperature)
-        <= performance_map.balance_tolerance
+        <= performance_map.temperature_match_tolerance
     )
     curve_ids = {point.curve_id for point in matching_points}
     if len(curve_ids) != 1:
@@ -2987,3 +3116,33 @@ def _hpr_candidate_capacity(
     if candidate.fixed_capacity > 0.0:
         return candidate.fixed_capacity
     return maps_by_id[candidate.map_id].reference_capacity
+
+
+def _hpr_candidate_capacity_scale(
+    candidate: HprCandidate,
+    maps_by_id: Mapping[str, HprPerformanceMap],
+) -> float:
+    performance_map = maps_by_id[candidate.map_id]
+    return (
+        _hpr_candidate_capacity(candidate, maps_by_id)
+        / performance_map.reference_capacity
+    )
+
+
+def _hpr_useful_duty_expression(
+    model: pyo.ConcreteModel,
+    candidate: HprCandidate,
+    period: str,
+):
+    if candidate.mode == "refrigeration":
+        return model.hpr_q_source[candidate.name, period]
+    return model.hpr_q_sink[candidate.name, period]
+
+
+def _hpr_reference_load(
+    point: HprPerformancePoint,
+    candidate: HprCandidate,
+) -> float:
+    if candidate.mode == "refrigeration":
+        return point.q_source
+    return point.q_sink

@@ -4,15 +4,26 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+import math
 from typing import Any
 
 
+HPR_SCHEMA_VERSIONS = {"1.0"}
 HPR_MODES = {"heat_pump", "refrigeration"}
 HPR_INTERPOLATION_TOPOLOGIES = {"ordered_part_load_curve"}
+HPR_REFERENCE_CAPACITY_BASES = {"q_source", "q_sink"}
+HPR_COP_CONVENTIONS = {"heating", "cooling"}
 HPR_REFRIGERATION_ROUTING_MODES = {
     "recovery_only",
     "rejection_only",
     "split",
+}
+HPR_REQUIRED_UNITS = {
+    "source_temperature": "degC",
+    "sink_temperature": "degC",
+    "q_source": "kW",
+    "q_sink": "kW",
+    "electric_power": "kW",
 }
 THERMAL_NODE_TYPES = {"source", "sink", "cooling", "rejection"}
 
@@ -30,6 +41,7 @@ class ThermalNode:
 
     def __post_init__(self) -> None:
         _require_name(self.name, "thermal node name")
+        _require_finite(self.temperature, "thermal node temperature")
         if self.node_type not in THERMAL_NODE_TYPES:
             raise ValueError(
                 f"thermal node type must be one of {sorted(THERMAL_NODE_TYPES)!r}"
@@ -70,6 +82,7 @@ class OperatingPeriod:
         _require_non_negative_mapping(self.heating_demand, "heating demand")
         _require_non_negative_mapping(self.cooling_demand, "cooling demand")
         _require_non_negative_mapping(self.rejection_capacity, "rejection capacity")
+        _require_finite_mapping(self.node_temperatures, "node temperatures")
 
 
 @dataclass(frozen=True)
@@ -89,6 +102,8 @@ class HprPerformancePoint:
     def __post_init__(self) -> None:
         _require_name(self.name, "HPR performance point name")
         _require_name(self.curve_id, "HPR curve id")
+        _require_finite(self.source_temperature, "source_temperature")
+        _require_finite(self.sink_temperature, "sink_temperature")
         _require_fraction_inclusive(self.load_fraction, "load_fraction")
         _require_non_negative(self.q_source, "q_source")
         _require_non_negative(self.q_sink, "q_sink")
@@ -97,6 +112,8 @@ class HprPerformancePoint:
             raise ValueError("electric_power must be positive for active HPR points")
         if self.cop is not None:
             _require_positive(self.cop, "cop")
+            if self.electric_power <= 0.0:
+                raise ValueError("electric_power must be positive for HPR COP checks")
 
 
 @dataclass(frozen=True)
@@ -108,19 +125,23 @@ class HprPerformanceMap:
     mode: str
     units: Mapping[str, str]
     reference_capacity: float
+    reference_capacity_basis: str
     interpolation_topology: str
     thermodynamic_backend: str
     model_id: str
-    provenance: Mapping[str, str]
+    provenance: Mapping[str, Any]
     points: tuple[HprPerformancePoint, ...]
-    cop_convention: str = "heating"
-    balance_tolerance: float = 1e-6
+    cop_convention: str
+    energy_balance_tolerance: float = 1e-6
+    temperature_match_tolerance: float = 1e-6
 
     def __post_init__(self) -> None:
-        _require_name(self.schema_version, "HPR map schema_version")
+        _require_hpr_schema_version(self.schema_version)
         _require_name(self.map_id, "HPR map_id")
         _require_hpr_mode(self.mode)
         _require_positive(self.reference_capacity, "reference_capacity")
+        _require_reference_capacity_basis(self.reference_capacity_basis)
+        _validate_mode_capacity_basis(self.mode, self.reference_capacity_basis)
         if self.interpolation_topology not in HPR_INTERPOLATION_TOPOLOGIES:
             raise ValueError(
                 "HPR interpolation_topology must be one of "
@@ -128,8 +149,16 @@ class HprPerformanceMap:
             )
         _require_name(self.thermodynamic_backend, "thermodynamic_backend")
         _require_name(self.model_id, "model_id")
-        _require_name(self.cop_convention, "cop_convention")
-        _require_non_negative(self.balance_tolerance, "balance_tolerance")
+        _require_hpr_cop_convention(self.cop_convention)
+        _validate_mode_cop_convention(self.mode, self.cop_convention)
+        _require_non_negative(
+            self.energy_balance_tolerance,
+            "energy_balance_tolerance",
+        )
+        _require_non_negative(
+            self.temperature_match_tolerance,
+            "temperature_match_tolerance",
+        )
         _validate_hpr_units(self.units)
         if not self.provenance:
             raise ValueError("HPR map provenance must not be empty")
@@ -139,7 +168,15 @@ class HprPerformanceMap:
         if len(set(point_names)) != len(point_names):
             raise ValueError("HPR performance point names must be unique per map")
         for point in self.points:
-            _validate_hpr_energy_balance(point, self.balance_tolerance)
+            _validate_hpr_energy_balance(point, self.energy_balance_tolerance)
+            _validate_hpr_cop(point, self.cop_convention, self.energy_balance_tolerance)
+            _validate_hpr_reference_capacity_point(
+                point,
+                self.reference_capacity,
+                self.reference_capacity_basis,
+                self.energy_balance_tolerance,
+            )
+        _validate_hpr_ordered_curves(self.points)
 
 
 @dataclass(frozen=True)
@@ -154,7 +191,7 @@ class HprCandidate:
     rejection_node: str | None = None
     fixed_capacity: float = 0.0
     minimum_load_fraction: float = 0.0
-    variable_operating_cost_per_q_sink: float = 0.0
+    variable_operating_cost_per_q_useful: float = 0.0
     must_select: bool = False
     refrigeration_routing: str = "rejection_only"
 
@@ -166,8 +203,8 @@ class HprCandidate:
         _require_non_negative(self.fixed_capacity, "fixed_capacity")
         _require_fraction(self.minimum_load_fraction, "minimum_load_fraction")
         _require_non_negative(
-            self.variable_operating_cost_per_q_sink,
-            "variable_operating_cost_per_q_sink",
+            self.variable_operating_cost_per_q_useful,
+            "variable_operating_cost_per_q_useful",
         )
         if self.mode == "heat_pump":
             _require_name(self.sink_node or "", "HPR sink_node")
@@ -190,39 +227,78 @@ def hpr_performance_map_from_mapping(
 ) -> HprPerformanceMap:
     """Decode a versioned HPR performance map from plain mapping data."""
 
+    _reject_unknown_keys(
+        values,
+        {
+            "schema_version",
+            "map_id",
+            "mode",
+            "units",
+            "reference_capacity",
+            "reference_capacity_basis",
+            "interpolation_topology",
+            "thermodynamic_backend",
+            "model_id",
+            "provenance",
+            "points",
+            "cop_convention",
+            "energy_balance_tolerance",
+            "temperature_match_tolerance",
+        },
+        "HPR performance map",
+    )
     raw_points = values.get("points")
     if not isinstance(raw_points, tuple | list):
         raise ValueError("HPR performance map points must be a sequence")
-    points = tuple(
-        HprPerformancePoint(
-            name=str(point["name"]),
-            curve_id=str(point["curve_id"]),
-            source_temperature=float(point["source_temperature"]),
-            sink_temperature=float(point["sink_temperature"]),
-            load_fraction=float(point["load_fraction"]),
-            q_source=float(point["q_source"]),
-            q_sink=float(point["q_sink"]),
-            electric_power=float(point["electric_power"]),
-            cop=_optional_float(point.get("cop")),
+    points: list[HprPerformancePoint] = []
+    for point in raw_points:
+        if not isinstance(point, Mapping):
+            raise ValueError("HPR performance map points must be mappings")
+        _reject_unknown_keys(
+            point,
+            {
+                "name",
+                "curve_id",
+                "source_temperature",
+                "sink_temperature",
+                "load_fraction",
+                "q_source",
+                "q_sink",
+                "electric_power",
+                "cop",
+            },
+            "HPR performance point",
         )
-        for point in raw_points
-        if isinstance(point, Mapping)
-    )
-    if len(points) != len(raw_points):
-        raise ValueError("HPR performance map points must be mappings")
+        points.append(
+            HprPerformancePoint(
+                name=_required_string(point, "name"),
+                curve_id=_required_string(point, "curve_id"),
+                source_temperature=float(point["source_temperature"]),
+                sink_temperature=float(point["sink_temperature"]),
+                load_fraction=float(point["load_fraction"]),
+                q_source=float(point["q_source"]),
+                q_sink=float(point["q_sink"]),
+                electric_power=float(point["electric_power"]),
+                cop=_optional_float(point.get("cop")),
+            )
+        )
     return HprPerformanceMap(
-        schema_version=str(values.get("schema_version", "")),
-        map_id=str(values.get("map_id", "")),
-        mode=str(values.get("mode", "")),
-        units=_required_mapping(values, "units"),
+        schema_version=_required_string(values, "schema_version"),
+        map_id=_required_string(values, "map_id"),
+        mode=_required_string(values, "mode"),
+        units=_required_string_mapping(values, "units"),
         reference_capacity=float(values.get("reference_capacity", 0.0)),
-        interpolation_topology=str(values.get("interpolation_topology", "")),
-        thermodynamic_backend=str(values.get("thermodynamic_backend", "")),
-        model_id=str(values.get("model_id", "")),
+        reference_capacity_basis=_required_string(values, "reference_capacity_basis"),
+        interpolation_topology=_required_string(values, "interpolation_topology"),
+        thermodynamic_backend=_required_string(values, "thermodynamic_backend"),
+        model_id=_required_string(values, "model_id"),
         provenance=_required_mapping(values, "provenance"),
-        points=points,
-        cop_convention=str(values.get("cop_convention", "heating")),
-        balance_tolerance=float(values.get("balance_tolerance", 1e-6)),
+        points=tuple(points),
+        cop_convention=_required_string(values, "cop_convention"),
+        energy_balance_tolerance=float(values.get("energy_balance_tolerance", 1e-6)),
+        temperature_match_tolerance=float(
+            values.get("temperature_match_tolerance", 1e-6)
+        ),
     )
 
 
@@ -1119,28 +1195,74 @@ def _require_name(value: str, label: str) -> None:
 
 
 def _require_positive(value: float, label: str) -> None:
+    _require_finite(value, label)
     if value <= 0.0:
         raise ValueError(f"{label} must be positive")
 
 
 def _require_non_negative(value: float, label: str) -> None:
+    _require_finite(value, label)
     if value < 0.0:
         raise ValueError(f"{label} must be non-negative")
 
 
 def _require_fraction(value: float, label: str) -> None:
+    _require_finite(value, label)
     if value < 0.0 or value >= 1.0:
         raise ValueError(f"{label} must be in the interval [0, 1)")
 
 
 def _require_fraction_inclusive(value: float, label: str) -> None:
+    _require_finite(value, label)
     if value < 0.0 or value > 1.0:
         raise ValueError(f"{label} must be in the interval [0, 1]")
+
+
+def _require_finite(value: float, label: str) -> None:
+    if not math.isfinite(value):
+        raise ValueError(f"{label} must be finite")
+
+
+def _require_hpr_schema_version(value: str) -> None:
+    _require_name(value, "HPR map schema_version")
+    if value not in HPR_SCHEMA_VERSIONS:
+        raise ValueError(
+            f"HPR map schema_version must be one of {sorted(HPR_SCHEMA_VERSIONS)!r}"
+        )
 
 
 def _require_hpr_mode(value: str) -> None:
     if value not in HPR_MODES:
         raise ValueError(f"HPR mode must be one of {sorted(HPR_MODES)!r}")
+
+
+def _require_reference_capacity_basis(value: str) -> None:
+    if value not in HPR_REFERENCE_CAPACITY_BASES:
+        raise ValueError(
+            "HPR reference_capacity_basis must be one of "
+            f"{sorted(HPR_REFERENCE_CAPACITY_BASES)!r}"
+        )
+
+
+def _require_hpr_cop_convention(value: str) -> None:
+    if value not in HPR_COP_CONVENTIONS:
+        raise ValueError(
+            f"HPR cop_convention must be one of {sorted(HPR_COP_CONVENTIONS)!r}"
+        )
+
+
+def _validate_mode_capacity_basis(mode: str, basis: str) -> None:
+    expected_basis = "q_sink" if mode == "heat_pump" else "q_source"
+    if basis != expected_basis:
+        raise ValueError(
+            f"HPR {mode} reference_capacity_basis must be {expected_basis!r}"
+        )
+
+
+def _validate_mode_cop_convention(mode: str, convention: str) -> None:
+    expected_convention = "heating" if mode == "heat_pump" else "cooling"
+    if convention != expected_convention:
+        raise ValueError(f"HPR {mode} cop_convention must be {expected_convention!r}")
 
 
 def _require_non_negative_mapping(
@@ -1154,6 +1276,17 @@ def _require_non_negative_mapping(
         _require_non_negative(value, f"{label} value")
 
 
+def _require_finite_mapping(
+    values: Mapping[str, float] | None,
+    label: str,
+) -> None:
+    if values is None:
+        return
+    for key, value in values.items():
+        _require_name(key, f"{label} key")
+        _require_finite(value, f"{label} value")
+
+
 def _mapping_keys(values: Mapping[str, object] | None) -> tuple[str, ...]:
     if values is None:
         return ()
@@ -1161,19 +1294,20 @@ def _mapping_keys(values: Mapping[str, object] | None) -> tuple[str, ...]:
 
 
 def _validate_hpr_units(units: Mapping[str, str]) -> None:
-    required_units = {
-        "source_temperature",
-        "sink_temperature",
-        "q_source",
-        "q_sink",
-        "electric_power",
-    }
-    missing_units = sorted(required_units.difference(units))
+    missing_units = sorted(set(HPR_REQUIRED_UNITS).difference(units))
     if missing_units:
         raise ValueError(f"HPR map units are missing {missing_units!r}")
-    for key, value in units.items():
+    unknown_units = sorted(set(units).difference(HPR_REQUIRED_UNITS))
+    if unknown_units:
+        raise ValueError(f"HPR map units include unknown keys {unknown_units!r}")
+    for key, expected_value in HPR_REQUIRED_UNITS.items():
+        value = units[key]
         _require_name(key, "HPR unit key")
         _require_name(value, f"HPR unit {key!r}")
+        if value != expected_value:
+            raise ValueError(
+                f"HPR map unit {key!r} must be {expected_value!r}, got {value!r}"
+            )
 
 
 def _validate_hpr_energy_balance(
@@ -1188,14 +1322,103 @@ def _validate_hpr_energy_balance(
         )
 
 
+def _validate_hpr_cop(
+    point: HprPerformancePoint,
+    convention: str,
+    tolerance: float,
+) -> None:
+    if point.cop is None:
+        return
+    useful_duty = point.q_sink if convention == "heating" else point.q_source
+    residual = abs(point.cop - useful_duty / point.electric_power)
+    if residual > tolerance:
+        raise ValueError(
+            f"HPR performance point {point.name!r} violates {convention} COP"
+        )
+
+
+def _validate_hpr_reference_capacity_point(
+    point: HprPerformancePoint,
+    reference_capacity: float,
+    basis: str,
+    tolerance: float,
+) -> None:
+    useful_duty = point.q_sink if basis == "q_sink" else point.q_source
+    expected = point.load_fraction * reference_capacity
+    if abs(useful_duty - expected) > tolerance:
+        raise ValueError(
+            f"HPR performance point {point.name!r} {basis} must equal "
+            "load_fraction * reference_capacity"
+        )
+
+
+def _validate_hpr_ordered_curves(points: tuple[HprPerformancePoint, ...]) -> None:
+    coordinate_keys = [
+        (
+            point.curve_id,
+            point.source_temperature,
+            point.sink_temperature,
+            point.load_fraction,
+        )
+        for point in points
+    ]
+    if len(set(coordinate_keys)) != len(coordinate_keys):
+        raise ValueError("HPR performance point coordinates must be unique")
+
+    points_by_curve: dict[str, list[HprPerformancePoint]] = {}
+    for point in points:
+        points_by_curve.setdefault(point.curve_id, []).append(point)
+    for curve_id, curve_points in points_by_curve.items():
+        source_temperatures = {point.source_temperature for point in curve_points}
+        sink_temperatures = {point.sink_temperature for point in curve_points}
+        if len(source_temperatures) != 1 or len(sink_temperatures) != 1:
+            raise ValueError(
+                f"HPR curve {curve_id!r} must use one source/sink temperature pair"
+            )
+        load_fractions = [point.load_fraction for point in curve_points]
+        if any(
+            current >= next_value
+            for current, next_value in zip(load_fractions, load_fractions[1:])
+        ):
+            raise ValueError(
+                f"HPR curve {curve_id!r} load_fraction values must be strictly "
+                "increasing"
+            )
+
+
 def _optional_float(value: Any) -> float | None:
     if value is None:
         return None
     return float(value)
 
 
-def _required_mapping(values: Mapping[str, Any], key: str) -> Mapping[str, str]:
+def _required_mapping(values: Mapping[str, Any], key: str) -> Mapping[str, Any]:
     value = values.get(key)
     if not isinstance(value, Mapping):
         raise ValueError(f"HPR performance map {key} must be a mapping")
-    return {str(item_key): str(item_value) for item_key, item_value in value.items()}
+    return dict(value)
+
+
+def _required_string_mapping(values: Mapping[str, Any], key: str) -> Mapping[str, str]:
+    value = _required_mapping(values, key)
+    for item_key, item_value in value.items():
+        if not isinstance(item_key, str) or not isinstance(item_value, str):
+            raise ValueError(f"HPR performance map {key} must be a string mapping")
+    return dict(value)
+
+
+def _required_string(values: Mapping[str, Any], key: str) -> str:
+    value = values.get(key)
+    if not isinstance(value, str):
+        raise ValueError(f"HPR performance map {key} must be a string")
+    return value
+
+
+def _reject_unknown_keys(
+    values: Mapping[str, Any],
+    allowed_keys: set[str],
+    label: str,
+) -> None:
+    unknown_keys = sorted(set(values).difference(allowed_keys))
+    if unknown_keys:
+        raise ValueError(f"{label} includes unknown keys {unknown_keys!r}")

@@ -187,6 +187,7 @@ def _smoke_install_code() -> str:
             mode="heat_pump",
             units=units,
             reference_capacity=150.0,
+            reference_capacity_basis="q_sink",
             interpolation_topology="ordered_part_load_curve",
             thermodynamic_backend="synthetic",
             model_id="smoke",
@@ -203,6 +204,7 @@ def _smoke_install_code() -> str:
                     electric_power=50.0,
                 ),
             ),
+            cop_convention="heating",
         )
         heat_pump_data = OpenUtility.UtilitySystemModelData(
             steam_mains=("MP",),
@@ -244,6 +246,7 @@ def _smoke_install_code() -> str:
             mode="refrigeration",
             units=units,
             reference_capacity=100.0,
+            reference_capacity_basis="q_source",
             interpolation_topology="ordered_part_load_curve",
             thermodynamic_backend="synthetic",
             model_id="smoke",
@@ -260,6 +263,7 @@ def _smoke_install_code() -> str:
                     electric_power=25.0,
                 ),
             ),
+            cop_convention="cooling",
         )
         refrigeration_data = OpenUtility.UtilitySystemModelData(
             steam_mains=("MP",),
