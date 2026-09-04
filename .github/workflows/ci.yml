@@ -121,14 +121,12 @@ jobs:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
           BASE_REPOSITORY: ${{ github.event.pull_request.base.repo.full_name }}
           BUMP_PART: ${{ steps.bump-part.outputs.part }}
-          GH_TOKEN: ${{ github.token }}
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git -c "http.https://github.com/.extraheader=AUTHORIZATION: bearer ${GH_TOKEN}" \
-            fetch --no-tags \
+          git fetch --no-tags \
             "https://github.com/${BASE_REPOSITORY}.git" \
             "${BASE_REF}:refs/remotes/pull-base/${BASE_REF}"
           git show \

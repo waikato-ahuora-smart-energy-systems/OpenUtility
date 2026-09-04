@@ -46,3 +46,11 @@ OpenPinch’s complementary producer design expects external thermal service tem
 **User Input**: "If CI runs on main and passes, the release should run automatically."
 **AI Response**: "Inspected CI and release workflows, release validation scripts, and release documentation. Began updating the release workflow so a successful CI workflow_run on main starts the protected PyPI release path automatically."
 **Context**: GitHub Actions release automation update.
+
+---
+
+## CI Failure Triage
+**Timestamp**: 2026-09-04T19:45:50Z
+**User Input**: "CI failed on version bump"
+**AI Response**: "Inspected GitHub Actions run 33912538030. The bump-version job failed because the workflow added an AUTHORIZATION extraheader while checkout persisted credentials, causing GitHub to reject the fetch with Duplicate header: Authorization. Removed the redundant fetch extraheader from the bump-version job and added a regression test for that workflow shape."
+**Context**: GitHub Actions version bump failure correction.
