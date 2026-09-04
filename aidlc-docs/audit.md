@@ -54,3 +54,11 @@ OpenPinch’s complementary producer design expects external thermal service tem
 **User Input**: "CI failed on version bump"
 **AI Response**: "Inspected GitHub Actions run 33912538030. The bump-version job failed because the workflow added an AUTHORIZATION extraheader while checkout persisted credentials, causing GitHub to reject the fetch with Duplicate header: Authorization. Removed the redundant fetch extraheader from the bump-version job and added a regression test for that workflow shape."
 **Context**: GitHub Actions version bump failure correction.
+
+---
+
+## CI Failure Triage
+**Timestamp**: 2026-09-04T19:49:46Z
+**User Input**: "CI failed on version bump"
+**AI Response**: "Pushed the bump-version fix and observed CI run 33912975799. The original bump-version job passed, but release-version failed during its base-branch fetch because the checkout intentionally did not persist credentials and the custom bearer extraheader was not accepted for Git smart HTTP. Updated release-version to authenticate only the fetch URL with GITHUB_TOKEN, then unset GH_TOKEN before running repository-owned Python code."
+**Context**: GitHub Actions release-version fetch authentication correction.

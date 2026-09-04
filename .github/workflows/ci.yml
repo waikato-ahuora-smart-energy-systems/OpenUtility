@@ -198,10 +198,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          git -c "http.https://github.com/.extraheader=AUTHORIZATION: bearer ${GH_TOKEN}" \
-            fetch --no-tags \
-            "https://github.com/${BASE_REPOSITORY}.git" \
+          git fetch --no-tags \
+            "https://x-access-token:${GH_TOKEN}@github.com/${BASE_REPOSITORY}.git" \
             "${BASE_REF}:refs/remotes/pull-base/${BASE_REF}"
+          unset GH_TOKEN
           git show \
             "refs/remotes/pull-base/${BASE_REF}:pyproject.toml" \
             > "${RUNNER_TEMP}/base-pyproject.toml"

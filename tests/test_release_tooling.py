@@ -56,13 +56,18 @@ def test_github_workflows_run_release_gate_and_publish_with_trusted_publishing()
     assert "patch" in ci
     assert "contents: write" in ci
     assert "GH_TOKEN: ${{ github.token }}" in ci
-    assert "AUTHORIZATION: bearer ${GH_TOKEN}" in ci
+    assert "AUTHORIZATION: bearer ${GH_TOKEN}" not in ci
     bump_job = ci.split("  bump-version:", maxsplit=1)[1].split(
         "  release-version:",
         maxsplit=1,
     )[0]
+    release_version_job = ci.split("  release-version:", maxsplit=1)[1]
     assert "persist-credentials: true" in bump_job
-    assert "AUTHORIZATION: bearer ${GH_TOKEN}" not in bump_job
+    assert (
+        "https://x-access-token:${GH_TOKEN}@github.com/${BASE_REPOSITORY}.git"
+        in release_version_job
+    )
+    assert "unset GH_TOKEN" in release_version_job
     assert "scripts/check_lockfile_version.py" in ci
     assert "scripts/check_release_version.py" in ci
     assert "actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8" in ci
