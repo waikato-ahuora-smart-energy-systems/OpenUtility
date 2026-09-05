@@ -40,6 +40,7 @@ def test_github_workflows_run_release_gate_and_publish_with_trusted_publishing()
     release = (PROJECT_ROOT / ".github" / "workflows" / "release.yml").read_text()
 
     assert 'PYTHON_VERSION: "3.14.2"' in ci
+    assert 'branches: ["main", "develop"]' in ci
     assert "all-tests:" in ci
     assert "needs: all-tests" in ci
     assert "Run all tests with coverage" in ci
@@ -50,6 +51,17 @@ def test_github_workflows_run_release_gate_and_publish_with_trusted_publishing()
     )
     assert "bump-version:" in ci
     assert "release-version:" in ci
+    assert "pr-gate:" in ci
+    pr_gate = ci.split("  pr-gate:", maxsplit=1)[1]
+    assert "always() && github.event_name == 'pull_request'" in pr_gate
+    assert "- all-tests" in pr_gate
+    assert "- release-gate" in pr_gate
+    assert "- bump-version" in pr_gate
+    assert "- release-version" in pr_gate
+    assert 'test "${ALL_TESTS_RESULT}" = "success"' in pr_gate
+    assert 'test "${RELEASE_GATE_RESULT}" = "success"' in pr_gate
+    assert 'test "${BUMP_VERSION_RESULT}" = "success"' in pr_gate
+    assert 'test "${RELEASE_VERSION_RESULT}" = "success"' in pr_gate
     assert "bump-my-version==1.2.3" in ci
     assert "major" in ci
     assert "minor" in ci

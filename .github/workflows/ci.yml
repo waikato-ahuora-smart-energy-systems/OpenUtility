@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "develop"]
   pull_request:
     branches: ["main", "develop"]
     types: [opened, synchronize, reopened, ready_for_review, edited, labeled, unlabeled]
@@ -207,3 +207,39 @@ jobs:
             > "${RUNNER_TEMP}/base-pyproject.toml"
           uv run --no-sync python scripts/check_release_version.py \
             --base-pyproject "${RUNNER_TEMP}/base-pyproject.toml"
+
+  pr-gate:
+    if: ${{ always() && github.event_name == 'pull_request' && github.event.pull_request.draft == false }}
+    needs:
+      - all-tests
+      - release-gate
+      - bump-version
+      - release-version
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every applicable validation job
+        env:
+          ALL_TESTS_RESULT: ${{ needs.all-tests.result }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BUMP_VERSION_RESULT: ${{ needs.bump-version.result }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          RELEASE_GATE_RESULT: ${{ needs.release-gate.result }}
+          RELEASE_VERSION_RESULT: ${{ needs.release-version.result }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          test "${ALL_TESTS_RESULT}" = "success"
+          test "${RELEASE_GATE_RESULT}" = "success"
+
+          if [ "${BASE_REF}" = "main" ]; then
+            if [ "${HEAD_REPO}" = "${REPOSITORY}" ]; then
+              test "${BUMP_VERSION_RESULT}" = "success"
+            else
+              test "${BUMP_VERSION_RESULT}" = "skipped"
+            fi
+            test "${RELEASE_VERSION_RESULT}" = "success"
+          else
+            test "${BUMP_VERSION_RESULT}" = "skipped"
+            test "${RELEASE_VERSION_RESULT}" = "skipped"
+          fi

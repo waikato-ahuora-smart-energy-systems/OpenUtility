@@ -31,6 +31,8 @@ def test_release_strategy_docs_describe_versioning_and_pypi_environment() -> Non
     assert "major" in docs
     assert "minor" in docs
     assert "patch" in docs
+    assert "pr-gate" in docs
+    assert "requires pull requests" in docs
     assert "environment: pypi" in docs
 
 
