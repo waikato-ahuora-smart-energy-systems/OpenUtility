@@ -70,3 +70,11 @@ OpenPinch’s complementary producer design expects external thermal service tem
 **User Input**: "Failed"
 **AI Response**: "Inspected Release run 33917477453. After the pypi environment was updated to allow main and the publish job was approved, the rerun failed because the validate job uploaded openutility-dist-${{ github.run_id }}-${{ github.run_attempt }} on attempt 1 while the rerun publish job looked for attempt 2. Updated the release artifact name to use only github.run_id so rerun-failed-jobs can download the previously verified distributions."
 **Context**: GitHub Actions release artifact naming correction.
+
+---
+
+## Repository Protection Setup
+**Timestamp**: 2026-09-05T20:33:17Z
+**User Input**: "I want to set up the repo to protect main and force PR into main after tests run. Use the same workflow approach as OpenPinch."
+**AI Response**: "Compared OpenUtility with OpenPinch's PR workflow model. Added an aggregate pr-gate job to the CI workflow so GitHub branch protection can require one stable check that verifies all applicable tests, release-gate, version-bump, and release-version jobs before merging pull requests to main."
+**Context**: GitHub Actions pull-request protection workflow update.
