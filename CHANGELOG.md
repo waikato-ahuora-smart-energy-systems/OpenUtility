@@ -1,6 +1,20 @@
 # Changelog
 
-## 0.1.0 - Current Alpha Release
+## 0.1.2 - Unreleased
+
+- Align Read the Docs builds and theme configuration with OpenPinch.
+- Add a combined PR gate for protected merges into `main`.
+- Run installed-wheel smoke tests with isolated Python outside the checkout and
+  verify that imports belong to the installed distribution.
+- Include release tooling in source distributions and document PyPI installation.
+- Link package metadata and the README to the hosted Read the Docs site.
+
+## 0.1.1 - 2026-09-04
+
+- Stabilize release artifact names so publication can retry using distributions
+  verified in an earlier attempt of the same workflow run.
+
+## 0.1.0 - Initial Alpha Release
 
 OpenUtility `0.1.0` establishes a tested reusable package for Pyomo-based
 utility-system optimization.

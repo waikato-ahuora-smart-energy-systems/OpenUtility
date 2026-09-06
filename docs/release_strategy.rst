@@ -19,7 +19,8 @@ Pull requests run the full release gate on Python 3.14.2. The gate checks:
 * wheel metadata and contents;
 * ``twine check``;
 * dependency audit;
-* fresh wheel-install smoke tests with HiGHS solves.
+* fresh wheel-install smoke tests with HiGHS solves, using isolated Python
+  outside the checkout and checking that imports come from the installed wheel.
 
 CI also exposes an explicit ``pr-gate`` job for GitHub branch protection. That
 job depends on the complete pytest suite, the full release gate, and the

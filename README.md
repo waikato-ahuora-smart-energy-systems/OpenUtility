@@ -73,13 +73,19 @@ remains outside OpenUtility.
 
 ## Install
 
-From a checkout:
+From PyPI (Python `>=3.14.2`):
+
+```bash
+python -m pip install OpenUtility
+```
+
+For development from a checkout:
 
 ```bash
 python -m pip install -e ".[dev,docs,release]"
 ```
 
-For normal package use:
+To install a local checkout:
 
 ```bash
 python -m pip install .
@@ -138,11 +144,13 @@ python tools/release_check.py --skip-audit --skip-smoke-install
 
 ## Documentation
 
+Read the [online documentation](https://openutility.readthedocs.io/en/latest/).
+
 Build docs locally:
 
 ```bash
 python -m sphinx -W -b html docs /tmp/openutility-docs-html
 ```
 
-OpenUtility `0.1.0` is an alpha release. Public reusable APIs are exposed
+OpenUtility is alpha-stage software. Public reusable APIs are exposed
 through `OpenUtility.__all__` and `OpenUtility.utility_system.__all__`.
