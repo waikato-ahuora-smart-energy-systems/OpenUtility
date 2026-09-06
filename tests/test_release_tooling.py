@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import ast
+import importlib.util
 from pathlib import Path
+import sys
 import tomllib
 
+import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
@@ -40,6 +43,7 @@ def test_github_workflows_run_release_gate_and_publish_with_trusted_publishing()
     release = (PROJECT_ROOT / ".github" / "workflows" / "release.yml").read_text()
 
     assert 'PYTHON_VERSION: "3.14.2"' in ci
+    assert 'branches: ["main", "develop"]' in ci
     assert "all-tests:" in ci
     assert "needs: all-tests" in ci
     assert "Run all tests with coverage" in ci
@@ -50,6 +54,17 @@ def test_github_workflows_run_release_gate_and_publish_with_trusted_publishing()
     )
     assert "bump-version:" in ci
     assert "release-version:" in ci
+    assert "pr-gate:" in ci
+    pr_gate = ci.split("  pr-gate:", maxsplit=1)[1]
+    assert "always() && github.event_name == 'pull_request'" in pr_gate
+    assert "- all-tests" in pr_gate
+    assert "- release-gate" in pr_gate
+    assert "- bump-version" in pr_gate
+    assert "- release-version" in pr_gate
+    assert 'test "${ALL_TESTS_RESULT}" = "success"' in pr_gate
+    assert 'test "${RELEASE_GATE_RESULT}" = "success"' in pr_gate
+    assert 'test "${BUMP_VERSION_RESULT}" = "success"' in pr_gate
+    assert 'test "${RELEASE_VERSION_RESULT}" = "success"' in pr_gate
     assert "bump-my-version==1.2.3" in ci
     assert "major" in ci
     assert "minor" in ci
@@ -140,6 +155,7 @@ def test_release_helper_scripts_are_parseable_and_packaged() -> None:
     sdist_includes = pyproject["tool"]["hatch"]["build"]["targets"]["sdist"]["include"]
     assert "/.bumpversion.toml" in sdist_includes
     assert "/scripts" in sdist_includes
+    assert "/tools" in sdist_includes
 
     for script_name in (
         "check_lockfile_version.py",
@@ -148,3 +164,41 @@ def test_release_helper_scripts_are_parseable_and_packaged() -> None:
     ):
         source = (PROJECT_ROOT / "scripts" / script_name).read_text()
         ast.parse(source)
+
+
+def test_wheel_smoke_ignores_checkout_and_pythonpath(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """Exercise the smoke subprocess with an import trap on PYTHONPATH."""
+    spec = importlib.util.spec_from_file_location(
+        "release_check", PROJECT_ROOT / "tools" / "release_check.py"
+    )
+    assert spec is not None and spec.loader is not None
+    release_check = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(release_check)
+
+    (tmp_path / "checkout_import_trap.py").write_text(
+        'raise RuntimeError("Imported from PYTHONPATH")\n'
+    )
+    monkeypatch.setenv("PYTHONPATH", str(tmp_path))
+    smoke_code = (
+        "import importlib.util, pathlib, sys\n"
+        f"assert pathlib.Path.cwd() != pathlib.Path({str(PROJECT_ROOT)!r})\n"
+        "assert sys.flags.isolated\n"
+        "assert importlib.util.find_spec('checkout_import_trap') is None\n"
+    )
+    monkeypatch.setattr(release_check, "_smoke_install_code", lambda: smoke_code)
+    monkeypatch.setattr(release_check.shutil, "which", lambda _: None)
+    run = release_check._run
+    completed = []
+
+    def run_without_install(command, **kwargs):
+        # Avoid network/venv creation here; the full release gate tests those.
+        if "-c" in command:
+            run([sys.executable, *command[1:]], **kwargs)
+            completed.append(True)
+
+    monkeypatch.setattr(release_check, "_run", run_without_install)
+    release_check._smoke_install(tmp_path / "unused.whl")
+    assert completed == [True]

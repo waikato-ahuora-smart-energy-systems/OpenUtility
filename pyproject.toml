@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "OpenUtility"
-version = "0.1.1"
+version = "0.1.2"
 description = "Pyomo-based utility-system optimization model and reporting helpers."
 readme = "README.md"
 requires-python = ">=3.14.2"
@@ -43,7 +43,7 @@ dependencies = [
 
 [project.urls]
 Changelog = "https://github.com/waikato-ahuora-smart-energy-systems/OpenUtility/blob/main/CHANGELOG.md"
-Documentation = "https://github.com/waikato-ahuora-smart-energy-systems/OpenUtility/tree/main/docs"
+Documentation = "https://openutility.readthedocs.io/en/latest/"
 Issues = "https://github.com/waikato-ahuora-smart-energy-systems/OpenUtility/issues"
 Repository = "https://github.com/waikato-ahuora-smart-energy-systems/OpenUtility"
 
@@ -55,7 +55,8 @@ notebook = [
   "nbformat>=5",
 ]
 docs = [
-  "sphinx>=7",
+  "sphinx>=9.1.0",
+  "sphinx-rtd-theme>=3.1.0",
 ]
 dev = [
   "mypy>=1.18",
@@ -82,6 +83,7 @@ include = [
   "/pyproject.toml",
   "/scripts",
   "/tests",
+  "/tools",
   "/uv.lock",
 ]
 

@@ -70,3 +70,66 @@ OpenPinch’s complementary producer design expects external thermal service tem
 **User Input**: "Failed"
 **AI Response**: "Inspected Release run 33917477453. After the pypi environment was updated to allow main and the publish job was approved, the rerun failed because the validate job uploaded openutility-dist-${{ github.run_id }}-${{ github.run_attempt }} on attempt 1 while the rerun publish job looked for attempt 2. Updated the release artifact name to use only github.run_id so rerun-failed-jobs can download the previously verified distributions."
 **Context**: GitHub Actions release artifact naming correction.
+
+---
+
+## Repository Protection Setup
+**Timestamp**: 2026-09-05T20:33:17Z
+**User Input**: "I want to set up the repo to protect main and force PR into main after tests run. Use the same workflow approach as OpenPinch."
+**AI Response**: "Compared OpenUtility with OpenPinch's PR workflow model. Added an aggregate pr-gate job to the CI workflow so GitHub branch protection can require one stable check that verifies all applicable tests, release-gate, version-bump, and release-version jobs before merging pull requests to main."
+**Context**: GitHub Actions pull-request protection workflow update.
+
+---
+
+## ReadTheDocs Formatting Alignment
+**Timestamp**: 2026-09-06T03:02:43Z
+**User Input**: "Use the same RTD formatting as OpenPinch"
+**AI Response**: "Compared OpenUtility and OpenPinch ReadTheDocs and Sphinx configuration. Updated OpenUtility to use the same docs/requirements.txt RTD install pattern, sphinx-rtd-theme HTML formatting, autosummary/viewcode extensions, dynamic pyproject.toml version loading, and tracked Sphinx asset directories."
+**Context**: Documentation build and ReadTheDocs configuration update.
+
+## Publishing Readiness Assessment
+**Timestamp**: 2026-09-06T03:11:10Z
+**User Input**: "What is needed before publishing this package to Pypi and RTD?"
+**AI Response**: "Reviewed package metadata, CI and release workflows, RTD configuration, release tooling, and current official publishing documentation. Local offline release checks passed: 187 tests, 90.24% coverage, Ruff, mypy, Sphinx, source and wheel builds, wheel inspection, and twine check. Dependency audit and fresh dependency installation were not run. Found checkout-shadowed wheel smoke testing, stale 0.1.0 release documentation against package 0.1.2, GitHub docs metadata URL, and omitted tools directory in source distribution. External PyPI, RTD, and GitHub account settings could not be verified; GitHub CLI is unauthenticated and direct network resolution is unavailable. Recommended verifying trusted publisher and environment settings, RTD import and successful build, final version availability, and a full online release gate before publishing."
+**Context**: Assessment only; no implementation changes or publication.
+
+---
+
+## Release Readiness Implementation
+**Timestamp**: 2026-09-06T03:26:00Z
+**User Input**: "go"
+**AI Response**: "Proceeding with the five previously proposed readiness steps. Loaded workflow rules and existing extension choices; security/resiliency rules skipped because disabled, Partial PBT not applicable to subprocess and metadata corrections. Created concise requirements and checkbox plans. PyPI confirms 0.1.1 published and 0.1.2 available; RTD public API returns no openutility project. GitHub CLI unauthenticated and Computer Use permissions unavailable."
+**Context**: Approved implementation and validation; public API unchanged.
+
+---
+
+## Read the Docs Project Confirmation
+**Timestamp**: 2026-09-06T03:28:43Z
+**User Input**: "[https://app.readthedocs.org/projects/openutility/](https://app.readthedocs.org/projects/openutility/)"
+**AI Response**: "Confirmed RTD project from supplied link. Latest build 34413757 succeeded for main commit 22ff10f7. Updated package metadata and README to the confirmed documentation URL. First full gate encountered scaffold test depending on historical state wording; preserved installation history in state file and continued validation."
+**Context**: User supplied project location, superseding earlier API lookup.
+
+---
+
+## Release Readiness Completion
+**Timestamp**: 2026-09-06T03:31:47Z
+**AI Response**: "Implemented isolated installed-wheel smoke testing with regression coverage, packaged the release tool, refreshed release notes and installation instructions, and linked to the confirmed RTD site. Full online release gate passed: 188 tests, 90.24% coverage, Ruff, mypy, strict Sphinx, source/wheel builds and checks, no known dependency vulnerabilities, and fresh-wheel HiGHS/HPR solves. Public GitHub Release run 33925200883 and RTD build 34413757 succeeded on existing main commit 22ff10f7. Recorded per-rule extension applicability and build/test instructions. Changes remain local on develop; no publishing or permission changes performed."
+**Context**: Approved readiness work complete; standard PR/CI/environment release path remains.
+
+---
+
+## Remaining Release Steps
+**Timestamp**: 2026-09-06T03:32:40Z
+**User Input**: "what else?"
+**AI Response**: "Checked local changes and release workflow. No additional code blockers identified by the completed gate. Remaining work is final release-date wording, commit/push and reviewed PR into main, required publishing approval, then verification of the actual PyPI installation and matching RTD build. Private GitHub protection/publisher settings still need authenticated verification. Broader Python/platform coverage is optional follow-up."
+**Context**: Readiness follow-up; no publication performed.
+
+---
+
+## Commit Release Readiness Changes
+**Timestamp**: 2026-09-06T03:33:12Z
+**User Input**: "commit"
+**AI Response**: "Preparing a local commit of the verified release-readiness changes on develop. Reviewed changed files and whitespace validation; prior full release gate passed with 188 tests and 90.24% coverage. Commit scope includes release tooling, regression coverage, package metadata, user documentation, and AI-DLC records. No push or publication requested."
+**Context**: User-authorized local Git commit.
+
+---

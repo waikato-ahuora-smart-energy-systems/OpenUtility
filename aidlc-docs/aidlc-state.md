@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Brownfield
 - **Start Date**: 2026-09-03
-- **Current Stage**: AI-DLC v1 scaffold installed
+- **Current Stage**: Release readiness validated locally
 
 ## Workspace State
 - **Existing Code**: Yes
@@ -27,6 +27,16 @@
 
 ## Progress
 
-- [x] AI-DLC V1 INSTALLATION - Installed the v1 rule scaffold matching the
+- [x] AI-DLC v1 scaffold installed - Installed the v1 rule scaffold matching the
   OpenPinch repository layout: `AGENTS.md`, `.aidlc-rule-details/`, and
   OpenUtility-specific `aidlc-docs/` state tracking.
+
+## Release Readiness Progress
+
+- [x] Workspace detection and prior assessment loaded.
+- [x] Requirements and workflow/code plan approved by user "go" in context.
+- [x] Code generation.
+- [x] Build and test: full online gate passed.
+- [x] Public PyPI and RTD verification; both have successful existing workflows.
+- Administrative settings remain unverified without login; no setup changes needed from public evidence.
+- Changes remain local on develop, ready for the established PR/release workflow.

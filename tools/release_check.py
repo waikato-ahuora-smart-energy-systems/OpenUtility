@@ -143,17 +143,29 @@ def _smoke_install(wheel: Path) -> None:
             _run(["uv", "pip", "install", "--python", str(python), str(wheel)])
         else:
             _run([str(python), "-m", "pip", "install", str(wheel)])
-        _run([str(python), "-c", _smoke_install_code()])
+        _run(
+            [str(python), "-I", "-c", _smoke_install_code()],
+            cwd=Path(temp_dir),
+        )
 
 
 def _smoke_install_code() -> str:
     return textwrap.dedent(
         """
+        from importlib.metadata import distribution
+        from pathlib import Path
+
         import pyomo.environ as pyo
         from pyomo.environ import SolverFactory
 
         import OpenUtility
 
+        installed_init = distribution("OpenUtility").locate_file(
+            "OpenUtility/__init__.py"
+        )
+        assert Path(OpenUtility.__file__).resolve() == Path(installed_init).resolve(), (
+            "Smoke test must import OpenUtility from the installed wheel"
+        )
         assert "pyomo_utility_system_solver" in OpenUtility.__all__
         assert SolverFactory("appsi_highs").available(exception_flag=False)
 
@@ -315,9 +327,9 @@ def _venv_python(venv_dir: Path) -> Path:
     return venv_dir / "bin" / "python"
 
 
-def _run(command: list[str]) -> None:
+def _run(command: list[str], *, cwd: Path = PROJECT_ROOT) -> None:
     print("$", " ".join(command), flush=True)
-    subprocess.run(command, cwd=PROJECT_ROOT, check=True)
+    subprocess.run(command, cwd=cwd, check=True)
 
 
 def _require(condition: bool, message: str) -> None:

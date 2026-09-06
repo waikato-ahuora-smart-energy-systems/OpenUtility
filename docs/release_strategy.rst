@@ -19,11 +19,13 @@ Pull requests run the full release gate on Python 3.14.2. The gate checks:
 * wheel metadata and contents;
 * ``twine check``;
 * dependency audit;
-* fresh wheel-install smoke tests with HiGHS solves.
+* fresh wheel-install smoke tests with HiGHS solves, using isolated Python
+  outside the checkout and checking that imports come from the installed wheel.
 
-CI also exposes an explicit ``all-tests`` job for GitHub branch protection. That
-job runs the complete pytest suite with the package coverage threshold, and the
-broader ``release-gate`` job depends on it.
+CI also exposes an explicit ``pr-gate`` job for GitHub branch protection. That
+job depends on the complete pytest suite, the full release gate, and the
+applicable release-version checks. Configure ``main`` so pull requests cannot be
+merged until ``pr-gate`` succeeds.
 
 For same-repository pull requests targeting ``main``, CI also maintains the
 candidate release version. The version bump is selected from labels named
@@ -39,11 +41,13 @@ must provide a forward version manually before merging into ``main``.
 Main branch
 -----------
 
-Pushes to ``main`` run the same release gate in CI. When that CI run completes
-successfully for a push event on ``main``, the ``Release`` workflow starts
-automatically from the exact commit SHA that CI tested. A releasable commit must
-therefore have a synchronized ``pyproject.toml``, ``uv.lock``, and
-``.bumpversion.toml``.
+Protect ``main`` with a repository ruleset or branch protection rule that
+requires pull requests, requires the ``pr-gate`` status check, blocks force
+pushes, and prevents deletion. Pushes to ``main`` should come from merges only.
+When the post-merge CI run completes successfully for a push event on ``main``,
+the ``Release`` workflow starts automatically from the exact commit SHA that CI
+tested. A releasable commit must therefore have a synchronized
+``pyproject.toml``, ``uv.lock``, and ``.bumpversion.toml``.
 
 Publishing
 ----------
