@@ -165,3 +165,10 @@ OpenPinch’s complementary producer design expects external thermal service tem
 **Context**: Release execution authorized; no protection bypass or self-approval.
 
 ---
+
+## Publication Discovered and Verified
+**Timestamp**: 2026-09-06T03:50:16Z
+**AI Response**: "Committed and pushed final release records as d057e13. Fresh origin/main showed PR #2 had already merged the release as 34f1fac; public PyPI serves 0.1.2 and Release run 34009511176 succeeded. Verified a fresh OpenUtility==0.1.2 installation from PyPI with isolated imports and all HiGHS/HPR smoke tests. RTD latest build 34413863 succeeded on the same main commit. Updated release records and synchronized develop with origin/main before preparing a draft documentation PR. A ready documentation PR would trigger the existing automatic patch bump, so the already-published 0.1.2 release must not be repeated."
+**Context**: Adapted authorized release sequence to externally completed publication; no additional release or review bypass.
+
+---

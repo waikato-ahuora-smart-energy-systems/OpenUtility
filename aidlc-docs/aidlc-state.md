@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Brownfield
 - **Start Date**: 2026-09-03
-- **Current Stage**: Release 0.1.2 handoff in progress
+- **Current Stage**: Release 0.1.2 published and verified
 
 ## Workspace State
 - **Existing Code**: Yes
@@ -39,7 +39,7 @@
 - [x] Build and test: full online gate passed.
 - [x] Public PyPI and RTD verification; both have successful existing workflows.
 - Administrative settings remain unverified without login; no setup changes needed from public evidence.
-- Release-readiness commit 98fd2d2 is on develop; final release records are being prepared for the PR workflow.
+- Release-readiness commit 98fd2d2 was merged by PR #2 in 34f1fac; PyPI 0.1.2 and RTD latest are verified.
 
 ## Main Branch Protection Setup
 
@@ -54,8 +54,9 @@ Browser ruleset: https://github.com/waikato-ahuora-smart-energy-systems/OpenUtil
 ## Release 0.1.2 Handoff
 
 - [x] Finalize release date.
-- [ ] Commit and push release records.
-- [ ] Open PR and verify CI.
-- [ ] Required review and protected merge.
-- [ ] PyPI publication and installation verification.
-- [ ] RTD release build verification.
+- [x] Commit and push finalized release notes (d057e13).
+- [x] Release PR #2 already merged; its CI and release workflow succeeded.
+- [ ] Draft PR for release records; later readiness triggers the existing patch bump workflow.
+- [x] Existing release merge observed; current main rules remain enforced.
+- [x] PyPI 0.1.2 publication and fresh isolated installation verified, including all solver smoke tests.
+- [x] RTD latest build 34413863 succeeded on release commit 34f1fac.
