@@ -78,3 +78,11 @@ OpenPinch’s complementary producer design expects external thermal service tem
 **User Input**: "I want to set up the repo to protect main and force PR into main after tests run. Use the same workflow approach as OpenPinch."
 **AI Response**: "Compared OpenUtility with OpenPinch's PR workflow model. Added an aggregate pr-gate job to the CI workflow so GitHub branch protection can require one stable check that verifies all applicable tests, release-gate, version-bump, and release-version jobs before merging pull requests to main."
 **Context**: GitHub Actions pull-request protection workflow update.
+
+---
+
+## ReadTheDocs Formatting Alignment
+**Timestamp**: 2026-09-06T03:02:43Z
+**User Input**: "Use the same RTD formatting as OpenPinch"
+**AI Response**: "Compared OpenUtility and OpenPinch ReadTheDocs and Sphinx configuration. Updated OpenUtility to use the same docs/requirements.txt RTD install pattern, sphinx-rtd-theme HTML formatting, autosummary/viewcode extensions, dynamic pyproject.toml version loading, and tracked Sphinx asset directories."
+**Context**: Documentation build and ReadTheDocs configuration update.

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import tomllib
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -12,8 +13,23 @@ def test_readthedocs_config_builds_sphinx_docs() -> None:
     assert "configuration: docs/conf.py" in config
     assert "fail_on_warning: true" in config
     assert 'python: "3.14"' in config
-    assert "extra_requirements:" in config
-    assert "- docs" in config
+    assert "requirements: docs/requirements.txt" in config
+
+
+def test_docs_configuration_uses_readthedocs_theme_formatting() -> None:
+    config = (PROJECT_ROOT / "docs" / "conf.py").read_text()
+    requirements = (PROJECT_ROOT / "docs" / "requirements.txt").read_text()
+    pyproject = tomllib.loads((PROJECT_ROOT / "pyproject.toml").read_text())
+    docs_extra = pyproject["project"]["optional-dependencies"]["docs"]
+
+    assert "sphinx.ext.autosummary" in config
+    assert "sphinx.ext.viewcode" in config
+    assert 'html_theme = "sphinx_rtd_theme"' in config
+    assert "release = _read_version()" in config
+    assert "sphinx>=9.1,<10" in requirements
+    assert "sphinx-rtd-theme>=3.1,<4" in requirements
+    assert "sphinx>=9.1.0" in docs_extra
+    assert "sphinx-rtd-theme>=3.1.0" in docs_extra
 
 
 def test_docs_index_prioritizes_reusable_package_api() -> None:
