@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Brownfield
 - **Start Date**: 2026-09-03
-- **Current Stage**: Automatic versioning implemented and validated locally
+- **Current Stage**: Merge-review rules saved; GitHub latest release corrected to v0.1.2
 
 ## Workspace State
 - **Existing Code**: Yes
@@ -75,3 +75,12 @@ Plan: construction/plans/public-notebook-examples-plan.md
 - [x] Implementation and validation: 223 tests, real bump integration, immutable tag checks, Actionlint, packaging, and dependency audit passed.
 
 Plan: construction/plans/automatic-versioning-plan.md
+
+## Maintainer Merge Reviews
+
+- [x] User clarified merge reviews only.
+- [x] Drafted CODEOWNERS and separate review/core ruleset forms; existing live protection unchanged.
+- [x] Save the ruleset migration after action-time confirmation; verified active main-reviews 22378749 and core main 22368425.
+- [ ] Deliver CODEOWNERS through PR and verify effective protection.
+
+Plan: construction/plans/maintainer-merge-review-plan.md
