@@ -13,3 +13,14 @@ Approved scope: five-step readiness assessment followed by user "go".
 
 Text workflow: workspace assessment -> requirements -> plan -> changes -> checks -> publishing readiness.
 No infrastructure or service architecture changes. Preserve established publishing protections.
+
+## Release execution
+
+User "Go" approves the release handoff sequence already presented.
+
+- [x] Finalize 0.1.2 release date and prepare audit/state updates.
+- [ ] Commit and push remaining changes to develop.
+- [ ] Open develop-to-main PR and verify CI.
+- [ ] Obtain required approving review and merge through branch protections.
+- [ ] Complete applicable PyPI environment approval.
+- [ ] Verify PyPI 0.1.2 installation and matching RTD build.

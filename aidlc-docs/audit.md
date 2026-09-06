@@ -133,3 +133,35 @@ OpenPinch’s complementary producer design expects external thermal service tem
 **Context**: User-authorized local Git commit.
 
 ---
+
+## Main Branch Protection
+**Timestamp**: 2026-09-06T03:39:59Z
+**User Input**: "Add a protected push to main "
+**AI Response**: "Inspected public GitHub branch state: main was unprotected. Signed-in browser revealed active ruleset 22368425 named main had no branch targets. Configured exact refs/heads/main inclusion, GitHub Actions pr-gate requirement, and up-to-date branches, preserving required PRs, deletion and force-push blocking, existing review settings, and empty bypass list. Clicked Save changes; GitHub requires fresh Confirm access authentication. Form remains pending user authentication; protection is not yet verified as saved."
+**Context**: External branch protection setup; awaiting GitHub authentication, no merge/push/publication performed.
+
+---
+
+## Main Branch Protection Verified
+**Timestamp**: 2026-09-06T03:43:43Z
+**User Input**: "done"
+**AI Response**: "Verified saved active ruleset 22368425 targets main with an empty bypass list. GitHub API reports protected=true and active deletion, non-fast-forward, pull-request, and required-status-check rules. Existing PR requirements retain one approving review and Code Owner approval where applicable. pr-gate is bound to GitHub Actions integration 15368 with strict up-to-date policy. No push or merge performed."
+**Context**: User completed GitHub authentication; requested main protection is active and verified.
+
+---
+
+## Release Handoff Status
+**Timestamp**: 2026-09-06T03:45:48Z
+**User Input**: "what else?"
+**AI Response**: "Branch protection is complete. GitHub has no open PR targeting main. Local changes are limited to protection state/audit records; changelog still marks 0.1.2 Unreleased. Remaining steps: finalize release date, commit/push remaining records, open develop-to-main PR, satisfy pr-gate and required review, merge, complete any pypi environment approval, then verify published package and matching RTD build."
+**Context**: Read-only release handoff assessment; no PR, push, or merge performed.
+
+---
+
+## Release 0.1.2 Handoff Authorization
+**Timestamp**: 2026-09-06T03:47:07Z
+**User Input**: "Go"
+**AI Response**: "Proceeding with the approved release sequence: finalize changelog, commit/push develop, open PR into main, follow CI, retain required independent review, merge when protections permit, complete applicable publication approval, and verify PyPI and RTD. Finalized 0.1.2 changelog date to 2026-09-06 and created release execution checkboxes."
+**Context**: Release execution authorized; no protection bypass or self-approval.
+
+---

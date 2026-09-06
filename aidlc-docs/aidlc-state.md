@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Brownfield
 - **Start Date**: 2026-09-03
-- **Current Stage**: Release readiness validated locally
+- **Current Stage**: Release 0.1.2 handoff in progress
 
 ## Workspace State
 - **Existing Code**: Yes
@@ -39,4 +39,23 @@
 - [x] Build and test: full online gate passed.
 - [x] Public PyPI and RTD verification; both have successful existing workflows.
 - Administrative settings remain unverified without login; no setup changes needed from public evidence.
-- Changes remain local on develop, ready for the established PR/release workflow.
+- Release-readiness commit 98fd2d2 is on develop; final release records are being prepared for the PR workflow.
+
+## Main Branch Protection Setup
+
+- [x] Inspect existing rules: active ruleset main had no targets.
+- [x] Configure main target, GitHub Actions pr-gate, and up-to-date checks.
+- [x] Preserve PR, deletion, force-push, review, and bypass settings.
+- [x] Complete GitHub Confirm access authentication and save.
+- [x] Verify effective protection via GitHub API: main protected, four active rules, one required PR approval, GitHub Actions pr-gate, and strict up-to-date checks.
+
+Browser ruleset: https://github.com/waikato-ahuora-smart-energy-systems/OpenUtility/settings/rules/22368425
+
+## Release 0.1.2 Handoff
+
+- [x] Finalize release date.
+- [ ] Commit and push release records.
+- [ ] Open PR and verify CI.
+- [ ] Required review and protected merge.
+- [ ] PyPI publication and installation verification.
+- [ ] RTD release build verification.
