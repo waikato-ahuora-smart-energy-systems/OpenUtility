@@ -2,8 +2,9 @@ Notebook Workflow
 =================
 
 OpenUtility is designed to work cleanly from a small notebook or script. The
-public package does not ship replication notebooks; test coverage uses a
-minimal reproducible example that builds package-owned model data directly.
+public tutorials in :doc:`examples` run independently against the installed
+package. Private replication notebooks remain outside the public package.
+The minimal reproducible example below builds package-owned model data directly.
 
 Minimal notebook
 ----------------

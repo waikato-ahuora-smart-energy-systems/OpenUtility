@@ -133,3 +133,95 @@ OpenPinch’s complementary producer design expects external thermal service tem
 **Context**: User-authorized local Git commit.
 
 ---
+
+## Main Branch Protection
+**Timestamp**: 2026-09-06T03:39:59Z
+**User Input**: "Add a protected push to main "
+**AI Response**: "Inspected public GitHub branch state: main was unprotected. Signed-in browser revealed active ruleset 22368425 named main had no branch targets. Configured exact refs/heads/main inclusion, GitHub Actions pr-gate requirement, and up-to-date branches, preserving required PRs, deletion and force-push blocking, existing review settings, and empty bypass list. Clicked Save changes; GitHub requires fresh Confirm access authentication. Form remains pending user authentication; protection is not yet verified as saved."
+**Context**: External branch protection setup; awaiting GitHub authentication, no merge/push/publication performed.
+
+---
+
+## Main Branch Protection Verified
+**Timestamp**: 2026-09-06T03:43:43Z
+**User Input**: "done"
+**AI Response**: "Verified saved active ruleset 22368425 targets main with an empty bypass list. GitHub API reports protected=true and active deletion, non-fast-forward, pull-request, and required-status-check rules. Existing PR requirements retain one approving review and Code Owner approval where applicable. pr-gate is bound to GitHub Actions integration 15368 with strict up-to-date policy. No push or merge performed."
+**Context**: User completed GitHub authentication; requested main protection is active and verified.
+
+---
+
+## Release Handoff Status
+**Timestamp**: 2026-09-06T03:45:48Z
+**User Input**: "what else?"
+**AI Response**: "Branch protection is complete. GitHub has no open PR targeting main. Local changes are limited to protection state/audit records; changelog still marks 0.1.2 Unreleased. Remaining steps: finalize release date, commit/push remaining records, open develop-to-main PR, satisfy pr-gate and required review, merge, complete any pypi environment approval, then verify published package and matching RTD build."
+**Context**: Read-only release handoff assessment; no PR, push, or merge performed.
+
+---
+
+## Release 0.1.2 Handoff Authorization
+**Timestamp**: 2026-09-06T03:47:07Z
+**User Input**: "Go"
+**AI Response**: "Proceeding with the approved release sequence: finalize changelog, commit/push develop, open PR into main, follow CI, retain required independent review, merge when protections permit, complete applicable publication approval, and verify PyPI and RTD. Finalized 0.1.2 changelog date to 2026-09-06 and created release execution checkboxes."
+**Context**: Release execution authorized; no protection bypass or self-approval.
+
+---
+
+## Publication Discovered and Verified
+**Timestamp**: 2026-09-06T03:50:16Z
+**AI Response**: "Committed and pushed final release records as d057e13. Fresh origin/main showed PR #2 had already merged the release as 34f1fac; public PyPI serves 0.1.2 and Release run 34009511176 succeeded. Verified a fresh OpenUtility==0.1.2 installation from PyPI with isolated imports and all HiGHS/HPR smoke tests. RTD latest build 34413863 succeeded on the same main commit. Updated release records and synchronized develop with origin/main before preparing a draft documentation PR. A ready documentation PR would trigger the existing automatic patch bump, so the already-published 0.1.2 release must not be repeated."
+**Context**: Adapted authorized release sequence to externally completed publication; no additional release or review bypass.
+
+---
+
+## Release Records Draft PR
+**Timestamp**: 2026-09-06T03:52:00Z
+**AI Response**: "Pushed synchronized develop commit 4b2804c and created draft PR #3, Finalize 0.1.2 release records, targeting main. Verified the GitHub UI shows Draft and the expected title, branch pair, and documentation-only scope. Public release 0.1.2 is already verified on PyPI and RTD; this draft preserves remaining release records for the next planned release without triggering the ready-PR patch bump."
+**Context**: https://github.com/waikato-ahuora-smart-energy-systems/OpenUtility/pull/3
+
+---
+
+## Notebook Examples Assessment
+**Timestamp**: 2026-09-06T05:30:40Z
+**User Input**: "is there a good set of jupyter notebook examples"
+**AI Response**: "Inspected tracked notebooks, public notebook-workflow documentation, and test examples. Three notebooks exist under case_study for computational-performance, integrated-hot-oil, and steam-main replication, outside the public package boundary. Public documentation contains a minimal notebook-style code snippet, but no public tutorial notebook collection. Recommended a progressive, self-contained public suite covering quick start, utility investment/dispatch, scenarios/costs, heat pumps, refrigeration/multiple periods, and advanced decomposition, with executable CI checks and RTD links."
+**Context**: Assessment only; no notebook generation or execution performed.
+
+---
+
+## Public Notebook Examples Authorization
+**Timestamp**: 2026-09-06T05:41:55Z
+**User Input**: "go"
+**AI Response**: "Proceeding with the approved six public notebooks, installed-package execution, RTD discovery, and CI validation. Reused existing architecture and session workflow. Created validated synthetic examples and an isolated-kernel checker; verification underway."
+**Context**: Documentation and execution tooling; existing approval covers implementation. Security and resiliency extensions disabled; partial property-testing rules N/A because no new library business logic is introduced.
+
+---
+
+## Public Notebook Examples Completion
+**Timestamp**: 2026-09-06T05:47:39Z
+**AI Response**: "Created six self-contained public notebooks with synthetic data, units, assumptions, numerical assertions, saved tables and plots. Added RTD downloads, README discovery, direct notebook execution dependencies, and built-wheel notebook gates/artifacts in CI and release workflows. All six executed successfully against published 0.1.2 and the built wheel. Four negative runner checks passed. Existing suite: 188 passed, 90.24% coverage. Lint, formatting, Sphinx -W, YAML parsing, lockfile version, build, Twine, distribution inspection, and whitespace checks passed. Changes remain local and ready for review/commit."
+**Context**: Approved notebook suite completed. Learned and documented explicit zero onsite generation for grid-only systems and zero disabled hot-oil assignments for the decomposition master. No library code changed. Partial property-testing extension N/A; disabled security/resiliency extensions skipped.
+
+---
+
+## Automatic Versioning Request
+**Timestamp**: 2026-09-06T05:52:05Z
+**User Input**: "Add automatic version bump like OpenPinch to the github workflow so the release and deployed package use an incremented v number. major and minor tags should increment the other v numbers."
+**AI Response**: "Compared local OpenPinch and OpenUtility workflows. Existing equal-version bump ignores later major/minor selectors and OpenUtility does not create release tags. Proceeding with the requested automation: base-relative idempotent version selection, synchronized metadata, validation of the bumped commit, immutable matching release tags, and GitHub release artifacts."
+**Context**: Continued release workflow; direct implementation authorized by this request. Plan: construction/plans/automatic-versioning-plan.md. Existing notebook changes preserved.
+
+---
+
+## Automatic Versioning Completion
+**Timestamp**: 2026-09-06T06:02:50Z
+**AI Response**: "Implemented default patch, minor, and major release increments with lower-component resets, labels/title precedence, late-label upgrades, and idempotent retries. CI synchronizes three version files, validates the bumped SHA, and records pr-gate on bot-created commits only after successful checks. Release validation resolves one version/tag/commit identity; immutable tag verification precedes PyPI, and the GitHub release uses the same distribution artifact ID. Validated with the actual bump tool in a disposable repository, local Git tag tests, 223 passing tests at 90.24% library coverage, Actionlint 1.7.12, YAML/bash syntax checks, Ruff, mypy, Sphinx -W, builds/Twine, lock/config checks, and dependency audit with no known vulnerabilities. Changes remain local; no remote release was performed."
+**Context**: Requested automation completed and documented in docs/release_strategy.rst. Partial property-testing requirements compliant; disabled extensions skipped.
+
+---
+
+## Commit and Push Authorization
+**Timestamp**: 2026-09-06T06:03:37Z
+**User Input**: "commit and push"
+**AI Response**: "Committing the validated notebook examples, automatic versioning, documentation, tests, and workflow records on develop, then pushing develop to origin. Prior validation: 223 passing tests, notebook execution against PyPI and built wheel, workflow linting, documentation, packaging, and dependency audit. Whitespace check passed."
+**Context**: Explicit commit and push authorization; existing draft PR #3 follows develop.
+
+---

@@ -45,7 +45,7 @@ def test_github_workflows_run_release_gate_and_publish_with_trusted_publishing()
     assert 'PYTHON_VERSION: "3.14.2"' in ci
     assert 'branches: ["main", "develop"]' in ci
     assert "all-tests:" in ci
-    assert "needs: all-tests" in ci
+    assert "needs: [all-tests, bump-version]" in ci
     assert "Run all tests with coverage" in ci
     assert "python tools/release_check.py" in ci
     assert (
@@ -66,9 +66,8 @@ def test_github_workflows_run_release_gate_and_publish_with_trusted_publishing()
     assert 'test "${BUMP_VERSION_RESULT}" = "success"' in pr_gate
     assert 'test "${RELEASE_VERSION_RESULT}" = "success"' in pr_gate
     assert "bump-my-version==1.2.3" in ci
-    assert "major" in ci
-    assert "minor" in ci
-    assert "patch" in ci
+    assert "PR_LABELS: ${{ join(github.event.pull_request.labels.*.name" in ci
+    assert "PR_TITLE: ${{ github.event.pull_request.title }}" in ci
     assert "contents: write" in ci
     assert "GH_TOKEN: ${{ github.token }}" in ci
     assert "AUTHORIZATION: bearer ${GH_TOKEN}" not in ci
@@ -112,8 +111,11 @@ def test_github_workflows_run_release_gate_and_publish_with_trusted_publishing()
     assert (
         "actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c" in release
     )
-    assert "name: openutility-dist-${{ github.run_id }}" in release
-    assert "github.run_attempt" not in release
+    assert (
+        "name: openutility-dist-${{ github.run_id }}-${{ github.run_attempt }}"
+        in release
+    )
+    assert "artifact-ids: ${{ needs.validate.outputs.distribution-id }}" in release
     assert "environment:" in release
     assert "name: pypi" in release
     assert "url: https://pypi.org/project/OpenUtility/" in release
@@ -126,6 +128,22 @@ def test_github_workflows_run_release_gate_and_publish_with_trusted_publishing()
         in release
     )
     assert "skip-existing: true" in release
+
+    assert "bump --new-version" in bump_job
+    assert "--plan-bump" in bump_job
+    assert "--require-bump" in release_version_job
+    assert 'echo "head-sha=$(git rev-parse HEAD)"' in bump_job
+    assert (
+        ci.count("ref: ${{ needs.bump-version.outputs.head-sha || github.sha }}") == 2
+    )
+    assert "checks: write" in pr_gate
+    assert '-f name=pr-gate -f head_sha="${VALIDATED_SHA}"' in pr_gate
+    assert "success() && needs.bump-version.outputs.head-sha != ''" in pr_gate
+    assert "needs: [validate, tag-release]" in release
+    assert "needs: [validate, publish]" in release
+    assert "scripts/ensure_release_tag.py" in release
+    assert "--verify-tag --generate-notes" in release
+    assert "cancel-in-progress: false" in release
 
 
 def test_version_bump_configuration_tracks_project_and_lockfile() -> None:
@@ -161,6 +179,7 @@ def test_release_helper_scripts_are_parseable_and_packaged() -> None:
         "check_lockfile_version.py",
         "check_release_tag.py",
         "check_release_version.py",
+        "ensure_release_tag.py",
     ):
         source = (PROJECT_ROOT / "scripts" / script_name).read_text()
         ast.parse(source)

@@ -33,10 +33,42 @@ candidate release version. The version bump is selected from labels named
 ``[major]``, ``[minor]``, or ``[patch]`` in the pull-request title. The default
 is ``patch``.
 
-The bump job runs only when the pull-request branch has the same version as the
-base branch. If the branch already carries a forward version, CI validates it
-instead of bumping again. Fork pull requests cannot be pushed to by CI, so they
-must provide a forward version manually before merging into ``main``.
+Labels take precedence over title markers. Within either source, ``major`` wins
+over ``minor``, which wins over ``patch``. These are pull-request labels or title
+markers; the resulting Git release tag is the full version, such as ``v0.2.0``.
+
+.. list-table:: Version selection when main is at 0.1.2
+   :header-rows: 1
+
+   * - Selector
+     - Package version
+     - Release tag
+   * - None, ``patch``, or ``[patch]``
+     - 0.1.3
+     - v0.1.3
+   * - ``minor`` or ``[minor]``
+     - 0.2.0
+     - v0.2.0
+   * - ``major`` or ``[major]``
+     - 1.0.0
+     - v1.0.0
+
+The minimum target is calculated from the version on ``main``. A minor bump
+resets patch to zero; a major bump resets minor and patch to zero. If a PR has
+already been bumped to 0.1.3, adding ``minor`` changes it to 0.2.0. Repeating the
+same run keeps that version. Removing a label never downgrades an already higher
+candidate. Candidates behind main must first synchronize with main.
+
+The bot commits synchronized changes to ``pyproject.toml``, ``uv.lock``, and
+``.bumpversion.toml`` on the PR branch. Both test jobs and the version check use
+the resulting commit SHA. If the bot creates a new commit, the final job records
+the required GitHub Actions ``pr-gate`` check on that commit only after all
+applicable checks succeed. This avoids depending on another bot-push workflow
+run. The workflow requires ``contents: write`` for the bump and ``checks: write``
+for that result; no additional personal token is needed.
+
+Draft PRs are not bumped. Fork PRs cannot be pushed to by CI, so they must supply
+a synchronized version meeting the selected increment before merging into main.
 
 Main branch
 -----------
@@ -55,13 +87,25 @@ Publishing
 Production publishing is CI-success based for ``main``. Tag pushes matching
 ``v*`` remain available as an explicit manual release path. A tag must use the
 exact form ``vX.Y.Z`` and must match the version in ``pyproject.toml``. For
-automatic ``main`` releases, the release workflow validates the project version
-directly.
+automatic ``main`` releases, the release workflow resolves the version from the
+tested commit and validates the matching bump configuration and lockfile.
 
 The release workflow separates validation from publication. The ``validate`` job
 runs the full release gate first and uploads only the verified distributions as
-a GitHub Actions artifact. The ``publish`` job depends on ``validate``, downloads
-that artifact, and is the only job bound to the protected ``pypi`` environment.
+a GitHub Actions artifact. The ``tag-release`` job then creates the annotated
+``vX.Y.Z`` tag on that exact validated commit. An existing tag must point to the
+same commit; a conflicting tag stops publication and is never moved.
+
+The ``publish`` job depends on validation and tag verification, downloads the
+verified artifact by its immutable ID, and is the only job bound to the protected
+``pypi`` environment. After PyPI publication succeeds, ``github-release`` creates
+the GitHub release with the same tag and distribution files. Package metadata
+uses ``X.Y.Z`` while the Git tag and GitHub release use the ``vX.Y.Z`` spelling.
+
+Retries preserve the version and tag. Artifact IDs connect consumers to the
+validation output even when failed jobs are rerun; full validation retries use
+distinct artifact names. Runs for the same source commit are serialized.
+Read the Docs builds from the merged source version as configured by its webhook.
 
 The PyPI upload job uses GitHub OpenID Connect trusted publishing:
 

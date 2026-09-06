@@ -17,6 +17,7 @@ are not part of the release test boundary.
    :caption: User Guide
 
    notebook_workflow
+   examples
    inputs
    api
 

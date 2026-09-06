@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.2 - Unreleased
+## 0.1.2 - 2026-09-06
 
 - Align Read the Docs builds and theme configuration with OpenPinch.
 - Add a combined PR gate for protected merges into `main`.

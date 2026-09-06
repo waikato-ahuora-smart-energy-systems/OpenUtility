@@ -35,3 +35,14 @@ Extension compliance for this unit:
 - PBT-08: N/A; deterministic subprocess regression and installation integration.
 - PBT-09: N/A; no PBT-applicable code introduced.
 - PBT-10: N/A; no business-critical domain path changed.
+
+## Publication verification on 2026-09-06
+
+The earlier local-only status above is superseded by the following verification.
+PR #2 merged the release changes as 34f1fac96e5e26a21d95ea12059aaf33deb349c3.
+GitHub Release run 34009511176 completed successfully. PyPI now serves 0.1.2.
+A fresh environment installed OpenUtility==0.1.2 directly from the public PyPI
+index and passed isolated distribution-owned import checks plus binary, heat-pump,
+and refrigeration HiGHS solves. RTD latest build 34413863 succeeded for the same
+release commit. Remaining release-date/audit changes are documentation only and
+will be submitted as a draft PR, since ready PRs automatically bump the patch version.
