@@ -9,6 +9,10 @@ on:
     branches: ["main"]
     types: [completed]
 
+concurrency:
+  group: release-${{ github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
@@ -18,6 +22,11 @@ env:
 
 jobs:
   validate:
+    outputs:
+      version: ${{ steps.identity.outputs.version }}
+      tag: ${{ steps.identity.outputs.tag }}
+      commit: ${{ steps.identity.outputs.commit }}
+      distribution-id: ${{ steps.distributions.outputs.artifact-id }}
     if: >-
       ${{
         github.event_name == 'push' ||
@@ -49,20 +58,68 @@ jobs:
       - name: Validate release tag
         if: ${{ github.event_name == 'push' }}
         run: uv run --no-sync python scripts/check_release_tag.py "${GITHUB_REF_NAME}"
-      - name: Validate release version
-        if: ${{ github.event_name == 'workflow_run' }}
-        run: uv run --no-sync python scripts/check_release_version.py
+      - name: Resolve synchronized release identity
+        id: identity
+        run: |
+          set -euo pipefail
+          version="$(uv run --no-sync python scripts/check_release_version.py --bump-config .bumpversion.toml)"
+          uv run --no-sync python scripts/check_release_tag.py "v${version}"
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+          echo "tag=v${version}" >> "${GITHUB_OUTPUT}"
+          echo "commit=$(git rev-parse HEAD)" >> "${GITHUB_OUTPUT}"
       - name: Run release gate
         run: uv run --no-sync python tools/release_check.py
-      - name: Upload verified distributions
+      - name: Execute public notebooks against the built wheel
+        shell: bash
+        run: |
+          set -euo pipefail
+          uv venv "${RUNNER_TEMP}/notebook-venv"
+          wheels=(dist/*.whl)
+          test "${#wheels[@]}" -eq 1
+          uv pip install --python "${RUNNER_TEMP}/notebook-venv/bin/python" "${wheels[0]}[notebook]"
+          "${RUNNER_TEMP}/notebook-venv/bin/python" -I tools/check_notebooks.py \
+            --output-dir "${RUNNER_TEMP}/notebook-examples"
+      - name: Upload executed notebook examples
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: openutility-dist-${{ github.run_id }}
+          name: openutility-notebook-examples-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/notebook-examples/*
+          if-no-files-found: error
+      - name: Upload verified distributions
+        id: distributions
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: openutility-dist-${{ github.run_id }}-${{ github.run_attempt }}
           path: dist/*
           if-no-files-found: error
 
-  publish:
+  tag-release:
     needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+        with:
+          ref: ${{ needs.validate.outputs.commit }}
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Create or verify the matching release tag
+        env:
+          RELEASE_TAG: ${{ needs.validate.outputs.tag }}
+          RELEASE_COMMIT: ${{ needs.validate.outputs.commit }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          python scripts/ensure_release_tag.py "${RELEASE_TAG}" "${RELEASE_COMMIT}"
+
+  publish:
+    needs: [validate, tag-release]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
@@ -75,9 +132,37 @@ jobs:
       - name: Download verified distributions
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
-          name: openutility-dist-${{ github.run_id }}
+          artifact-ids: ${{ needs.validate.outputs.distribution-id }}
+          merge-multiple: true
           path: dist
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33
         with:
           skip-existing: true
+
+  github-release:
+    needs: [validate, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Download the published distributions
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          artifact-ids: ${{ needs.validate.outputs.distribution-id }}
+          merge-multiple: true
+          path: dist
+      - name: Create the matching GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ needs.validate.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+            echo "GitHub release ${RELEASE_TAG} already exists."
+          else
+            gh release create "${RELEASE_TAG}" dist/* --verify-tag --generate-notes \
+              --title "OpenUtility ${RELEASE_TAG}"
+          fi

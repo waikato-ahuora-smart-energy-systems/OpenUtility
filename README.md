@@ -93,6 +93,21 @@ python -m pip install .
 
 ## Quick Start
 
+For guided, executable tutorials, start with the
+[six Jupyter examples](docs/notebooks) and the
+[Read the Docs example guide](https://openutility.readthedocs.io/en/latest/examples.html).
+They cover first solve, equipment selection, scenario analysis, heat pumps,
+multi-period refrigeration, and binary-selection decomposition. Each uses
+synthetic data and includes checked results, tables, and plots.
+
+```bash
+python -m pip install "OpenUtility[notebook]>=0.1.2"
+python -m jupyterlab
+```
+
+Download any notebook, select the installed environment's Python kernel, and
+restart the kernel and run all cells. No checkout or private data is required.
+
 ```python
 from OpenUtility import (
     SteamLevelCandidate,
