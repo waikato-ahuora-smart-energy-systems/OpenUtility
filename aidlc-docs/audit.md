@@ -286,3 +286,26 @@ OpenPinch’s complementary producer design expects external thermal service tem
 **Context**: Corrected metadata for an existing published version; did not merge PR #3 or publish candidate 0.1.3. Disabled extensions skipped; PBT not applicable to administrative metadata changes.
 
 ---
+
+## Create Pull Request
+**Timestamp**: 2026-09-06T19:04:07Z
+**User Input**: "create a PR"
+**AI Response**: "Verified PR #3 is merged, main is 0.1.3, and origin/develop already contains the user-pushed Supporting docs. commit adbac28361bf490a5f846e0afb6efa9c84a5ef67. Preparing a new develop-to-main PR for CODEOWNERS and three workflow records. No duplicate PR exists. Diff whitespace check passed; no runtime code changes. Existing CI will apply the next patch bump on the ready PR."
+**Context**: Explicit authorization to create the PR. No additional code commit needed; updating local audit and progress only.
+
+---
+
+## Pull Request Created
+**Timestamp**: 2026-09-06T19:05:10Z
+**AI Response**: "Created ready PR #4, Require maintainer reviews with CODEOWNERS, from develop to main. GitHub confirms CODEOWNERS is valid. PR includes existing pushed commit adbac28; no merge performed. Required checks will run, with the existing workflow selecting the next patch version. URL: https://github.com/waikato-ahuora-smart-energy-systems/OpenUtility/pull/4"
+**Context**: Requested PR creation complete; local audit/progress records updated.
+
+---
+
+## Commit PR Records
+**Timestamp**: 2026-09-07T09:00:21Z
+**User Input**: "commit"
+**AI Response**: "Reviewed the three remaining documentation changes and committing the PR #4 audit and progress records. No executable code changes; validation is git diff --check. Commit only, with no push requested in this turn."
+**Context**: Explicit commit authorization; existing CODEOWNERS and automatic version bump are already committed.
+
+---

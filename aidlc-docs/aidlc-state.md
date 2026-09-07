@@ -81,6 +81,7 @@ Plan: construction/plans/automatic-versioning-plan.md
 - [x] User clarified merge reviews only.
 - [x] Drafted CODEOWNERS and separate review/core ruleset forms; existing live protection unchanged.
 - [x] Save the ruleset migration after action-time confirmation; verified active main-reviews 22378749 and core main 22368425.
-- [ ] Deliver CODEOWNERS through PR and verify effective protection.
+- [x] Deliver CODEOWNERS through PR #4 (develop to main); GitHub confirms the CODEOWNERS file is valid.
+- [ ] Merge PR #4 and verify code-owner enforcement on main.
 
 Plan: construction/plans/maintainer-merge-review-plan.md
