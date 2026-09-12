@@ -309,3 +309,18 @@ OpenPinch’s complementary producer design expects external thermal service tem
 **Context**: Explicit commit authorization; existing CODEOWNERS and automatic version bump are already committed.
 
 ---
+
+## Repository Cleanup - Assessment and Implementation
+**Timestamp**: 2026-09-07T09:11:20Z
+**User Input**: "Clean up obsolete and old files. "
+**AI Response**: "Inspected clean Git state, loaded common workflow rules, extension opt-ins, existing state and prior assessment, and displayed the workflow welcome. Confirmed three unreferenced Markdown pages are superseded by README/Sphinx guidance; local 0.1.2 archives are stale relative to project 0.1.4. Recorded a conservative cleanup plan, removed the three pages, and added explicit environment/type-cache ignore rules. Proceeding with existing documentation/metadata tests and isolated temporary documentation/package builds under the user-authorized maintenance scope."
+**Context**: Small maintenance unit; reuse prior repository assessment. Preserve source, case-study results, notebooks, environment, and audit history. Disabled security/resiliency extensions skipped; all PBT rules N/A because no domain behavior changes. Generated Markdown validated for balanced syntax; no diagrams or structured code blocks introduced.
+
+---
+
+## Repository Cleanup - Complete
+**Timestamp**: 2026-09-07T09:12:19Z
+**AI Response**: "Removed three superseded Markdown pages; stale 0.1.2 distribution archives; coverage, mypy, pytest, Ruff, Hypothesis, and bytecode caches outside the environment; and empty tmp directories. Deleted 141 generated files totaling 28,316,496 bytes. Added explicit .venv/ and .mypy_cache/ ignores. All 11 existing docs/metadata tests passed; strict Sphinx HTML and 0.1.4 wheel/source builds passed. Verified archive contents and retained tracked files; Git whitespace check passed. Application sources, notebooks, case-study data, environment, and prior workflow records remain available."
+**Context**: Cleanup plan checkboxes complete. Tests/builds used temporary output paths. No new domain code or PBT required; disabled extensions skipped. Changes are local and uncommitted.
+
+---

@@ -1,5 +1,7 @@
 __pycache__/
 *.py[cod]
+.venv/
+.mypy_cache/
 .pytest_cache/
 .hypothesis/
 .ruff_cache/

@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Brownfield
 - **Start Date**: 2026-09-03
-- **Current Stage**: Merge-review rules saved; GitHub latest release corrected to v0.1.2
+- **Current Stage**: Repository cleanup complete
 
 ## Workspace State
 - **Existing Code**: Yes
@@ -85,3 +85,12 @@ Plan: construction/plans/automatic-versioning-plan.md
 - [ ] Merge PR #4 and verify code-owner enforcement on main.
 
 Plan: construction/plans/maintainer-merge-review-plan.md
+
+## Repository Cleanup
+
+- [x] Workspace detection, minimal requirements, and cleanup plan.
+- [x] Remove superseded documentation and update ignore rules.
+- [x] Documentation/metadata tests, strict docs build, and packaging verification.
+- [x] Generated artifact cleanup and final verification.
+
+Plan: construction/plans/repository-cleanup-plan.md
